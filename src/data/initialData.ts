@@ -44,7 +44,7 @@ export const initialProjects: ProjectItem[] = [
       "기술 스택별 숙련도 및 프로젝트 연계 매트릭스",
       "공개용 이력서 뷰(Visitor Mode) 및 JSON/Markdown 내보내기"
     ],
-    githubUrl: "https://github.com/minsu-dev/dev-archive",
+    githubUrl: "https://github.com/minjun-dev/dev-archive",
     demoUrl: "https://dev-archive.app",
     featured: true,
     starBullets: [
@@ -75,7 +75,7 @@ export const initialProjects: ProjectItem[] = [
       "JPA Fetch Join을 통한 전공서적 목록 조회 쿼리 수 최적화 (N+1 문제 해결)",
       "Docker Compose를 이용한 로컬 및 AWS EC2 배포 환경 컨테이너화"
     ],
-    githubUrl: "https://github.com/minsu-dev/campus-mate-backend",
+    githubUrl: "https://github.com/minjun-dev/campus-mate-backend",
     demoUrl: "https://campusmate-demo.site",
     featured: true,
     starBullets: [
@@ -106,7 +106,7 @@ export const initialProjects: ProjectItem[] = [
       "Buddy Allocator 기반 고정 크기 블록 풀링으로 내부 단편화 억제",
       "터미널 기반 ASCII 트리 시각화 유틸리티 내장"
     ],
-    githubUrl: "https://github.com/minsu-dev/custom-rbtree-allocator",
+    githubUrl: "https://github.com/minjun-dev/custom-rbtree-allocator",
     featured: true,
     starBullets: [
       "[Situation] CS 2-1 자료구조 전공 수업에서 라이브러리 없이 트리 불균형과 메모리 누수를 완벽히 해결하는 과제 수행",
@@ -135,7 +135,7 @@ export const initialProjects: ProjectItem[] = [
       "자주 쓰이는 C++ 빠른 입출력 템플릿 및 자료구조 스니펫 모음집",
       "시간 복잡도 O(N log N) / O(V+E) 등 빅오(Big-O) 분석 첨부"
     ],
-    githubUrl: "https://github.com/minsu-dev/algorithm-solutions",
+    githubUrl: "https://github.com/minjun-dev/algorithm-solutions",
     featured: false,
     updatedAt: "2026-08-15"
   }
