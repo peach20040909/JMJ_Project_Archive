@@ -3,23 +3,19 @@ import {
   Download, 
   Upload, 
   RotateCcw, 
-  FileText, 
   Check, 
   Copy, 
   X, 
-  Sparkles,
   AlertTriangle
 } from 'lucide-react';
-import { UserProfile, ProjectItem, CourseworkSubject, TechSkill, SemesterGoal, DevLog } from '../types';
+import { UserProfile, ProjectItem, TechSkill, DevLog } from '../types';
 
 interface ExportModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: UserProfile;
   projects: ProjectItem[];
-  courseworks: CourseworkSubject[];
   skills: TechSkill[];
-  goals: SemesterGoal[];
   devLogs: DevLog[];
   onImportData: (data: any) => void;
   onResetData: () => void;
@@ -30,9 +26,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   onClose,
   profile,
   projects,
-  courseworks,
   skills,
-  goals,
   devLogs,
   onImportData,
   onResetData
@@ -42,12 +36,11 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 
   if (!isOpen) return null;
 
-  // Generate clean Markdown for GitHub Profile or Notion
   const generateMarkdown = () => {
-    return `# 👨‍💻 ${profile.name} (${profile.englishName}) - Portfolio Archive
-> ${profile.targetRole} | ${profile.department} ${profile.currentSemester} (GPA: ${profile.gpa})
+    return `# 👨‍💻 ${profile.name} (${profile.englishName}) - Software Portfolio
+> **${profile.targetRole}** | ${profile.university} ${profile.department} ${profile.currentSemester && `(${profile.currentSemester})`} ${profile.gpa && `GPA: ${profile.gpa}`}
 
-## 📌 Introduction
+## 📌 About Me
 ${profile.bio}
 
 - 📧 **Email**: ${profile.email}
@@ -57,36 +50,31 @@ ${profile.bio}
 
 ---
 
-## 🛠️ Tech Stack & Skills
+## 🛠️ Tech Stack & Core Competencies
 ${skills.map(s => `- **${s.name}** (${s.category} / ${s.level}): ${s.experience}`).join('\n')}
 
 ---
 
-## 🚀 Featured Projects
+## 🚀 Projects Archive
 ${projects.map(p => `### ${p.title} (${p.period})
-- **Category**: ${p.category} | **Role**: ${p.role} (${p.teamType})
-- **Tech Stack**: ${p.techStack.join(', ')}
-- **Summary**: ${p.summary}
+- **분야**: ${p.category} | **역할**: ${p.role} (${p.teamType})
+- **기술 스택**: ${p.techStack.join(', ')}
+- **소개**: ${p.summary}
 ${p.githubUrl ? `- **GitHub**: ${p.githubUrl}` : ''}
 ${p.demoUrl ? `- **Live Demo**: ${p.demoUrl}` : ''}
 
-${p.starBullets && p.starBullets.length > 0 ? `**STAR Highlights:**\n${p.starBullets.map(b => `  - ${b}`).join('\n')}` : ''}
+${p.starBullets && p.starBullets.length > 0 ? `**STAR 이력서 성과 요약:**\n${p.starBullets.map(b => `  - ${b}`).join('\n')}` : ''}
+${p.keyFeatures && p.keyFeatures.length > 0 ? `**주요 기능:**\n${p.keyFeatures.map(f => `  - ${f}`).join('\n')}` : ''}
 `).join('\n\n')}
 
 ---
 
-## 🎓 CS Coursework & Academics
-${courseworks.map(c => `- **${c.name}** [${c.semester}, ${c.credits}학점, 성적: ${c.grade}]
-  - 핵심 개념: ${c.keyConcepts.join(', ')}
-  ${c.review ? `  - 수강 소감: "${c.review}"` : ''}
-`).join('\n')}
+## 📝 Engineering & Dev Logs
+${devLogs.map(l => `### [${l.category}] ${l.title} (${l.date})
+- 태그: ${l.tags.map(t => `#${t}`).join(' ')}
 
----
-
-## 🎯 2학년 2학기 핵심 목표
-${goals.map(g => `- [${g.progress === 100 ? 'x' : ' '}] **${g.title}** (${g.category}, 진행률: ${g.progress}%)
-${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
-`).join('\n')}
+${l.content}
+`).join('\n\n')}
 `;
   };
 
@@ -111,9 +99,7 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
     const data = {
       profile,
       projects,
-      courseworks,
       skills,
-      goals,
       devLogs,
       exportedAt: new Date().toISOString()
     };
@@ -149,51 +135,51 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl text-slate-100 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
         
         {/* Header */}
-        <div className="p-6 border-b border-slate-800 bg-slate-950/40 flex items-center justify-between">
+        <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Download className="w-5 h-5 text-indigo-400" />
-            <h2 className="text-lg font-bold text-white">포트폴리오 내보내기 & 데이터 관리</h2>
+            <Download className="w-5 h-5 text-indigo-600" />
+            <h2 className="text-lg font-bold text-slate-900">포트폴리오 내보내기 & 데이터 관리</h2>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-800 px-6 bg-slate-900/60">
+        <div className="flex border-b border-slate-200 px-6 bg-slate-50/50">
           <button
             onClick={() => setActiveTab('markdown')}
-            className={`py-3 px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+            className={`py-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-colors ${
               activeTab === 'markdown'
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             Markdown (GitHub / Notion용)
           </button>
           <button
             onClick={() => setActiveTab('json')}
-            className={`py-3 px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+            className={`py-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-colors ${
               activeTab === 'json'
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             JSON 데이터 백업
           </button>
           <button
             onClick={() => setActiveTab('import')}
-            className={`py-3 px-3 text-xs sm:text-sm font-medium border-b-2 transition-colors ${
+            className={`py-3 px-3 text-xs sm:text-sm font-bold border-b-2 transition-colors ${
               activeTab === 'import'
-                ? 'border-indigo-500 text-indigo-400'
-                : 'border-transparent text-slate-400 hover:text-slate-200'
+                ? 'border-indigo-600 text-indigo-600'
+                : 'border-transparent text-slate-500 hover:text-slate-800'
             }`}
           >
             복원 & 초기화
@@ -205,20 +191,20 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
           {activeTab === 'markdown' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-slate-400">
+                <p className="text-slate-600">
                   GitHub Profile README 또는 Notion 포트폴리오로 바로 복사하여 붙여넣을 수 있는 마크다운 텍스트입니다.
                 </p>
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 flex-shrink-0">
                   <button
                     onClick={handleCopyMarkdown}
-                    className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 flex items-center space-x-1 font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 flex items-center space-x-1 font-semibold transition-colors"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
                     <span>{copied ? '복사 완료!' : '클립보드 복사'}</span>
                   </button>
                   <button
                     onClick={handleDownloadMarkdown}
-                    className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white flex items-center space-x-1 font-medium transition-colors"
+                    className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white flex items-center space-x-1 font-semibold transition-colors shadow-sm"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>.md 파일 다운로드</span>
@@ -229,25 +215,25 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
               <textarea
                 readOnly
                 value={generateMarkdown()}
-                rows={14}
-                className="w-full p-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 font-mono text-xs focus:outline-none"
+                rows={13}
+                className="w-full p-4 rounded-xl bg-slate-50 border border-slate-200 text-slate-800 font-mono text-xs focus:outline-none"
               />
             </div>
           )}
 
           {activeTab === 'json' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-xl bg-indigo-950/40 border border-indigo-500/30 text-slate-300 space-y-2">
-                <h4 className="font-bold text-white">전체 아카이브 데이터 JSON 백업</h4>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  프로필, 등록된 모든 프로젝트, 전공 교과목 및 학점, 보유 기술 스택, 2학기 목표 마일스톤, 트러블슈팅 일지를 단일 JSON 파일로 안전하게 백업합니다.
+              <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-slate-700 space-y-2">
+                <h4 className="font-bold text-slate-900">전체 아카이브 데이터 JSON 백업</h4>
+                <p className="text-xs text-slate-600 leading-relaxed">
+                  프로필, 등록된 모든 프로젝트, 보유 기술 스택 매트릭스, 트러블슈팅 일지를 단일 JSON 파일로 안전하게 백업합니다.
                 </p>
               </div>
 
               <div className="flex justify-center pt-4">
                 <button
                   onClick={handleDownloadJson}
-                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold flex items-center space-x-2 shadow-lg shadow-indigo-600/30 transition-all hover:scale-105"
+                  className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center space-x-2 shadow-sm transition-all hover:scale-105"
                 >
                   <Download className="w-4 h-4" />
                   <span>전체 데이터 백업 파일 다운로드 (.json)</span>
@@ -258,31 +244,29 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
 
           {activeTab === 'import' && (
             <div className="space-y-6">
-              {/* Import File */}
-              <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700 space-y-3">
-                <h4 className="font-bold text-white flex items-center space-x-2">
-                  <Upload className="w-4 h-4 text-indigo-400" />
+              <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <h4 className="font-bold text-slate-900 flex items-center space-x-2">
+                  <Upload className="w-4 h-4 text-indigo-600" />
                   <span>백업 파일 복원 (Restore)</span>
                 </h4>
-                <p className="text-xs text-slate-400">
+                <p className="text-xs text-slate-500">
                   이전에 저장해 둔 DevArchive JSON 백업 파일을 선택하여 데이터를 복원합니다.
                 </p>
                 <input
                   type="file"
                   accept=".json"
                   onChange={handleFileUpload}
-                  className="block w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-500 cursor-pointer"
+                  className="block w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
                 />
               </div>
 
-              {/* Reset to Seed Data */}
-              <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 space-y-3">
-                <div className="flex items-center space-x-2 text-rose-400 font-bold">
+              <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 space-y-3">
+                <div className="flex items-center space-x-2 text-rose-700 font-bold">
                   <AlertTriangle className="w-4 h-4" />
-                  <span>초기 데모 데이터로 되돌리기</span>
+                  <span>초기 데이터로 되돌리기</span>
                 </div>
-                <p className="text-xs text-slate-400">
-                  소프트웨어학과 2학년 2학기 기본 템플릿 데이터로 전체 아카이브를 초기화합니다.
+                <p className="text-xs text-slate-500">
+                  기본 템플릿 데이터로 전체 포트폴리오 아카이브를 초기화합니다.
                 </p>
                 <button
                   onClick={() => {
@@ -292,7 +276,7 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
                       onClose();
                     }
                   }}
-                  className="px-3.5 py-1.5 rounded-lg bg-rose-600/80 hover:bg-rose-600 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors"
+                  className="px-3.5 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors"
                 >
                   <RotateCcw className="w-3.5 h-3.5" />
                   <span>초기 데이터로 리셋</span>
@@ -303,10 +287,10 @@ ${g.milestones.map(m => `  - [${m.done ? 'x' : ' '}] ${m.text}`).join('\n')}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex justify-end">
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-white font-medium text-xs"
+            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs"
           >
             닫기
           </button>

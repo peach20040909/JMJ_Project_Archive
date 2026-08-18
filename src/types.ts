@@ -1,9 +1,10 @@
 export type SemesterType = 
-  | '1학년 1학기' 
-  | '1학년 2학기' 
-  | '2학년 1학기' 
-  | '2학년 여름방학' 
-  | '2학년 2학기 (예정/진행중)' 
+  | '1학년' 
+  | '2학년' 
+  | '3학년' 
+  | '4학년' 
+  | '사이드 프로젝트' 
+  | '산학/인턴십' 
   | '기타/개인';
 
 export type ProjectCategory = 
@@ -21,7 +22,7 @@ export interface ProjectItem {
   title: string;
   summary: string;
   category: 'Web' | 'App' | 'Backend' | 'Frontend' | 'System' | 'Algorithm' | 'AI/Data';
-  semester: SemesterType;
+  semester: string;
   period: string;
   teamType: '개인' | '팀 (2명)' | '팀 (3명)' | '팀 (4명)' | '팀 (5인 이상)';
   role: string;
@@ -43,9 +44,9 @@ export interface ProjectItem {
 export interface CourseworkSubject {
   id: string;
   name: string;
-  semester: '1학년 1학기' | '1학년 2학기' | '2학년 1학기' | '2학년 2학기 (수강예정)';
+  semester: string;
   credits: number;
-  grade: 'A+' | 'A0' | 'B+' | 'B0' | '수강예정' | 'P';
+  grade: string;
   professor?: string;
   keyConcepts: string[];
   termProjectName?: string;

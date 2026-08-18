@@ -2,18 +2,19 @@ import React, { useState } from 'react';
 import { 
   MessageSquareCode, 
   Plus, 
-  Calendar, 
+  Search, 
   Tag, 
-  FolderGit2, 
-  Edit, 
+  Calendar, 
+  Edit3, 
   Trash2, 
-  ChevronRight,
-  BookOpen,
-  Search,
-  Sparkles
+  Check, 
+  X, 
+  Link as LinkIcon,
+  Code2,
+  FileText
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 import { DevLog, ProjectItem } from '../types';
-import Markdown from 'react-markdown';
 
 interface DevLogsSectionProps {
   devLogs: DevLog[];
@@ -23,6 +24,8 @@ interface DevLogsSectionProps {
   onDeleteLog: (id: string) => void;
 }
 
+const CATEGORIES = ['전체', '트러블슈팅', '기술 학습 (TIL)', '학기 회고', '세미나/스터디'] as const;
+
 export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
   devLogs,
   projects,
@@ -30,10 +33,11 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
   onUpdateLog,
   onDeleteLog
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingLog, setEditingLog] = useState<DevLog | null>(null);
+  const [selectedCat, setSelectedCat] = useState<string>('전체');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedLog, setSelectedLog] = useState<DevLog | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<DevLog>>({
     title: '',
@@ -46,246 +50,265 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
 
   const [tagInput, setTagInput] = useState('');
 
-  const categories = ['All', '트러블슈팅', '기술 학습 (TIL)', '학기 회고', '세미나/스터디'];
-
   const filteredLogs = devLogs.filter(log => {
-    const matchesCategory = selectedCategory === 'All' || log.category === selectedCategory;
-    const query = searchQuery.toLowerCase();
+    const matchesCat = selectedCat === '전체' || log.category === selectedCat;
     const matchesSearch = 
-      log.title.toLowerCase().includes(query) ||
-      log.content.toLowerCase().includes(query) ||
-      log.tags.some(t => t.toLowerCase().includes(query));
-
-    return matchesCategory && matchesSearch;
+      log.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      log.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      log.content.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCat && matchesSearch;
   });
 
   const handleOpenAdd = () => {
+    setEditingId(null);
     setFormData({
-      id: `log-${Date.now()}`,
       title: '',
       date: new Date().toISOString().split('T')[0],
       category: '트러블슈팅',
-      tags: ['Spring Boot', '최적화'],
-      content: '### 🔍 문제 정의\n\n### 🛠️ 해결 과정\n\n### 💡 배운 점',
+      tags: ['Spring Boot', '성능최적화'],
+      content: `### 🔍 문제 상황\n- \n\n### 🛠️ 원인 분석\n- \n\n### 💡 해결 방법\n- \n\n### 📈 결과 및 배운 점\n- `,
       linkedProjectId: ''
     });
-    setEditingLog(null);
-    setIsEditing(true);
+    setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (log: DevLog) => {
-    setFormData({ ...log });
-    setEditingLog(log);
-    setIsEditing(true);
+  const handleOpenEdit = (log: DevLog, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setEditingId(log.id);
+    setFormData(log);
+    setIsFormOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.title || !formData.content) {
-      alert('제목과 본문은 필수입니다.');
+      alert('제목과 내용은 필수입니다.');
       return;
     }
 
-    const logToSave: DevLog = {
-      id: formData.id || `log-${Date.now()}`,
-      title: formData.title,
-      date: formData.date || new Date().toISOString().split('T')[0],
-      category: formData.category || '트러블슈팅',
-      tags: formData.tags && formData.tags.length > 0 ? formData.tags : ['CS'],
-      content: formData.content,
-      linkedProjectId: formData.linkedProjectId || ''
-    };
-
-    if (editingLog) {
-      onUpdateLog(logToSave);
+    if (editingId) {
+      onUpdateLog({
+        ...(formData as DevLog),
+        id: editingId
+      });
     } else {
-      onAddLog(logToSave);
+      const newLog: DevLog = {
+        ...(formData as DevLog),
+        id: `log-${Date.now()}`
+      };
+      onAddLog(newLog);
     }
-    setIsEditing(false);
-  };
-
-  const handleAddTag = () => {
-    if (!tagInput.trim()) return;
-    const current = formData.tags || [];
-    if (!current.includes(tagInput.trim())) {
-      setFormData({ ...formData, tags: [...current, tagInput.trim()] });
-    }
-    setTagInput('');
-  };
-
-  const handleRemoveTag = (t: string) => {
-    const current = formData.tags || [];
-    setFormData({ ...formData, tags: current.filter(item => item !== t) });
+    setIsFormOpen(false);
   };
 
   return (
-    <div className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 py-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">트러블슈팅 & 개발 회고 일지</h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-indigo-400 font-mono border border-slate-700">
-              {devLogs.length}편 기록
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>트러블슈팅 & 기술 학습 일지</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+              총 {devLogs.length}편
             </span>
-          </div>
-          <p className="text-sm text-slate-400 mt-1">
-            버그 해결 과정, 기술 학습 노트, 학기별 회고를 기록하여 성장 궤적을 증명합니다.
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            개발 중 직면한 버그 해결 과정, CS 이론 공부(TIL), 학기말 회고를 기록하는 엔지니어링 일지입니다.
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-95 self-start md:self-auto"
+          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-105 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>새 개발일지 작성</span>
+          <span>새 일지 작성</span>
         </button>
       </div>
 
-      {/* Search & Category Filter */}
-      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            type="text"
-            placeholder="일지 제목, 태그, 본문 내용 검색..."
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-indigo-500"
-          />
-        </div>
-
-        <div className="flex space-x-1.5 overflow-x-auto scrollbar-none pt-1">
-          {categories.map(cat => (
+      {/* Filter and Search */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+        <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+          {CATEGORIES.map(cat => (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
-                selectedCategory === cat
-                  ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                  : 'bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
+              onClick={() => setSelectedCat(cat)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+                selectedCat === cat
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
               }`}
             >
-              {cat === 'All' ? '전체 보기' : cat}
+              {cat}
             </button>
           ))}
         </div>
+
+        <div className="relative min-w-[200px]">
+          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+            placeholder="제목, 태그, 내용 검색..."
+            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+          />
+        </div>
       </div>
 
-      {/* Log Posts List */}
-      <div className="space-y-4">
+      {/* Logs Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {filteredLogs.map(log => {
           const linkedProj = projects.find(p => p.id === log.linkedProjectId);
 
           return (
             <div
               key={log.id}
-              className="p-6 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition-all space-y-4"
+              onClick={() => setSelectedLog(log)}
+              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer p-5 flex flex-col justify-between space-y-4 group"
             >
-              {/* Post Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
-                <div className="space-y-1">
-                  <div className="flex items-center space-x-2">
-                    <span className="px-2.5 py-0.5 rounded-md text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/30">
-                      {log.category}
-                    </span>
-                    <span className="text-xs text-slate-400 flex items-center space-x-1">
-                      <Calendar className="w-3.5 h-3.5 text-slate-500" />
-                      <span>{log.date}</span>
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-white pt-0.5">{log.title}</h3>
-                </div>
-
-                <div className="flex items-center space-x-1 self-end sm:self-center">
-                  <button
-                    onClick={() => handleOpenEdit(log)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs flex items-center space-x-1"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                    <span>수정</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`'${log.title}' 글을 삭제하시겠습니까?`)) {
-                        onDeleteLog(log.id);
-                      }
-                    }}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition-colors"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Linked Project tag if any */}
-              {linkedProj && (
-                <div className="inline-flex items-center space-x-1.5 px-2.5 py-1 rounded-md bg-indigo-950/40 text-indigo-300 text-xs border border-indigo-500/30">
-                  <FolderGit2 className="w-3.5 h-3.5" />
-                  <span>연계 프로젝트: {linkedProj.title}</span>
-                </div>
-              )}
-
-              {/* Markdown Content */}
-              <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-slate-300 text-sm leading-relaxed">
-                <div className="markdown-body">
-                  <Markdown>{log.content}</Markdown>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="flex flex-wrap gap-1.5 pt-1">
-                {log.tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-400 text-xs border border-slate-700/60 flex items-center space-x-1"
-                  >
-                    <Tag className="w-3 h-3 text-indigo-400" />
-                    <span>{tag}</span>
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+                    {log.category}
                   </span>
-                ))}
+                  
+                  <div className="flex items-center space-x-1">
+                    <span className="text-[11px] text-slate-400 font-mono">{log.date}</span>
+                    <button
+                      onClick={(e) => handleOpenEdit(log, e)}
+                      className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                    >
+                      <Edit3 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`'${log.title}' 일지를 삭제하시겠습니까?`)) {
+                          onDeleteLog(log.id);
+                        }
+                      }}
+                      className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                  {log.title}
+                </h3>
+
+                <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                  {log.content.replace(/[#*`]/g, '')}
+                </p>
+              </div>
+
+              <div className="space-y-2 pt-2 border-t border-slate-100">
+                <div className="flex flex-wrap gap-1">
+                  {log.tags.map((t, i) => (
+                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
+                      #{t}
+                    </span>
+                  ))}
+                </div>
+
+                {linkedProj && (
+                  <div className="text-[11px] text-indigo-600 font-semibold truncate flex items-center space-x-1">
+                    <LinkIcon className="w-3 h-3 flex-shrink-0" />
+                    <span className="truncate">{linkedProj.title}</span>
+                  </div>
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Edit / Add Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl p-6 text-slate-100 shadow-2xl space-y-4 my-8 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-                <MessageSquareCode className="w-5 h-5 text-indigo-400" />
-                <span>{editingLog ? '개발일지 수정' : '새 개발일지 작성'}</span>
-              </h2>
+      {/* Log Detail Modal */}
+      {selectedLog && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <div className="space-y-1">
+                <div className="flex items-center space-x-2">
+                  <span className="px-2.5 py-0.5 rounded-md bg-blue-100 text-blue-700 text-xs font-bold">
+                    {selectedLog.category}
+                  </span>
+                  <span className="text-xs text-slate-500 font-mono">{selectedLog.date}</span>
+                </div>
+                <h2 className="text-xl font-bold text-slate-900">{selectedLog.title}</h2>
+              </div>
               <button
-                onClick={() => setIsEditing(false)}
-                className="text-slate-400 hover:text-white text-sm"
+                onClick={() => setSelectedLog(null)}
+                className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4">
+              <div className="flex flex-wrap gap-1.5 pb-2 border-b border-slate-100">
+                {selectedLog.tags.map((t, i) => (
+                  <span key={i} className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 font-medium">
+                    #{t}
+                  </span>
+                ))}
+              </div>
+
+              <div className="prose prose-slate max-w-none text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+                <ReactMarkdown>{selectedLog.content}</ReactMarkdown>
+              </div>
+            </div>
+
+            <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
+              <button
+                onClick={() => setSelectedLog(null)}
+                className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs"
               >
                 닫기
               </button>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm">
+          </div>
+        </div>
+      )}
+
+      {/* Add / Edit Form Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-2xl text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">
+                {editingId ? '일지 수정' : '새 개발 일지 작성'}
+              </h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">제목 *</label>
+                <label className="font-bold text-slate-700">일지 제목 *</label>
                 <input
                   type="text"
-                  placeholder="예: Spring Boot + JPA Fetch Join 최적화와 N+1 해결기"
-                  value={formData.title || ''}
+                  value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                  placeholder="예: Spring Boot JPA N+1 문제 해결 및 Fetch Join 최적화"
+                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 bg-white text-slate-900"
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-slate-300 mb-1 font-medium">카테고리</label>
+                  <label className="font-bold text-slate-700">카테고리</label>
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   >
                     <option value="트러블슈팅">트러블슈팅</option>
                     <option value="기술 학습 (TIL)">기술 학습 (TIL)</option>
@@ -293,68 +316,71 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
                     <option value="세미나/스터디">세미나/스터디</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-slate-300 mb-1 font-medium">작성 날짜</label>
+                  <label className="font-bold text-slate-700">작성일</label>
                   <input
                     type="date"
-                    value={formData.date || ''}
+                    value={formData.date}
                     onChange={e => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">연계 프로젝트</label>
+                  <select
+                    value={formData.linkedProjectId || ''}
+                    onChange={e => setFormData({ ...formData, linkedProjectId: e.target.value })}
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
+                  >
+                    <option value="">없음</option>
+                    {projects.map(p => (
+                      <option key={p.id} value={p.id}>{p.title}</option>
+                    ))}
+                  </select>
                 </div>
               </div>
 
+              {/* Tags */}
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">연계 프로젝트 (선택)</label>
-                <select
-                  value={formData.linkedProjectId || ''}
-                  onChange={e => setFormData({ ...formData, linkedProjectId: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="">연계 프로젝트 없음 (일반 학습/회고)</option>
-                  {projects.map(p => (
-                    <option key={p.id} value={p.id}>{p.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1 font-medium">태그</label>
-                <div className="flex space-x-2 mb-2">
+                <label className="font-bold text-slate-700">태그 (Enter로 추가)</label>
+                <div className="flex gap-2 mt-1">
                   <input
                     type="text"
-                    placeholder="태그 입력 후 엔터"
                     value={tagInput}
                     onChange={e => setTagInput(e.target.value)}
                     onKeyDown={e => {
                       if (e.key === 'Enter') {
                         e.preventDefault();
-                        handleAddTag();
+                        if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
+                          setFormData({ ...formData, tags: [...(formData.tags || []), tagInput.trim()] });
+                          setTagInput('');
+                        }
                       }
                     }}
-                    className="flex-1 px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500 text-xs sm:text-sm"
+                    placeholder="예: JPA, Redis, 동시성제어..."
+                    className="flex-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   />
                   <button
                     type="button"
-                    onClick={handleAddTag}
-                    className="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold"
+                    onClick={() => {
+                      if (tagInput.trim() && !formData.tags?.includes(tagInput.trim())) {
+                        setFormData({ ...formData, tags: [...(formData.tags || []), tagInput.trim()] });
+                        setTagInput('');
+                      }
+                    }}
+                    className="px-3 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold"
                   >
                     추가
                   </button>
                 </div>
-
-                <div className="flex flex-wrap gap-1.5">
-                  {(formData.tags || []).map((t, idx) => (
-                    <span
-                      key={idx}
-                      className="px-2.5 py-1 rounded-md bg-slate-800 text-indigo-300 text-xs border border-slate-700 flex items-center space-x-1.5"
-                    >
+                <div className="flex flex-wrap gap-1.5 mt-2">
+                  {formData.tags?.map((t, i) => (
+                    <span key={i} className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded bg-blue-50 text-blue-700 text-xs font-mono font-semibold border border-blue-200">
                       <span>#{t}</span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveTag(t)}
-                        className="text-slate-400 hover:text-rose-400"
+                        onClick={() => setFormData({ ...formData, tags: formData.tags?.filter((_, idx) => idx !== i) })}
+                        className="text-blue-400 hover:text-blue-700 ml-1"
                       >
                         ×
                       </button>
@@ -363,37 +389,40 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
                 </div>
               </div>
 
+              {/* Content */}
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">본문 내용 (Markdown 지원) *</label>
+                <label className="font-bold text-slate-700">내용 (Markdown 지원) *</label>
                 <textarea
-                  rows={8}
-                  placeholder="마크다운 형식으로 트러블슈팅 과정 및 학습 내용을 자세히 기록하세요."
-                  value={formData.content || ''}
+                  value={formData.content}
                   onChange={e => setFormData({ ...formData, content: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500 font-mono text-xs"
+                  rows={8}
+                  placeholder="발생한 문제, 원인, 해결 방법 및 결과를 자유롭게 기록해주세요."
+                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-mono"
+                  required
                 />
               </div>
-            </div>
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm font-medium"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold"
-              >
-                저장하기
-              </button>
-            </div>
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center space-x-1 shadow-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>저장</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

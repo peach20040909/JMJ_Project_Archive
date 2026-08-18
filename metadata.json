@@ -1,7 +1,8 @@
 {
   "name": "DevArchive - Software Portfolio",
-  "description": "소프트웨어학과 2학년 2학기를 위한 맞춤형 개인 포트폴리오 및 프로젝트 아카이브",
+  "description": "명지대 융합소프트웨어학과 장민준 \n개인 포트폴리오 및 프로젝트 아카이브",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
-

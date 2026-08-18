@@ -2,24 +2,34 @@ import React, { useState } from 'react';
 import { 
   Cpu, 
   Plus, 
-  Code2, 
-  Server, 
-  Database, 
-  Layers, 
-  Sparkles, 
-  Edit, 
+  Star, 
+  Edit3, 
   Trash2, 
   Check, 
-  Star
+  X, 
+  Layers,
+  Code,
+  Server,
+  Database,
+  Terminal
 } from 'lucide-react';
 import { TechSkill } from '../types';
 
 interface TechStackMatrixProps {
   skills: TechSkill[];
-  onAddSkill: (skill: TechSkill) => void;
-  onUpdateSkill: (skill: TechSkill) => void;
+  onAddSkill: (s: TechSkill) => void;
+  onUpdateSkill: (s: TechSkill) => void;
   onDeleteSkill: (id: string) => void;
 }
+
+const CATEGORIES = [
+  'All',
+  'Languages',
+  'Frontend',
+  'Backend',
+  'Database & Infra',
+  'CS Fundamentals'
+] as const;
 
 export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
   skills,
@@ -27,131 +37,103 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
   onUpdateSkill,
   onDeleteSkill
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingSkill, setEditingSkill] = useState<TechSkill | null>(null);
+  const [selectedCat, setSelectedCat] = useState<string>('All');
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<Partial<TechSkill>>({
     name: '',
-    category: 'Languages',
+    category: 'Backend',
     level: 'Competent (과제/프로젝트 구현)',
     score: 80,
     experience: '',
     featured: true
   });
 
-  const categories = ['All', 'Languages', 'Frontend', 'Backend', 'Database & Infra', 'CS Fundamentals'];
-
-  const filteredSkills = skills.filter(s => {
-    if (selectedCategory === 'All') return true;
-    return s.category === selectedCategory;
-  });
+  const filteredSkills = skills.filter(s => 
+    selectedCat === 'All' || s.category === selectedCat
+  );
 
   const handleOpenAdd = () => {
+    setEditingId(null);
     setFormData({
-      id: `skill-${Date.now()}`,
       name: '',
-      category: 'Languages',
+      category: 'Backend',
       level: 'Competent (과제/프로젝트 구현)',
       score: 80,
       experience: '',
-      featured: false
+      featured: true
     });
-    setEditingSkill(null);
-    setIsEditing(true);
+    setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (skill: TechSkill) => {
-    setFormData({ ...skill });
-    setEditingSkill(skill);
-    setIsEditing(true);
+  const handleOpenEdit = (s: TechSkill) => {
+    setEditingId(s.id);
+    setFormData(s);
+    setIsFormOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.name) {
       alert('기술명을 입력해주세요.');
       return;
     }
 
-    const skillToSave: TechSkill = {
-      id: formData.id || `skill-${Date.now()}`,
-      name: formData.name,
-      category: formData.category || 'Languages',
-      level: formData.level || 'Competent (과제/프로젝트 구현)',
-      score: Number(formData.score) || 75,
-      experience: formData.experience || '',
-      featured: !!formData.featured
-    };
-
-    if (editingSkill) {
-      onUpdateSkill(skillToSave);
+    if (editingId) {
+      onUpdateSkill({
+        ...(formData as TechSkill),
+        id: editingId
+      });
     } else {
-      onAddSkill(skillToSave);
+      const newSkill: TechSkill = {
+        ...(formData as TechSkill),
+        id: `skill-${Date.now()}`
+      };
+      onAddSkill(newSkill);
     }
-    setIsEditing(false);
-  };
-
-  const getCategoryIcon = (cat: string) => {
-    switch (cat) {
-      case 'Languages':
-        return <Code2 className="w-4 h-4 text-indigo-400" />;
-      case 'Frontend':
-        return <Layers className="w-4 h-4 text-sky-400" />;
-      case 'Backend':
-        return <Server className="w-4 h-4 text-emerald-400" />;
-      case 'Database & Infra':
-        return <Database className="w-4 h-4 text-amber-400" />;
-      case 'CS Fundamentals':
-        return <Cpu className="w-4 h-4 text-purple-400" />;
-      default:
-        return <Cpu className="w-4 h-4 text-indigo-400" />;
-    }
-  };
-
-  const getLevelColor = (score: number) => {
-    if (score >= 85) return 'from-indigo-500 to-emerald-400';
-    if (score >= 75) return 'from-sky-500 to-indigo-500';
-    return 'from-amber-500 to-sky-500';
+    setIsFormOpen(false);
   };
 
   return (
-    <div className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 py-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">기술 스택 & 역량 매트릭스</h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800 text-sky-400 font-mono border border-slate-700">
-              {skills.length}개 스택
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>기술 스택 & 역량 매트릭스</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-violet-50 text-violet-700 text-xs font-bold border border-violet-200">
+              총 {skills.length}개 기술
             </span>
-          </div>
-          <p className="text-sm text-slate-400 mt-1">
-            프로그래밍 언어, 백엔드/프론트엔드 프레임워크, 데이터베이스, CS 핵심 역량 숙련도
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            프로그래밍 언어, 프레임워크, CS 기초 역량의 숙련도와 실제 적용 프로젝트 경험을 수치화합니다.
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold shadow-lg shadow-sky-600/30 transition-all hover:scale-[1.02] active:scale-95 self-start md:self-auto"
+          className="px-4 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-105 self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
-          <span>새 기술 스택 추가</span>
+          <span>기술 스택 추가</span>
         </button>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex space-x-1.5 overflow-x-auto scrollbar-none p-1.5 rounded-xl bg-slate-900 border border-slate-800">
-        {categories.map(cat => (
+      {/* Filter Tabs */}
+      <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none pb-1 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-sm">
+        {CATEGORIES.map(cat => (
           <button
             key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all flex items-center space-x-1.5 ${
-              selectedCategory === cat
-                ? 'bg-sky-600 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+            onClick={() => setSelectedCat(cat)}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+              selectedCat === cat
+                ? 'bg-violet-600 text-white shadow-sm'
+                : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
             }`}
           >
-            {cat !== 'All' && getCategoryIcon(cat)}
-            <span>{cat === 'All' ? '전체 보기' : cat}</span>
+            {cat}
           </button>
         ))}
       </div>
@@ -161,33 +143,25 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
         {filteredSkills.map(skill => (
           <div
             key={skill.id}
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-sky-500/40 transition-all flex flex-col justify-between space-y-3"
+            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-sm hover:shadow-md hover:border-violet-300 transition-all flex flex-col justify-between space-y-3 group"
           >
-            <div className="space-y-2.5">
-              {/* Header: Name, Category, Action */}
+            <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <div className="p-2 rounded-lg bg-slate-800 border border-slate-700">
-                    {getCategoryIcon(skill.category)}
-                  </div>
-                  <div>
-                    <h4 className="text-base font-bold text-white flex items-center space-x-1.5">
-                      <span>{skill.name}</span>
-                      {skill.featured && (
-                        <Star className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-                      )}
-                    </h4>
-                    <span className="text-xs text-slate-400">{skill.category}</span>
-                  </div>
+                  <span className="text-base font-bold text-slate-900">{skill.name}</span>
+                  {skill.featured && (
+                    <span title="대표 기술">
+                      <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                    </span>
+                  )}
                 </div>
-
+                
                 <div className="flex items-center space-x-1">
                   <button
                     onClick={() => handleOpenEdit(skill)}
-                    className="p-1 text-slate-400 hover:text-slate-200"
-                    title="수정"
+                    className="p-1 text-slate-400 hover:text-violet-600 hover:bg-violet-50 rounded"
                   >
-                    <Edit className="w-3.5 h-3.5" />
+                    <Edit3 className="w-3.5 h-3.5" />
                   </button>
                   <button
                     onClick={() => {
@@ -195,31 +169,34 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
                         onDeleteSkill(skill.id);
                       }
                     }}
-                    className="p-1 text-slate-400 hover:text-rose-400"
-                    title="삭제"
+                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
 
-              {/* Score Bar & Level */}
-              <div className="space-y-1.5 pt-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-300">{skill.level}</span>
-                  <span className="font-mono text-sky-400 font-bold">{skill.score}%</span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/60">
-                  <div
-                    className={`bg-gradient-to-r ${getLevelColor(skill.score)} h-full rounded-full`}
-                    style={{ width: `${skill.score}%` }}
-                  ></div>
-                </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="px-2 py-0.5 rounded bg-violet-50 text-violet-700 font-semibold border border-violet-100">
+                  {skill.category}
+                </span>
+                <span className="font-mono text-slate-600 font-bold">{skill.score}%</span>
               </div>
 
-              {/* Experience / Description */}
+              {/* Progress Bar */}
+              <div className="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200">
+                <div
+                  className="bg-gradient-to-r from-violet-500 to-indigo-600 h-full rounded-full transition-all"
+                  style={{ width: `${skill.score}%` }}
+                ></div>
+              </div>
+
+              <div className="text-xs font-semibold text-slate-700">
+                {skill.level}
+              </div>
+
               {skill.experience && (
-                <p className="text-xs text-slate-400 leading-relaxed pt-1">
+                <p className="text-xs text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
                   {skill.experience}
                 </p>
               )}
@@ -228,122 +205,123 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
         ))}
       </div>
 
-      {/* Edit / Add Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-lg p-6 text-slate-100 shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Cpu className="w-5 h-5 text-sky-400" />
-                <span>{editingSkill ? '기술 스택 수정' : '새 기술 스택 추가'}</span>
-              </h2>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="text-slate-400 hover:text-white text-sm"
-              >
-                닫기
+      {/* Add / Edit Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-lg text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">
+                {editingId ? '기술 스택 수정' : '새 기술 스택 추가'}
+              </h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm">
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">기술명 *</label>
+                <label className="font-bold text-slate-700">기술/언어/도구명 *</label>
                 <input
                   type="text"
-                  placeholder="예: Java, Spring Boot, React, MySQL..."
-                  value={formData.name || ''}
+                  value={formData.name}
                   onChange={e => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
+                  placeholder="예: Java / Spring Boot"
+                  className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900"
+                  required
                 />
               </div>
 
-              <div>
-                <label className="block text-slate-300 mb-1 font-medium">분야 / 카테고리</label>
-                <select
-                  value={formData.category}
-                  onChange={e => setFormData({ ...formData, category: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
-                >
-                  <option value="Languages">Languages (언어)</option>
-                  <option value="Frontend">Frontend (프론트엔드)</option>
-                  <option value="Backend">Backend (백엔드)</option>
-                  <option value="Database & Infra">Database & Infra (데이터베이스/인프라)</option>
-                  <option value="CS Fundamentals">CS Fundamentals (컴퓨터과학 기본기)</option>
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-bold text-slate-700">카테고리</label>
+                  <select
+                    value={formData.category}
+                    onChange={e => setFormData({ ...formData, category: e.target.value as any })}
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
+                  >
+                    <option value="Languages">Languages</option>
+                    <option value="Frontend">Frontend</option>
+                    <option value="Backend">Backend</option>
+                    <option value="Database & Infra">Database & Infra</option>
+                    <option value="CS Fundamentals">CS Fundamentals</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">숙련도 레벨</label>
+                  <select
+                    value={formData.level}
+                    onChange={e => setFormData({ ...formData, level: e.target.value as any })}
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
+                  >
+                    <option value="Familiar (기초 문법)">Familiar (기초 문법)</option>
+                    <option value="Competent (과제/프로젝트 구현)">Competent (과제/구현)</option>
+                    <option value="Proficient (아키텍처/최적화)">Proficient (최적화/설계)</option>
+                    <option value="Expert">Expert (마스터)</option>
+                  </select>
+                </div>
               </div>
 
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">숙련도 수준 (Level)</label>
-                <select
-                  value={formData.level}
-                  onChange={e => setFormData({ ...formData, level: e.target.value as any })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
-                >
-                  <option value="Familiar (기초 문법)">Familiar (기초 문법 및 튜토리얼 이해)</option>
-                  <option value="Competent (과제/프로젝트 구현)">Competent (과제 및 프로젝트 핵심 기능 구현)</option>
-                  <option value="Proficient (아키텍처/최적화)">Proficient (아키텍처 설계, 동시성, 성능 최적화)</option>
-                  <option value="Expert">Expert (심화 튜닝 및 라이브러리 내부 원리 이해)</option>
-                </select>
-              </div>
-
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-slate-300 font-medium">자신감 점수 (Score: {formData.score}%)</label>
+                <div className="flex justify-between font-bold text-slate-700">
+                  <span>자신감 점수</span>
+                  <span className="text-violet-600 font-mono">{formData.score}%</span>
                 </div>
                 <input
                   type="range"
-                  min="40"
-                  max="100"
-                  value={formData.score || 75}
+                  min={10}
+                  max={100}
+                  step={5}
+                  value={formData.score}
                   onChange={e => setFormData({ ...formData, score: Number(e.target.value) })}
-                  className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-sky-500"
+                  className="w-full mt-2 accent-violet-600"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">경험 및 역량 설명</label>
+                <label className="font-bold text-slate-700">실제 구현 및 활용 경험</label>
                 <textarea
-                  rows={3}
-                  placeholder="예: Spring Data JPA를 사용한 동시성 제어 및 REST API 설계 경험..."
                   value={formData.experience || ''}
                   onChange={e => setFormData({ ...formData, experience: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-sky-500"
+                  rows={3}
+                  placeholder="예: RESTful API 서버 구축, JPA N+1 최적화 및 비관적 락 적용"
+                  className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                 />
               </div>
 
               <div className="flex items-center space-x-2 pt-1">
                 <input
                   type="checkbox"
-                  id="featuredSkillCheck"
-                  checked={!!formData.featured}
+                  id="featured-skill"
+                  checked={formData.featured}
                   onChange={e => setFormData({ ...formData, featured: e.target.checked })}
-                  className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 bg-slate-800 border-slate-700"
+                  className="w-4 h-4 rounded text-violet-600 accent-violet-600"
                 />
-                <label htmlFor="featuredSkillCheck" className="text-sm font-medium text-slate-300 cursor-pointer">
-                  주요 핵심 기술(Featured)로 설정
+                <label htmlFor="featured-skill" className="text-xs font-semibold text-slate-700 cursor-pointer">
+                  대표 기술 스택으로 강조 (Featured)
                 </label>
               </div>
-            </div>
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm font-medium"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-5 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold"
-              >
-                저장하기
-              </button>
-            </div>
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold flex items-center space-x-1 shadow-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>저장</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

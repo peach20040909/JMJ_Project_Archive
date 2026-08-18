@@ -5,23 +5,22 @@ import {
   CheckCircle2, 
   Circle, 
   Calendar, 
-  Flame, 
   Sparkles, 
-  Edit, 
+  Edit3, 
   Trash2, 
   Check, 
-  TrendingUp,
+  X, 
+  Clock, 
   AlertTriangle,
-  Award,
-  ChevronRight
+  Award
 } from 'lucide-react';
-import { SemesterGoal } from '../types';
 import confetti from 'canvas-confetti';
+import { SemesterGoal } from '../types';
 
 interface SemesterRoadmapProps {
   goals: SemesterGoal[];
-  onAddGoal: (goal: SemesterGoal) => void;
-  onUpdateGoal: (goal: SemesterGoal) => void;
+  onAddGoal: (g: SemesterGoal) => void;
+  onUpdateGoal: (g: SemesterGoal) => void;
   onDeleteGoal: (id: string) => void;
   onOpenAiCoach: () => void;
 }
@@ -33,377 +32,261 @@ export const SemesterRoadmap: React.FC<SemesterRoadmapProps> = ({
   onDeleteGoal,
   onOpenAiCoach
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('All');
-  const [isEditing, setIsEditing] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<SemesterGoal | null>(null);
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<Partial<SemesterGoal>>({
     title: '',
-    category: '전공 학점',
-    targetDate: '2026.12.20',
-    progress: 0,
+    category: '주력 프로젝트',
+    targetDate: '2026.11.30',
+    progress: 20,
+    isCompleted: false,
     priority: 'High',
-    milestones: [
-      { id: 'm1', text: '', done: false }
-    ]
+    milestones: [{ id: 'm1', text: '프로젝트 기획 및 요구사항 정의', done: false }]
   });
 
-  const categories = ['All', '전공 학점', '주력 프로젝트', '알고리즘/코테', '대회/해커톤', '기타'];
-
-  const filteredGoals = goals.filter(g => {
-    if (selectedCategory === 'All') return true;
-    return g.category === selectedCategory;
-  });
+  const [newMilestoneText, setNewMilestoneText] = useState('');
 
   const overallProgress = goals.length > 0
     ? Math.round(goals.reduce((acc, g) => acc + g.progress, 0) / goals.length)
     : 0;
 
-  // Toggle milestone completion
-  const handleToggleMilestone = (goalId: string, milestoneId: string) => {
-    const goal = goals.find(g => g.id === goalId);
-    if (!goal) return;
+  // Toggle milestone checkbox
+  const handleToggleMilestone = (goal: SemesterGoal, milestoneId: string) => {
+    const updatedMilestones = goal.milestones.map(m => 
+      m.id === milestoneId ? { ...m, done: !m.done } : m
+    );
 
-    const nextMilestones = goal.milestones.map(m => {
-      if (m.id === milestoneId) return { ...m, done: !m.done };
-      return m;
-    });
+    const completedCount = updatedMilestones.filter(m => m.done).length;
+    const newProgress = Math.round((completedCount / updatedMilestones.length) * 100);
+    const isCompleted = newProgress === 100;
 
-    const doneCount = nextMilestones.filter(m => m.done).length;
-    const newProgress = nextMilestones.length > 0 
-      ? Math.round((doneCount / nextMilestones.length) * 100)
-      : goal.progress;
-
-    if (newProgress === 100 && goal.progress < 100) {
-      try {
-        confetti({
-          particleCount: 80,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } catch (e) {}
+    if (isCompleted && !goal.isCompleted) {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 }
+      });
     }
 
     onUpdateGoal({
       ...goal,
-      milestones: nextMilestones,
+      milestones: updatedMilestones,
       progress: newProgress,
-      isCompleted: newProgress === 100
+      isCompleted
     });
   };
 
   const handleOpenAdd = () => {
+    setEditingId(null);
     setFormData({
-      id: `goal-${Date.now()}`,
       title: '',
       category: '주력 프로젝트',
       targetDate: '2026.11.30',
       progress: 0,
+      isCompleted: false,
       priority: 'High',
-      milestones: [
-        { id: `m-${Date.now()}-1`, text: '기획 및 아키텍처 설계', done: false },
-        { id: `m-${Date.now()}-2`, text: '핵심 기능 개발 및 배포', done: false }
-      ]
+      milestones: [{ id: `m-${Date.now()}`, text: '첫 번째 세부 실행 과제', done: false }]
     });
-    setEditingGoal(null);
-    setIsEditing(true);
+    setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (goal: SemesterGoal) => {
-    setFormData({ ...goal });
-    setEditingGoal(goal);
-    setIsEditing(true);
+  const handleOpenEdit = (g: SemesterGoal) => {
+    setEditingId(g.id);
+    setFormData(g);
+    setIsFormOpen(true);
   };
 
-  const handleSave = () => {
+  const handleSave = (e: React.FormEvent) => {
+    e.preventDefault();
     if (!formData.title) {
-      alert('목표 제목은 필수입니다.');
+      alert('목표 제목을 입력해주세요.');
       return;
     }
 
-    const validMilestones = (formData.milestones || [])
-      .filter(m => m.text.trim() !== '')
-      .map((m, idx) => ({
-        id: m.id || `m-${Date.now()}-${idx}`,
-        text: m.text,
-        done: !!m.done
-      }));
-
-    const doneCount = validMilestones.filter(m => m.done).length;
-    const calcProgress = validMilestones.length > 0 
-      ? Math.round((doneCount / validMilestones.length) * 100)
-      : (formData.progress || 0);
-
-    const goalToSave: SemesterGoal = {
-      id: formData.id || `goal-${Date.now()}`,
-      title: formData.title,
-      category: formData.category || '전공 학점',
-      targetDate: formData.targetDate || '2026.12.20',
-      progress: calcProgress,
-      isCompleted: calcProgress === 100,
-      priority: formData.priority || 'High',
-      milestones: validMilestones.length > 0 ? validMilestones : [
-        { id: `m-${Date.now()}-1`, text: '목표 착수 및 준비', done: false }
-      ]
-    };
-
-    if (editingGoal) {
-      onUpdateGoal(goalToSave);
+    if (editingId) {
+      onUpdateGoal({
+        ...(formData as SemesterGoal),
+        id: editingId
+      });
     } else {
-      onAddGoal(goalToSave);
+      const newGoal: SemesterGoal = {
+        ...(formData as SemesterGoal),
+        id: `goal-${Date.now()}`
+      };
+      onAddGoal(newGoal);
     }
-    setIsEditing(false);
-  };
-
-  const handleMilestoneTextChange = (idx: number, text: string) => {
-    const next = [...(formData.milestones || [])];
-    next[idx] = { ...next[idx], text };
-    setFormData({ ...formData, milestones: next });
-  };
-
-  const handleAddMilestoneField = () => {
-    const next = [...(formData.milestones || []), { id: `m-${Date.now()}`, text: '', done: false }];
-    setFormData({ ...formData, milestones: next });
-  };
-
-  const handleRemoveMilestoneField = (idx: number) => {
-    const next = (formData.milestones || []).filter((_, i) => i !== idx);
-    setFormData({ ...formData, milestones: next });
-  };
-
-  const getPriorityBadge = (priority: string) => {
-    switch (priority) {
-      case 'High':
-        return 'bg-rose-500/10 text-rose-300 border-rose-500/30';
-      case 'Medium':
-        return 'bg-amber-500/10 text-amber-300 border-amber-500/30';
-      case 'Low':
-        return 'bg-slate-800 text-slate-400 border-slate-700';
-      default:
-        return 'bg-indigo-500/10 text-indigo-300 border-indigo-500/30';
-    }
+    setIsFormOpen(false);
   };
 
   return (
-    <div className="py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="space-y-6 py-6">
+      
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center space-x-2">
-            <h2 className="text-2xl font-bold text-white tracking-tight">2학년 2학기 목표 & 마일스톤</h2>
-            <span className="text-xs px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-400 font-mono border border-indigo-500/30">
-              평균 달성률 {overallProgress}%
+          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>2학년 2학기 핵심 목표 & 로드맵</span>
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 text-xs font-bold border border-amber-200">
+              전체 진행률 {overallProgress}%
             </span>
-          </div>
-          <p className="text-sm text-slate-400 mt-1">
-            2-2학기 전공 학점 유지, 주력 프로젝트 릴리즈, 알고리즘 티어업, 대회 참가를 위한 단계별 실행 계획
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            2학년 2학기 동안 달성할 주력 프로젝트 릴리즈, CS 전공 학점, 코딩테스트 마일스톤을 추적합니다.
           </p>
         </div>
 
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-2.5">
           <button
             onClick={onOpenAiCoach}
-            className="inline-flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/30 text-sm font-medium transition-colors"
+            className="px-3.5 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs sm:text-sm font-bold flex items-center space-x-1.5 border border-indigo-200"
           >
-            <Sparkles className="w-4 h-4 text-amber-300" />
+            <Sparkles className="w-4 h-4 text-indigo-600" />
             <span>AI 로드맵 조언</span>
           </button>
-
           <button
             onClick={handleOpenAdd}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold shadow-lg shadow-indigo-600/30 transition-all hover:scale-[1.02] active:scale-95"
+            className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-105"
           >
             <Plus className="w-4 h-4" />
-            <span>새 목표 추가</span>
+            <span>목표 추가</span>
           </button>
         </div>
       </div>
 
-      {/* Progress Overview Hero Banner */}
-      <div className="p-6 rounded-2xl bg-gradient-to-r from-indigo-950/70 via-slate-900 to-purple-950/40 border border-indigo-500/40 shadow-xl space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div>
-            <span className="text-xs font-semibold text-indigo-400 uppercase tracking-wider">
-              2026 2학년 2학기 로드맵 진행도
-            </span>
-            <h3 className="text-xl font-bold text-white mt-0.5">
-              총 {goals.length}개 핵심 목표 중 {goals.filter(g => g.progress === 100).length}개 완료
-            </h3>
-          </div>
-          <div className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-emerald-400 font-mono">
-            {overallProgress}%
-          </div>
+      {/* Progress Banner */}
+      <div className="p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-orange-50/40 border border-amber-200/80 shadow-sm space-y-2">
+        <div className="flex items-center justify-between text-xs font-bold">
+          <span className="text-amber-900 flex items-center space-x-1.5">
+            <Award className="w-4 h-4 text-amber-600" />
+            <span>2학기 로드맵 전체 달성도</span>
+          </span>
+          <span className="text-amber-800 font-mono text-sm">{overallProgress}%</span>
         </div>
-
-        {/* Big Progress Bar */}
-        <div className="w-full bg-slate-800/80 rounded-full h-3 overflow-hidden border border-slate-700">
+        <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-indigo-500 via-sky-400 to-emerald-400 h-full rounded-full transition-all duration-500"
+            className="bg-gradient-to-r from-amber-500 to-emerald-500 h-full rounded-full transition-all duration-500"
             style={{ width: `${overallProgress}%` }}
           ></div>
         </div>
       </div>
 
-      {/* Category Pills */}
-      <div className="flex space-x-1.5 overflow-x-auto scrollbar-none p-1.5 rounded-xl bg-slate-900 border border-slate-800">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3.5 py-1.5 rounded-lg text-xs sm:text-sm font-medium whitespace-nowrap transition-all ${
-              selectedCategory === cat
-                ? 'bg-indigo-600 text-white font-semibold shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-            }`}
-          >
-            {cat === 'All' ? '전체 목표' : cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Goals Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        {filteredGoals.map(goal => (
+      {/* Goal Cards List */}
+      <div className="space-y-4">
+        {goals.map(goal => (
           <div
             key={goal.id}
-            className="p-5 rounded-2xl bg-slate-900 border border-slate-800 hover:border-indigo-500/40 transition-all flex flex-col justify-between space-y-4"
+            className={`p-5 rounded-2xl border transition-all ${
+              goal.isCompleted 
+                ? 'bg-emerald-50/30 border-emerald-200 shadow-sm'
+                : 'bg-white border-slate-200 shadow-sm hover:shadow-md hover:border-amber-300'
+            }`}
           >
-            <div className="space-y-3">
-              {/* Card Meta */}
-              <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div className="space-y-1">
                 <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-800 text-indigo-300 border border-slate-700">
+                  <span className="px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-900 text-[11px] font-bold">
                     {goal.category}
                   </span>
-                  <span className={`px-2 py-0.5 rounded-md text-xs font-medium border ${getPriorityBadge(goal.priority)}`}>
-                    우선순위: {goal.priority}
+                  <span className="text-xs text-slate-500 font-mono flex items-center space-x-1">
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span>목표일: {goal.targetDate}</span>
+                  </span>
+                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                    goal.priority === 'High' ? 'bg-rose-50 text-rose-700 border border-rose-200' : 'bg-slate-100 text-slate-600'
+                  }`}>
+                    {goal.priority}
                   </span>
                 </div>
-
-                <div className="flex items-center space-x-1">
-                  <button
-                    onClick={() => handleOpenEdit(goal)}
-                    className="p-1 text-slate-400 hover:text-slate-200"
-                    title="수정"
-                  >
-                    <Edit className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (confirm(`'${goal.title}' 목표를 삭제하시겠습니까?`)) {
-                        onDeleteGoal(goal.id);
-                      }
-                    }}
-                    className="p-1 text-slate-400 hover:text-rose-400"
-                    title="삭제"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
+                <h3 className="text-base font-bold text-slate-900">{goal.title}</h3>
               </div>
 
-              {/* Title & Target Date */}
-              <div>
-                <h4 className="text-base font-bold text-white tracking-tight leading-snug">
-                  {goal.title}
-                </h4>
-                <div className="flex items-center space-x-1.5 text-xs text-slate-400 mt-1">
-                  <Calendar className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>목표 기한: {goal.targetDate}</span>
-                </div>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm font-mono font-bold text-amber-700">{goal.progress}%</span>
+                <button
+                  onClick={() => handleOpenEdit(goal)}
+                  className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg"
+                >
+                  <Edit3 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`'${goal.title}' 목표를 삭제하시겠습니까?`)) {
+                      onDeleteGoal(goal.id);
+                    }
+                  }}
+                  className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
+            </div>
 
-              {/* Progress Bar */}
-              <div className="space-y-1 pt-1">
-                <div className="flex items-center justify-between text-xs font-mono">
-                  <span className="text-slate-400">진행률</span>
-                  <span className={`font-bold ${goal.progress === 100 ? 'text-emerald-400' : 'text-indigo-400'}`}>
-                    {goal.progress}%
-                  </span>
-                </div>
-                <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700/60">
+            {/* Milestones Checkbox List */}
+            <div className="pt-3 space-y-2">
+              <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
+                세부 실행 마일스톤 ({goal.milestones.filter(m => m.done).length} / {goal.milestones.length})
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {goal.milestones.map(m => (
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${
-                      goal.progress === 100
-                        ? 'bg-emerald-400'
-                        : 'bg-gradient-to-r from-indigo-500 to-sky-400'
+                    key={m.id}
+                    onClick={() => handleToggleMilestone(goal, m.id)}
+                    className={`p-2.5 rounded-xl border flex items-center space-x-2.5 cursor-pointer transition-colors text-xs ${
+                      m.done 
+                        ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900 font-semibold'
+                        : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-700'
                     }`}
-                    style={{ width: `${goal.progress}%` }}
-                  ></div>
-                </div>
-              </div>
-
-              {/* Interactive Milestones Checklist */}
-              <div className="space-y-2 pt-2 border-t border-slate-800">
-                <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                  세부 마일스톤 체크리스트 ({goal.milestones.filter(m => m.done).length}/{goal.milestones.length})
-                </span>
-                <div className="space-y-1.5">
-                  {goal.milestones.map(m => (
-                    <div
-                      key={m.id}
-                      onClick={() => handleToggleMilestone(goal.id, m.id)}
-                      className={`p-2 rounded-lg text-xs flex items-start space-x-2 cursor-pointer transition-colors ${
-                        m.done
-                          ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                          : 'bg-slate-800/60 text-slate-300 border border-slate-700/50 hover:bg-slate-800'
-                      }`}
-                    >
-                      <button className="flex-shrink-0 mt-0.5">
-                        {m.done ? (
-                          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                        ) : (
-                          <Circle className="w-4 h-4 text-slate-500" />
-                        )}
-                      </button>
-                      <span className={`leading-relaxed ${m.done ? 'line-through text-slate-400' : ''}`}>
-                        {m.text}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+                  >
+                    {m.done ? (
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                    ) : (
+                      <Circle className="w-4 h-4 text-slate-400 flex-shrink-0" />
+                    )}
+                    <span className={m.done ? 'line-through text-slate-400' : ''}>
+                      {m.text}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Edit / Create Goal Modal */}
-      {isEditing && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-xl p-6 text-slate-100 shadow-2xl space-y-4 my-8 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h2 className="text-lg font-bold text-white flex items-center space-x-2">
-                <Target className="w-5 h-5 text-indigo-400" />
-                <span>{editingGoal ? '목표 및 마일스톤 수정' : '새 학기 목표 등록'}</span>
-              </h2>
-              <button
-                onClick={() => setIsEditing(false)}
-                className="text-slate-400 hover:text-white text-sm"
-              >
-                닫기
+      {/* Add / Edit Goal Modal */}
+      {isFormOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+          <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-xl text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+            <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
+              <h3 className="text-lg font-bold text-slate-900">
+                {editingId ? '목표 수정' : '새 학기 목표 등록'}
+              </h3>
+              <button onClick={() => setIsFormOpen(false)} className="text-slate-400 hover:text-slate-700">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs sm:text-sm">
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 text-xs sm:text-sm">
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">목표 제목 *</label>
+                <label className="font-bold text-slate-700">목표 제목 *</label>
                 <input
                   type="text"
-                  placeholder="예: 2-2학기 전공 핵심(알고리즘, OS, DB) A+ 달성"
-                  value={formData.title || ''}
+                  value={formData.title}
                   onChange={e => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                  placeholder="예: 백준 골드 2 티어 달성 & 350문제 돌파"
+                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 bg-white text-slate-900"
+                  required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-slate-300 mb-1 font-medium">카테고리</label>
+                  <label className="font-bold text-slate-700">카테고리</label>
                   <select
                     value={formData.category}
                     onChange={e => setFormData({ ...formData, category: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   >
                     <option value="전공 학점">전공 학점</option>
                     <option value="주력 프로젝트">주력 프로젝트</option>
@@ -413,89 +296,103 @@ export const SemesterRoadmap: React.FC<SemesterRoadmapProps> = ({
                     <option value="기타">기타</option>
                   </select>
                 </div>
-
                 <div>
-                  <label className="block text-slate-300 mb-1 font-medium">우선순위</label>
+                  <label className="font-bold text-slate-700">목표 달성일</label>
+                  <input
+                    type="text"
+                    value={formData.targetDate}
+                    onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
+                    placeholder="2026.12.31"
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
+                  />
+                </div>
+                <div>
+                  <label className="font-bold text-slate-700">우선순위</label>
                   <select
                     value={formData.priority}
                     onChange={e => setFormData({ ...formData, priority: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
+                    className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   >
-                    <option value="High">High (최우선)</option>
-                    <option value="Medium">Medium (보통)</option>
-                    <option value="Low">Low (보조)</option>
+                    <option value="High">High</option>
+                    <option value="Medium">Medium</option>
+                    <option value="Low">Low</option>
                   </select>
                 </div>
               </div>
 
+              {/* Milestones in Form */}
               <div>
-                <label className="block text-slate-300 mb-1 font-medium">목표 완료 예정일 (Target Date)</label>
-                <input
-                  type="text"
-                  placeholder="2026.12.20"
-                  value={formData.targetDate || ''}
-                  onChange={e => setFormData({ ...formData, targetDate: e.target.value })}
-                  className="w-full px-3 py-2 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500"
-                />
-              </div>
-
-              {/* Milestones list */}
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-slate-300 font-medium">세부 마일스톤 목록</label>
+                <label className="font-bold text-slate-700">세부 마일스톤 리스트</label>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    value={newMilestoneText}
+                    onChange={e => setNewMilestoneText(e.target.value)}
+                    placeholder="예: 주 3회 DP 문제 풀이..."
+                    className="flex-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
+                  />
                   <button
                     type="button"
-                    onClick={handleAddMilestoneField}
-                    className="text-xs text-indigo-400 hover:text-indigo-300"
+                    onClick={() => {
+                      if (newMilestoneText.trim()) {
+                        setFormData({
+                          ...formData,
+                          milestones: [
+                            ...(formData.milestones || []),
+                            { id: `m-${Date.now()}`, text: newMilestoneText.trim(), done: false }
+                          ]
+                        });
+                        setNewMilestoneText('');
+                      }
+                    }}
+                    className="px-3 py-2 bg-slate-800 text-white rounded-xl text-xs font-semibold"
                   >
-                    + 마일스톤 추가
+                    추가
                   </button>
                 </div>
 
-                <div className="space-y-2">
-                  {(formData.milestones || []).map((m, idx) => (
-                    <div key={idx} className="flex items-center space-x-2">
-                      <input
-                        type="text"
-                        placeholder={`마일스톤 ${idx + 1}`}
-                        value={m.text}
-                        onChange={e => handleMilestoneTextChange(idx, e.target.value)}
-                        className="flex-1 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-white focus:outline-none focus:border-indigo-500 text-xs sm:text-sm"
-                      />
-                      {(formData.milestones || []).length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveMilestoneField(idx)}
-                          className="px-2 text-slate-400 hover:text-rose-400 text-sm"
-                        >
-                          ✕
-                        </button>
-                      )}
+                <div className="space-y-1.5 mt-2">
+                  {formData.milestones?.map((m, idx) => (
+                    <div key={m.id} className="flex items-center justify-between p-2 rounded-lg bg-slate-50 border border-slate-200 text-xs">
+                      <span className="text-slate-800 truncate mr-2">{m.text}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setFormData({
+                            ...formData,
+                            milestones: formData.milestones?.filter((_, i) => i !== idx)
+                          });
+                        }}
+                        className="text-rose-500 hover:text-rose-700"
+                      >
+                        삭제
+                      </button>
                     </div>
                   ))}
                 </div>
               </div>
-            </div>
 
-            <div className="flex justify-end space-x-3 pt-3 border-t border-slate-800">
-              <button
-                type="button"
-                onClick={() => setIsEditing(false)}
-                className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 text-sm font-medium"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleSave}
-                className="px-5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold"
-              >
-                저장하기
-              </button>
-            </div>
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsFormOpen(false)}
+                  className="px-4 py-2 rounded-xl text-slate-600 hover:bg-slate-100 font-semibold"
+                >
+                  취소
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold flex items-center space-x-1 shadow-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>저장</span>
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
+
     </div>
   );
 };

@@ -4,23 +4,16 @@ import {
   Globe, 
   Mail, 
   ExternalLink, 
-  CheckCircle2, 
-  Sparkles, 
-  Calendar, 
-  Award, 
-  BookOpen, 
   Layers, 
   Printer, 
-  FolderGit2, 
-  ArrowUpRight,
-  GraduationCap
+  FolderGit2,
+  Code2
 } from 'lucide-react';
-import { UserProfile, ProjectItem, CourseworkSubject, TechSkill } from '../types';
+import { UserProfile, ProjectItem, TechSkill } from '../types';
 
 interface PublicPortfolioViewProps {
   profile: UserProfile;
   projects: ProjectItem[];
-  courseworks: CourseworkSubject[];
   skills: TechSkill[];
   onBackToArchive: () => void;
 }
@@ -28,37 +21,38 @@ interface PublicPortfolioViewProps {
 export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
   profile,
   projects,
-  courseworks,
   skills,
   onBackToArchive
 }) => {
   const featuredProjects = projects.filter(p => p.featured);
+  const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects;
   const featuredSkills = skills.filter(s => s.featured);
+  const displaySkills = featuredSkills.length > 0 ? featuredSkills : skills;
 
   const handlePrint = () => {
     window.print();
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:text-black">
-      <div className="max-w-4xl mx-auto space-y-12">
+    <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:text-black">
+      <div className="max-w-4xl mx-auto space-y-10">
         
         {/* Navigation & Controls (Hidden in Print) */}
-        <div className="flex items-center justify-between border-b border-slate-800 pb-4 print:hidden">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
           <button
             onClick={onBackToArchive}
-            className="text-xs sm:text-sm font-semibold text-slate-400 hover:text-white flex items-center space-x-1"
+            className="text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
           >
             <span>← 아카이브 관리 모드로 돌아가기</span>
           </button>
 
           <div className="flex items-center space-x-3">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-medium">
+            <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
               공개 포트폴리오 뷰 (Recruiter Mode)
             </span>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-colors shadow-sm"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>PDF / 인쇄 출력</span>
@@ -67,16 +61,16 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
         </div>
 
         {/* 1. Header / Intro Profile */}
-        <header className="space-y-4">
+        <header className="space-y-4 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm print:border-none print:shadow-none print:p-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="inline-block px-3 py-1 rounded-md bg-indigo-500/10 text-indigo-300 font-mono text-xs mb-2 border border-indigo-500/20">
-                {profile.university} {profile.department} • {profile.currentSemester} (GPA: {profile.gpa})
+              <div className="inline-block px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono text-xs font-bold mb-2 border border-indigo-200">
+                {profile.university} {profile.department} {profile.currentSemester && `• ${profile.currentSemester}`} {profile.gpa && `(GPA: ${profile.gpa})`}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight print:text-black">
-                {profile.name} <span className="text-lg font-normal text-slate-400">({profile.englishName})</span>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+                {profile.name} <span className="text-lg font-normal text-slate-500">({profile.englishName})</span>
               </h1>
-              <p className="text-lg text-indigo-400 font-semibold mt-1">
+              <p className="text-lg text-indigo-600 font-bold mt-1">
                 {profile.targetRole}
               </p>
             </div>
@@ -88,7 +82,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                   href={profile.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center space-x-1.5 text-slate-300 hover:text-white transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center space-x-1.5 text-slate-800 font-medium transition-colors"
                 >
                   <Github className="w-3.5 h-3.5" />
                   <span>GitHub</span>
@@ -99,48 +93,48 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                   href={profile.blogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center space-x-1.5 text-slate-300 hover:text-white transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center space-x-1.5 text-slate-800 font-medium transition-colors"
                 >
-                  <Globe className="w-3.5 h-3.5" />
-                  <span>Blog</span>
+                  <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Tech Blog</span>
                 </a>
               )}
               {profile.email && (
                 <a
                   href={`mailto:${profile.email}`}
-                  className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 flex items-center space-x-1.5 text-slate-300 hover:text-white transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center space-x-1.5 text-slate-800 font-medium transition-colors"
                 >
-                  <Mail className="w-3.5 h-3.5" />
+                  <Mail className="w-3.5 h-3.5 text-indigo-600" />
                   <span>{profile.email}</span>
                 </a>
               )}
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-900/80 border border-slate-800/80 text-sm text-slate-300 leading-relaxed print:bg-slate-50 print:text-slate-800">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed">
             {profile.bio}
           </div>
         </header>
 
-        {/* 2. Core CS Skills & Competencies */}
+        {/* 2. Core Tech Skills & Competencies */}
         <section className="space-y-4">
-          <h2 className="text-xl font-bold text-white border-b border-slate-800 pb-2 flex items-center space-x-2 print:text-black">
-            <Layers className="w-5 h-5 text-indigo-400" />
+          <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center space-x-2">
+            <Layers className="w-5 h-5 text-indigo-600" />
             <span>기술 스택 & 핵심 역량</span>
           </h2>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {featuredSkills.map(skill => (
+            {displaySkills.map(skill => (
               <div
                 key={skill.id}
-                className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-1 print:bg-slate-50 print:border-slate-300"
+                className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between space-y-1"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-sm print:text-black">{skill.name}</span>
-                  <span className="text-xs text-indigo-400 font-mono font-semibold">{skill.level}</span>
+                  <span className="font-bold text-slate-900 text-sm">{skill.name}</span>
+                  <span className="text-xs text-indigo-600 font-mono font-bold">{skill.level}</span>
                 </div>
                 {skill.experience && (
-                  <p className="text-xs text-slate-400 leading-relaxed print:text-slate-600">
+                  <p className="text-xs text-slate-600 leading-relaxed pt-1">
                     {skill.experience}
                   </p>
                 )}
@@ -149,29 +143,29 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
           </div>
         </section>
 
-        {/* 3. Featured Projects (STAR Format) */}
+        {/* 3. Projects Archive (STAR Format) */}
         <section className="space-y-6">
-          <h2 className="text-xl font-bold text-white border-b border-slate-800 pb-2 flex items-center space-x-2 print:text-black">
-            <FolderGit2 className="w-5 h-5 text-indigo-400" />
-            <span>주요 프로젝트 아카이브</span>
+          <h2 className="text-xl font-bold text-slate-900 border-b border-slate-200 pb-2 flex items-center space-x-2">
+            <FolderGit2 className="w-5 h-5 text-indigo-600" />
+            <span>프로젝트 아카이브</span>
           </h2>
 
           <div className="space-y-6">
-            {featuredProjects.map(project => (
+            {displayProjects.map(project => (
               <article
                 key={project.id}
-                className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-4 print:bg-white print:border-slate-300"
+                className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-4"
               >
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800/80 pb-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                   <div>
                     <div className="flex items-center space-x-2">
-                      <span className="px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300 text-xs font-semibold">
+                      <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
                         {project.category}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono">{project.period}</span>
-                      <span className="text-xs text-slate-400">• {project.role} ({project.teamType})</span>
+                      <span className="text-xs text-slate-500 font-mono">{project.period}</span>
+                      <span className="text-xs text-slate-500">• {project.role} ({project.teamType})</span>
                     </div>
-                    <h3 className="text-xl font-bold text-white mt-1 print:text-black">
+                    <h3 className="text-xl font-bold text-slate-900 mt-1">
                       {project.title}
                     </h3>
                   </div>
@@ -182,7 +176,8 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                         href={project.githubUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                        className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 transition-colors"
+                        title="GitHub"
                       >
                         <Github className="w-4 h-4" />
                       </a>
@@ -192,7 +187,8 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                         href={project.demoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
+                        className="p-2 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 transition-colors"
+                        title="Live Demo"
                       >
                         <ExternalLink className="w-4 h-4" />
                       </a>
@@ -201,7 +197,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                 </div>
 
                 {/* Summary */}
-                <p className="text-sm text-slate-300 leading-relaxed font-medium">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium">
                   {project.summary}
                 </p>
 
@@ -210,7 +206,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                   {project.techStack.map((tech, idx) => (
                     <span
                       key={idx}
-                      className="px-2.5 py-0.5 rounded-md bg-slate-800 text-slate-300 text-xs font-mono border border-slate-700/60 print:bg-slate-100 print:text-black"
+                      className="px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-xs font-mono font-medium border border-slate-200"
                     >
                       {tech}
                     </span>
@@ -219,10 +215,10 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
 
                 {/* STAR Bullets */}
                 {project.starBullets && project.starBullets.length > 0 && (
-                  <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-2 text-xs print:bg-slate-50">
-                    <span className="font-bold text-amber-400 block mb-1">STAR 이력서 총평:</span>
+                  <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2 text-xs">
+                    <span className="font-bold text-amber-900 block mb-1">STAR 이력서 성과 요약:</span>
                     {project.starBullets.map((bullet, idx) => (
-                      <div key={idx} className="text-slate-300 leading-relaxed">
+                      <div key={idx} className="text-slate-800 leading-relaxed">
                         • {bullet}
                       </div>
                     ))}
@@ -230,58 +226,24 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                 )}
 
                 {/* Key Features */}
-                <div className="space-y-1 text-xs text-slate-300">
-                  <span className="font-bold text-slate-400 block">핵심 구현 기능:</span>
-                  <ul className="list-disc list-inside space-y-1">
-                    {project.keyFeatures.map((feat, i) => (
-                      <li key={i}>{feat}</li>
-                    ))}
-                  </ul>
-                </div>
+                {project.keyFeatures && project.keyFeatures.length > 0 && (
+                  <div className="space-y-1 text-xs text-slate-700">
+                    <span className="font-bold text-slate-900 block">핵심 구현 기능:</span>
+                    <ul className="list-disc list-inside space-y-1 text-slate-600">
+                      {project.keyFeatures.map((feat, i) => (
+                        <li key={i}>{feat}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
               </article>
             ))}
           </div>
         </section>
 
-        {/* 4. CS Coursework Highlights */}
-        <section className="space-y-4">
-          <h2 className="text-xl font-bold text-white border-b border-slate-800 pb-2 flex items-center space-x-2 print:text-black">
-            <GraduationCap className="w-5 h-5 text-indigo-400" />
-            <span>컴퓨터공학 전공 교과목 이수 현황</span>
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
-            {courseworks.map(course => (
-              <div
-                key={course.id}
-                className="p-3.5 rounded-xl bg-slate-900 border border-slate-800 space-y-1.5 print:bg-slate-50 print:border-slate-300"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs sm:text-sm print:text-black truncate">
-                    {course.name}
-                  </span>
-                  <span className="text-xs px-2 py-0.5 rounded font-mono font-bold bg-slate-800 text-emerald-400 border border-slate-700">
-                    {course.grade}
-                  </span>
-                </div>
-                <div className="text-[11px] text-slate-400">
-                  {course.semester} ({course.credits}학점)
-                </div>
-                <div className="flex flex-wrap gap-1 pt-1">
-                  {course.keyConcepts.slice(0, 3).map((c, i) => (
-                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300">
-                      {c}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         {/* Footer */}
-        <footer className="text-center text-xs text-slate-500 pt-8 border-t border-slate-800 print:text-slate-600">
-          <p>© {new Date().getFullYear()} {profile.name} • Software Engineering Archive</p>
+        <footer className="text-center text-xs text-slate-400 pt-8 border-t border-slate-200">
+          <p>© {new Date().getFullYear()} {profile.name} • Software Engineering Portfolio</p>
         </footer>
 
       </div>

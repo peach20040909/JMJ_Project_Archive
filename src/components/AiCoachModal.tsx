@@ -1,26 +1,24 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Sparkles, 
-  X, 
-  TrendingUp, 
+  Target, 
   Lightbulb, 
-  BookOpen, 
-  FolderGit2, 
-  CheckCircle2, 
+  ArrowRight, 
+  X, 
+  Loader2, 
   RefreshCw,
-  Cpu,
-  ArrowRight,
-  Flame
+  FolderGit2,
+  Briefcase,
+  CheckCircle2
 } from 'lucide-react';
-import { UserProfile, ProjectItem, CourseworkSubject, SemesterGoal } from '../types';
+import { UserProfile, ProjectItem, TechSkill } from '../types';
 
 interface AiCoachModalProps {
   isOpen: boolean;
   onClose: () => void;
   profile: UserProfile;
   projects: ProjectItem[];
-  courseworks: CourseworkSubject[];
-  goals: SemesterGoal[];
+  skills: TechSkill[];
 }
 
 export const AiCoachModal: React.FC<AiCoachModalProps> = ({
@@ -28,229 +26,207 @@ export const AiCoachModal: React.FC<AiCoachModalProps> = ({
   onClose,
   profile,
   projects,
-  courseworks,
-  goals
+  skills
 }) => {
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  const completedCourses = courseworks
-    .filter(c => c.semester !== '2학년 2학기 (수강예정)')
-    .map(c => c.name);
+  if (!isOpen) return null;
 
-  const upcomingCourses = courseworks
-    .filter(c => c.semester === '2학년 2학기 (수강예정)')
-    .map(c => c.name);
-
-  const goalTitles = goals.map(g => g.title);
-
-  const fetchAiFeedback = async () => {
-    setLoading(true);
-    setError(null);
-
+  const handleGenerateAdvice = async () => {
+    setIsLoading(true);
     try {
+      const projectSummaries = projects.map(p => `${p.title} (${p.category} | ${p.techStack.join(', ')})`);
+      const skillNames = skills.map(s => `${s.name} (${s.level})`);
+
       const res = await fetch('/api/ai/semester-feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           studentName: profile.name,
           targetRole: profile.targetRole,
-          completedCourses,
-          upcomingCourses,
-          currentProjects: projects.map(p => ({ title: p.title, category: p.category, techStack: p.techStack })),
-          goals: goalTitles
+          currentProjects: projectSummaries,
+          skills: skillNames
         })
       });
 
       const data = await res.json();
-      if (data.success) {
+      if (res.ok && data.success) {
         setFeedback(data);
       } else {
-        setError(data.error || '피드백 생성에 실패했습니다.');
+        alert('AI 조언을 생성하지 못했습니다.');
       }
-    } catch (err: any) {
-      console.error(err);
-      setError('서버 연결 중 오류가 발생했습니다.');
+    } catch (err) {
+      alert('AI 조언 생성 중 오류가 발생했습니다.');
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (isOpen && !feedback && !loading) {
-      fetchAiFeedback();
-    }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-3xl text-slate-100 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white border border-slate-200 rounded-2xl w-full max-w-3xl text-slate-800 shadow-2xl overflow-hidden my-8 max-h-[90vh] flex flex-col animate-in fade-in zoom-in-95 duration-150">
         
-        {/* Modal Top Header */}
-        <div className="p-6 border-b border-slate-800 bg-gradient-to-r from-indigo-950/80 via-purple-950/50 to-slate-900 flex items-center justify-between">
+        {/* Header */}
+        <div className="p-6 border-b border-slate-100 bg-gradient-to-r from-indigo-50/80 via-white to-purple-50/60 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-amber-400 p-[2px] flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-amber-300 animate-pulse" />
-              </div>
+            <div className="p-2.5 rounded-xl bg-indigo-600 text-white shadow-md shadow-indigo-600/20">
+              <Sparkles className="w-5 h-5 text-amber-300" />
             </div>
             <div>
-              <h2 className="text-lg sm:text-xl font-bold text-white flex items-center space-x-2">
-                <span>2학년 2학기 맞춤형 AI 커리어 전략 코치</span>
+              <h2 className="text-lg font-bold text-slate-900">
+                AI 포트폴리오 & 커리어 코치
               </h2>
-              <p className="text-xs text-indigo-300">
-                소프트웨어학과 2학년을 위한 CS 심화 & 포트폴리오 빌드업 로드맵
+              <p className="text-xs text-slate-500">
+                {profile.name}님의 프로젝트 아카이브 진단 및 취업 대비 빌드업 전략
               </p>
             </div>
           </div>
-
-          <div className="flex items-center space-x-2">
-            <button
-              onClick={fetchAiFeedback}
-              disabled={loading}
-              className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors"
-              title="피드백 다시 생성"
-            >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            </button>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
-        {/* Modal Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-sm">
-          {loading ? (
-            <div className="py-16 text-center space-y-4">
-              <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mx-auto"></div>
-              <div className="space-y-1">
-                <h4 className="font-bold text-white text-base">2학년 2학기 포트폴리오 전략 분석 중...</h4>
-                <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  {profile.name}님의 기이수 과목({completedCourses.length}개), 2-2학기 수강 과목({upcomingCourses.length}개), 등록 프로젝트({projects.length}개)를 종합 진단하고 있습니다.
+        {/* Body */}
+        <div className="p-6 overflow-y-auto space-y-6 text-xs sm:text-sm">
+          
+          {!feedback && !isLoading && (
+            <div className="text-center py-10 space-y-4">
+              <div className="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto border border-indigo-100 shadow-sm">
+                <Briefcase className="w-8 h-8" />
+              </div>
+              <div className="space-y-1 max-w-md mx-auto">
+                <h3 className="font-bold text-slate-900 text-base">
+                  현재 프로젝트 아카이브 진단 & 킬러 스펙 제안
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed">
+                  등록된 {projects.length}개 프로젝트와 기술 스택을 종합 분석하여, 네이버/카카오/토스 등 주요 IT 기업 개발자 채용에서 서류 및 면접 합격률을 높일 차기 전략을 제안합니다.
                 </p>
               </div>
-            </div>
-          ) : error ? (
-            <div className="p-6 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 text-center space-y-3">
-              <p>{error}</p>
+
               <button
-                onClick={fetchAiFeedback}
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold"
+                onClick={handleGenerateAdvice}
+                className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold flex items-center space-x-2 mx-auto shadow-md shadow-indigo-600/20 transition-all hover:scale-105"
               >
-                다시 시도하기
+                <Sparkles className="w-4 h-4 text-amber-300" />
+                <span>AI 포트폴리오 전략 분석하기</span>
               </button>
             </div>
-          ) : feedback ? (
-            <div className="space-y-6">
+          )}
+
+          {isLoading && (
+            <div className="py-16 text-center space-y-3">
+              <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+              <p className="text-sm font-bold text-slate-800">
+                {profile.name}님의 프로젝트 아카이브를 AI가 정밀 분석하고 있습니다...
+              </p>
+              <p className="text-xs text-slate-400">
+                목표 직무({profile.targetRole})에 최적화된 아키텍처 및 트러블슈팅 포인트를 탐색합니다.
+              </p>
+            </div>
+          )}
+
+          {feedback && (
+            <div className="space-y-6 animate-in fade-in duration-200">
               
-              {/* Semester Summary Box */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-indigo-950/60 to-slate-900 border border-indigo-500/30 space-y-2">
-                <div className="flex items-center space-x-2 text-indigo-300 font-bold text-xs uppercase tracking-wider">
-                  <TrendingUp className="w-4 h-4 text-indigo-400" />
-                  <span>2학년 2학기 포트폴리오 전략 총평</span>
-                </div>
-                <p className="text-slate-200 text-sm sm:text-base leading-relaxed font-medium">
+              {/* Summary Banner */}
+              <div className="p-5 rounded-2xl bg-gradient-to-r from-indigo-50 via-white to-purple-50 border border-indigo-100 text-slate-800 space-y-1.5">
+                <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider block">
+                  포트폴리오 역량 총평
+                </span>
+                <p className="text-sm font-semibold leading-relaxed text-slate-900">
                   {feedback.semesterSummary}
                 </p>
               </div>
 
-              {/* Recommendations 3 Action Items */}
-              <div className="space-y-3">
-                <h4 className="font-bold text-white text-base flex items-center space-x-2">
-                  <Lightbulb className="w-4 h-4 text-amber-400" />
-                  <span>2학기 핵심 실천 전략 (Action Plans)</span>
-                </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-                  {feedback.recommendations?.map((rec: any, idx: number) => (
-                    <div
-                      key={idx}
-                      className="p-4 rounded-xl bg-slate-800/80 border border-slate-700/80 flex flex-col justify-between space-y-2.5"
-                    >
-                      <div className="space-y-1">
-                        <span className="text-[11px] font-bold text-indigo-400 uppercase">
-                          {rec.category}
-                        </span>
-                        <h5 className="font-bold text-white text-xs sm:text-sm leading-snug">
-                          {rec.title}
-                        </h5>
-                        <p className="text-xs text-slate-300 leading-relaxed pt-1">
-                          {rec.detail}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Suggested Next Project Banner */}
+              {/* Suggested Main Project */}
               {feedback.suggestedNextProject && (
-                <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/50 via-slate-900 to-indigo-950/50 border border-emerald-500/30 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-emerald-400 font-bold text-xs uppercase tracking-wider">
-                      <FolderGit2 className="w-4 h-4" />
-                      <span>2학년 2학기 추천 메인 프로젝트 주제</span>
-                    </div>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-mono">
-                      High-Impact
-                    </span>
+                <div className="p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <FolderGit2 className="w-5 h-5 text-amber-600" />
+                    <h4 className="font-bold text-slate-900 text-sm">
+                      추천 킬러 프로젝트 주제
+                    </h4>
                   </div>
 
                   <div>
-                    <h5 className="text-base font-extrabold text-white">
+                    <h5 className="font-bold text-indigo-700 text-base">
                       {feedback.suggestedNextProject.title}
                     </h5>
-                    <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+                    <p className="text-xs text-slate-600 mt-1 leading-relaxed">
                       {feedback.suggestedNextProject.reason}
                     </p>
                   </div>
 
                   <div className="flex flex-wrap gap-1.5 pt-1">
-                    {feedback.suggestedNextProject.techStack?.map((tech: string, i: number) => (
-                      <span
-                        key={i}
-                        className="px-2.5 py-0.5 rounded-md bg-slate-800 text-emerald-300 text-xs font-mono border border-slate-700"
-                      >
-                        {tech}
+                    {feedback.suggestedNextProject.techStack?.map((t: string, i: number) => (
+                      <span key={i} className="px-2 py-0.5 rounded bg-white text-slate-700 text-xs font-mono font-semibold border border-slate-200">
+                        {t}
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* CS Focus Tips */}
-              {feedback.csFocusTips && (
-                <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 text-xs sm:text-sm space-y-1.5">
-                  <div className="flex items-center space-x-2 text-indigo-300 font-semibold text-xs">
-                    <BookOpen className="w-3.5 h-3.5 text-indigo-400" />
-                    <span>2-2학기 전공 이론(OS, DB, 알고리즘) 포트폴리오 연계 팁</span>
+              {/* Recommendations */}
+              {feedback.recommendations && feedback.recommendations.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-bold text-slate-900 text-sm flex items-center space-x-1.5">
+                    <Target className="w-4 h-4 text-indigo-600" />
+                    <span>분야별 역량 강화 전략</span>
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    {feedback.recommendations.map((rec: any, i: number) => (
+                      <div key={i} className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
+                        <span className="text-[11px] font-bold text-indigo-600 block">
+                          {rec.category}
+                        </span>
+                        <h5 className="font-bold text-slate-900 text-xs">{rec.title}</h5>
+                        <p className="text-xs text-slate-500 leading-relaxed">{rec.detail}</p>
+                      </div>
+                    ))}
                   </div>
-                  <p className="text-slate-300 leading-relaxed">
-                    {feedback.csFocusTips}
-                  </p>
                 </div>
               )}
 
+              {/* CS / Troubleshooting Focus Tips */}
+              {feedback.csFocusTips && (
+                <div className="p-4 rounded-xl bg-emerald-50/60 border border-emerald-200 text-xs space-y-1">
+                  <span className="font-bold text-emerald-800 flex items-center space-x-1">
+                    <Lightbulb className="w-3.5 h-3.5" />
+                    <span>면접관 어필 포인트:</span>
+                  </span>
+                  <p className="text-slate-700 leading-relaxed">{feedback.csFocusTips}</p>
+                </div>
+              )}
+
+              <div className="flex justify-center pt-2">
+                <button
+                  onClick={handleGenerateAdvice}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold flex items-center space-x-1.5"
+                >
+                  <RefreshCw className="w-3.5 h-3.5" />
+                  <span>새로 분석하기</span>
+                </button>
+              </div>
             </div>
-          ) : null}
+          )}
+
         </div>
 
-        {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/40 flex items-center justify-between text-xs">
-          <span className="text-slate-500">Gemini 3.7 Flash AI 기반 분석</span>
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-100 bg-slate-50 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-semibold"
+            className="px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold text-xs"
           >
-            확인 및 닫기
+            닫기
           </button>
         </div>
+
       </div>
     </div>
   );
