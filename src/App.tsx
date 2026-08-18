@@ -41,11 +41,11 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'devarchive_profile_v2',
-  PROJECTS: 'devarchive_projects_v2',
-  SKILLS: 'devarchive_skills_v2',
-  LOGS: 'devarchive_logs_v2',
-  COVER_LETTERS: 'devarchive_coverletters_v2'
+  PROFILE: 'jmj_archive_profile_v3',
+  PROJECTS: 'jmj_archive_projects_v3',
+  SKILLS: 'jmj_archive_skills_v3',
+  LOGS: 'jmj_archive_logs_v3',
+  COVER_LETTERS: 'jmj_archive_coverletters_v3'
 };
 
 export default function App() {
@@ -84,26 +84,49 @@ export default function App() {
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [isGitHubModalOpen, setIsGitHubModalOpen] = useState<boolean>(false);
 
-  // Sync to LocalStorage
+  // Initial Load from Server if available
+  useEffect(() => {
+    fetch('/api/archive-data')
+      .then(res => res.json())
+      .then(result => {
+        if (result.success && result.data) {
+          const d = result.data;
+          if (d.profile) setProfile(d.profile);
+          if (d.projects) setProjects(d.projects);
+          if (d.skills) setSkills(d.skills);
+          if (d.devLogs) setDevLogs(d.devLogs);
+          if (d.coverLetters) setCoverLetters(d.coverLetters);
+        }
+      })
+      .catch(err => console.log('Server archive load skipped:', err));
+  }, []);
+
+  // Sync to LocalStorage and Server File
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
-  }, [profile]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
-  }, [projects]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(skills));
-  }, [skills]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(devLogs));
-  }, [devLogs]);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.COVER_LETTERS, JSON.stringify(coverLetters));
-  }, [coverLetters]);
+
+    // Debounced sync to server file
+    const timer = setTimeout(() => {
+      fetch('/api/archive-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          profile,
+          projects,
+          skills,
+          devLogs,
+          coverLetters,
+          updatedAt: new Date().toISOString()
+        })
+      }).catch(err => console.log('Server archive sync skipped:', err));
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [profile, projects, skills, devLogs, coverLetters]);
 
   // CRUD Handlers - Profile
   const handleUpdateProfile = (updated: UserProfile) => {

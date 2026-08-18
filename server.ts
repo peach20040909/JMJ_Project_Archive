@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -9,7 +10,9 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
-app.use(express.json());
+app.use(express.json({ limit: "20mb" }));
+
+const DATA_FILE = path.join(process.cwd(), "src", "data", "userArchiveData.json");
 
 // Lazy-initialize Gemini AI
 let aiClient: GoogleGenAI | null = null;
@@ -470,6 +473,36 @@ ${JSON.stringify(selectedProjects, null, 2)}
   } catch (error: any) {
     console.error("AI Cover Letter generation error:", error);
     return res.status(500).json({ error: error.message || "Failed to generate cover letter" });
+  }
+});
+
+// Persistent Archive Data Store (Auto-saves to workspace file)
+app.get("/api/archive-data", (_req, res) => {
+  try {
+    if (fs.existsSync(DATA_FILE)) {
+      const raw = fs.readFileSync(DATA_FILE, "utf-8");
+      const data = JSON.parse(raw);
+      return res.json({ success: true, data });
+    }
+    return res.json({ success: true, data: null });
+  } catch (error: any) {
+    console.error("Error reading archive data file:", error);
+    return res.json({ success: false, data: null });
+  }
+});
+
+app.post("/api/archive-data", (req, res) => {
+  try {
+    const payload = req.body;
+    const dir = path.dirname(DATA_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(DATA_FILE, JSON.stringify(payload, null, 2), "utf-8");
+    return res.json({ success: true, message: "Archive data saved successfully to workspace" });
+  } catch (error: any) {
+    console.error("Error writing archive data file:", error);
+    return res.status(500).json({ error: "Failed to persist archive data" });
   }
 });
 

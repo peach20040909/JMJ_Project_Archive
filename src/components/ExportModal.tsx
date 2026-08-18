@@ -35,6 +35,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState<'markdown' | 'json' | 'import'>('markdown');
   const [copied, setCopied] = useState(false);
+  const [jsonText, setJsonText] = useState('');
 
   if (!isOpen) return null;
 
@@ -261,10 +262,10 @@ ${l.content}
               <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
                 <h4 className="font-bold text-slate-900 flex items-center space-x-2">
                   <Upload className="w-4 h-4 text-indigo-600" />
-                  <span>백업 파일 복원 (Restore)</span>
+                  <span>백업 파일 업로드로 복원</span>
                 </h4>
                 <p className="text-xs text-slate-500">
-                  이전에 저장해 둔 DevArchive JSON 백업 파일을 선택하여 데이터를 복원합니다.
+                  이전에 저장해 둔 JMJ_Archive JSON 백업 파일(.json)을 선택하여 데이터를 복원합니다.
                 </p>
                 <input
                   type="file"
@@ -272,6 +273,48 @@ ${l.content}
                   onChange={handleFileUpload}
                   className="block w-full text-xs text-slate-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 cursor-pointer"
                 />
+              </div>
+
+              {/* Direct Paste JSON Text */}
+              <div className="p-4 rounded-xl bg-indigo-50/70 border border-indigo-200 space-y-3">
+                <h4 className="font-bold text-slate-900 flex items-center space-x-2">
+                  <Copy className="w-4 h-4 text-indigo-600" />
+                  <span>JSON 텍스트 직접 붙여넣기로 복원</span>
+                </h4>
+                <p className="text-xs text-slate-600">
+                  다른 창이나 백업 파일에서 복사한 JSON 텍스트를 아래에 바로 붙여넣어 즉시 적용할 수 있습니다.
+                </p>
+                <textarea
+                  value={jsonText}
+                  onChange={(e) => setJsonText(e.target.value)}
+                  placeholder='{"profile": {...}, "projects": [...]}'
+                  rows={4}
+                  className="w-full p-3 rounded-xl bg-white border border-slate-300 text-slate-800 font-mono text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+                <button
+                  onClick={() => {
+                    if (!jsonText.trim()) {
+                      alert('붙여넣을 JSON 텍스트를 입력해주세요.');
+                      return;
+                    }
+                    try {
+                      const parsed = JSON.parse(jsonText);
+                      if (parsed.profile || parsed.projects) {
+                        onImportData(parsed);
+                        alert('데이터가 성공적으로 적용되었습니다!');
+                        onClose();
+                      } else {
+                        alert('올바른 JMJ_Archive 백업 JSON 형식이 아닙니다.');
+                      }
+                    } catch (e) {
+                      alert('JSON 형식이 올바르지 않습니다. 복사한 텍스트를 다시 확인해주세요.');
+                    }
+                  }}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-sm flex items-center space-x-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>JSON 데이터 즉시 적용하기</span>
+                </button>
               </div>
 
               <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 space-y-3">
