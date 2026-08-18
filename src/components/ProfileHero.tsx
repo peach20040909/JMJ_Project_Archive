@@ -11,7 +11,8 @@ import {
   X,
   ExternalLink,
   MessageSquareCode,
-  Sparkles
+  Sparkles,
+  FileEdit
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill, DevLog } from '../types';
 
@@ -21,6 +22,7 @@ interface ProfileHeroProps {
   projects: ProjectItem[];
   skills: TechSkill[];
   devLogs: DevLog[];
+  coverLettersCount?: number;
   onOpenAiCoach: () => void;
   onNavigateTab: (tab: string) => void;
 }
@@ -31,6 +33,7 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
   projects,
   skills,
   devLogs,
+  coverLettersCount = 0,
   onOpenAiCoach,
   onNavigateTab
 }) => {
@@ -150,16 +153,16 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
             </div>
 
             <div 
-              onClick={() => onNavigateTab('projects')}
-              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-emerald-300 hover:shadow-md transition-all cursor-pointer group"
+              onClick={() => onNavigateTab('coverletter')}
+              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group"
             >
               <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">대표 프로젝트</span>
-                <Sparkles className="w-4 h-4 text-amber-500 group-hover:scale-110 transition-transform" />
+                <span className="text-xs font-semibold">AI 자기소개서</span>
+                <FileEdit className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1">
-                <span className="text-xl font-black text-slate-900">{featuredProjectsCount}</span>
-                <span className="text-xs text-slate-500">개 선정</span>
+                <span className="text-xl font-black text-slate-900">{coverLettersCount}</span>
+                <span className="text-xs text-slate-500">건 작성/관리</span>
               </div>
             </div>
 

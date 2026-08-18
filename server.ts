@@ -124,7 +124,7 @@ ${readmeText || "README 파일이 없거나 간단함"}
   "title": "한글로 다듬은 프로젝트 제목 (예: CampusMate - 전공서적 대여 및 중고 거래 플랫폼)",
   "summary": "프로젝트의 핵심 가치와 기술적 포인트를 집약한 1~2문장의 전문적인 한 줄 소개",
   "category": "Web | Backend | Frontend | System | Algorithm | App | AI/Data 중 택1",
-  "semester": "2026",
+  "semester": "진행 프로젝트",
   "period": "2026.03 - 2026.06",
   "teamType": "개인 | 팀 (2명) | 팀 (3명) | 팀 (4명) 중 추정",
   "role": "예: 풀스택 개발 / 백엔드 엔지니어링 / 핵심 로직 구현",
@@ -297,7 +297,7 @@ app.post("/api/ai/enhance-project", async (req, res) => {
   }
 });
 
-// AI Career & Portfolio Coach Advisor (Long-term: 2nd ~ 4th grade & job prep)
+// AI Career & Portfolio Coach Advisor
 app.post("/api/ai/semester-feedback", async (req, res) => {
   try {
     const { studentName, targetRole, currentProjects, skills } = req.body;
@@ -376,6 +376,103 @@ app.post("/api/ai/semester-feedback", async (req, res) => {
   }
 });
 
+// NEW: AI Cover Letter (자기소개서 & 면접 대비 답변) Generator
+app.post("/api/ai/generate-cover-letter", async (req, res) => {
+  try {
+    const { 
+      companyName, 
+      targetRole, 
+      question, 
+      questionCategory, 
+      targetCharCount = 800, 
+      selectedProjects = [], 
+      studentProfile = {}, 
+      customNotes = "" 
+    } = req.body;
+
+    if (!question) {
+      return res.status(400).json({ error: "자기소개서 문항을 입력해주세요." });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      const projTitles = selectedProjects.map((p: any) => p.title).join(", ") || "대표 프로젝트";
+      return res.json({
+        success: true,
+        isMock: true,
+        content: `[${companyName || "지원 기업"} ${targetRole || "개발자"}: 기술적 문제 해결과 가치 창출]\n\n${projTitles} 프로젝트를 수행하며 단순한 기능 구현을 넘어 아키텍처 최적화와 안정적인 데이터 처리를 위해 치열하게 고민했습니다. 특히 동시성 문제와 데이터베이스 쿼리 병목을 경험하며 비관적 락과 인덱스 튜닝을 적용하여 성능을 대폭 개선한 경험이 있습니다. 이러한 집요한 문제 해결 역량을 바탕으로 입사 후에도 신뢰성 높은 서비스를 구축하겠습니다.`,
+        interviewTips: [
+          "해당 프로젝트에서 동시성 제어 방식으로 비관적 락을 선택한 구체적인 트레이드오프는 무엇인가요?",
+          "JPA N+1 문제 해결 시 Fetch Join 외에 Batch Size 설정 등 대안을 고려해보았나요?",
+          "서비스 규모가 10배 이상 커졌을 때 발생할 수 있는 추가적인 병목과 해결책은 무엇인가요?"
+        ],
+        keyStrengths: [
+          "실무 수준의 데이터베이스 락 및 동시성 제어 경험",
+          "쿼리 튜닝 및 API 응답 시간 최적화 역량",
+          "문제 정의부터 배포/검증까지 주도적인 엔지니어링 마인드셋"
+        ]
+      });
+    }
+
+    const ai = getAi();
+    const prompt = `당신은 네이버, 카카오, 토스, 라인, 쿠팡 등 유수의 IT 기업 개발자 채용 서류 평가관이자 테크 면접관입니다.
+지원자가 등록해 둔 실제 프로젝트 아카이브 데이터를 바탕으로, 서류 합격률을 극대화하고 면접관이 매력적인 꼬리 질문을 던질 수 있도록 돕는 최고 수준의 개발자 자기소개서 답변을 작성해주세요.
+
+[지원 정보]
+- 지원 기업: ${companyName || "IT 기업"}
+- 지원 직무: ${targetRole || "백엔드 / 풀스택 엔지니어"}
+- 문항 분류: ${questionCategory || "기술적 문제해결 경험"}
+- 자기소개서 문항: "${question}"
+- 목표 글자 수: 약 ${targetCharCount}자 내외
+- 추가 강조 요청사항: ${customNotes || "없음"}
+
+[지원자 기본 프로필]
+- 이름: ${studentProfile.name || "지원자"}
+- 학과: ${studentProfile.university || "명지대학교"} ${studentProfile.department || "융합소프트웨어학부"}
+- 강점 및 지향점: ${studentProfile.bio || "안정적이고 확장성 있는 아키텍처를 지향하는 소프트웨어 엔지니어"}
+
+[지원자가 선택한 프로젝트 아카이브 상세 데이터 (반드시 이 프로젝트들의 구체적 기술과 수치를 기반으로 작성할 것)]
+${JSON.stringify(selectedProjects, null, 2)}
+
+[작성 가이드라인]
+1. [소제목]: 문항의 핵심 결론과 지원자의 기술적 가치를 집약한 임팩트 있는 한 줄 소제목으로 시작하세요.
+2. STAR 기법: Situation(배경/문제) -> Task(부여된 기술적 도전 과제) -> Action(구체적으로 어떤 기술과 원리로 해결했는지) -> Result(정량적 수치 성과 및 깨달음) 흐름을 명확히 갖추세요.
+3. 추상적인 미사여구(예: "열심히 최선을 다했습니다")를 배제하고, 구체적인 기술 스택(예: Spring Data JPA, Redis 분산 락, Red-Black Tree, Valgrind, WebSocket 등)과 아키텍처적 선택의 이유(Trade-off)를 명시하세요.
+4. 글자 수: 공백 포함 약 ${targetCharCount}자(±10%) 분량에 맞추어 완결성 있게 작성하세요.
+5. 면접 대비: 작성된 자소서를 기반으로 면접관이 반드시 물어볼 법한 심층 기술 질문 3~4개를 도출하세요.
+
+반드시 다음 JSON 규격으로만 응답해주세요:
+{
+  "content": "작성된 완성형 자기소개서 본문 (소제목 포함, 문단 나눔 줄바꿈 반영)",
+  "interviewTips": [
+    "면접관 예상 기술 꼬리 질문 1",
+    "면접관 예상 기술 꼬리 질문 2",
+    "면접관 예상 기술 꼬리 질문 3",
+    "면접관 예상 기술 꼬리 질문 4"
+  ],
+  "keyStrengths": [
+    "이 답변에서 어필된 지원자의 핵심 엔지니어링 강점 1",
+    "강점 2",
+    "강점 3"
+  ]
+}`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3.7-flash",
+      contents: prompt,
+      config: {
+        responseMimeType: "application/json",
+      },
+    });
+
+    const parsed = JSON.parse(response.text || "{}");
+    return res.json({ success: true, ...parsed });
+
+  } catch (error: any) {
+    console.error("AI Cover Letter generation error:", error);
+    return res.status(500).json({ error: error.message || "Failed to generate cover letter" });
+  }
+});
+
 // Vite & Static file handler
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
@@ -393,7 +490,7 @@ async function startServer() {
   }
 
   app.listen(PORT, "0.0.0.0", () => {
-    console.log(`DevArchive Server running on http://localhost:${PORT}`);
+    console.log(`JMJ_Archive Server running on http://localhost:${PORT}`);
   });
 }
 

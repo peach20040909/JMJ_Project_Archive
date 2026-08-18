@@ -8,7 +8,7 @@ import {
   X, 
   AlertTriangle
 } from 'lucide-react';
-import { UserProfile, ProjectItem, TechSkill, DevLog } from '../types';
+import { UserProfile, ProjectItem, TechSkill, DevLog, CoverLetterItem } from '../types';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -17,6 +17,7 @@ interface ExportModalProps {
   projects: ProjectItem[];
   skills: TechSkill[];
   devLogs: DevLog[];
+  coverLetters: CoverLetterItem[];
   onImportData: (data: any) => void;
   onResetData: () => void;
 }
@@ -28,6 +29,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   projects,
   skills,
   devLogs,
+  coverLetters = [],
   onImportData,
   onResetData
 }) => {
@@ -37,7 +39,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   if (!isOpen) return null;
 
   const generateMarkdown = () => {
-    return `# 👨‍💻 ${profile.name} (${profile.englishName}) - Software Portfolio
+    return `# 👨‍💻 ${profile.name} (${profile.englishName}) - Software Portfolio & Job Prep Archive
 > **${profile.targetRole}** | ${profile.university} ${profile.department} ${profile.currentSemester && `(${profile.currentSemester})`} ${profile.gpa && `GPA: ${profile.gpa}`}
 
 ## 📌 About Me
@@ -65,6 +67,17 @@ ${p.demoUrl ? `- **Live Demo**: ${p.demoUrl}` : ''}
 
 ${p.starBullets && p.starBullets.length > 0 ? `**STAR 이력서 성과 요약:**\n${p.starBullets.map(b => `  - ${b}`).join('\n')}` : ''}
 ${p.keyFeatures && p.keyFeatures.length > 0 ? `**주요 기능:**\n${p.keyFeatures.map(f => `  - ${f}`).join('\n')}` : ''}
+`).join('\n\n')}
+
+---
+
+## ✍️ 인턴 & 채용 대비 자기소개서 (Cover Letters)
+${coverLetters.map(c => `### [${c.companyName}] ${c.targetRole} - ${c.questionCategory}
+**문항**: ${c.question}
+
+${c.content}
+
+${c.interviewTips && c.interviewTips.length > 0 ? `**면접 대비 예상 질문:**\n${c.interviewTips.map(t => `- ${t}`).join('\n')}` : ''}
 `).join('\n\n')}
 
 ---
@@ -101,13 +114,14 @@ ${l.content}
       projects,
       skills,
       devLogs,
+      coverLetters,
       exportedAt: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `DevArchive_Backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.download = `JMJ_Archive_Backup_${new Date().toISOString().split('T')[0]}.json`;
     link.click();
     URL.revokeObjectURL(url);
   };
@@ -125,7 +139,7 @@ ${l.content}
           alert('데이터가 성공적으로 복원되었습니다.');
           onClose();
         } else {
-          alert('올바른 DevArchive 백업 JSON 형식이 아닙니다.');
+          alert('올바른 JMJ_Archive 백업 JSON 형식이 아닙니다.');
         }
       } catch (err) {
         alert('JSON 파싱 중 오류가 발생했습니다.');
@@ -226,7 +240,7 @@ ${l.content}
               <div className="p-4 rounded-xl bg-indigo-50 border border-indigo-100 text-slate-700 space-y-2">
                 <h4 className="font-bold text-slate-900">전체 아카이브 데이터 JSON 백업</h4>
                 <p className="text-xs text-slate-600 leading-relaxed">
-                  프로필, 등록된 모든 프로젝트, 보유 기술 스택 매트릭스, 트러블슈팅 일지를 단일 JSON 파일로 안전하게 백업합니다.
+                  프로필, 등록된 모든 프로젝트, 보유 기술 스택 매트릭스, AI 자기소개서, 트러블슈팅 일지를 단일 JSON 파일로 안전하게 백업합니다.
                 </p>
               </div>
 

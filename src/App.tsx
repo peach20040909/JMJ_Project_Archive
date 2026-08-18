@@ -4,6 +4,7 @@ import { ProfileHero } from './components/ProfileHero';
 import { ProjectArchive } from './components/ProjectArchive';
 import { TechStackMatrix } from './components/TechStackMatrix';
 import { DevLogsSection } from './components/DevLogsSection';
+import { CoverLetterSection } from './components/CoverLetterSection';
 import { AiCoachModal } from './components/AiCoachModal';
 import { ExportModal } from './components/ExportModal';
 import { PublicPortfolioView } from './components/PublicPortfolioView';
@@ -13,14 +14,16 @@ import {
   UserProfile,
   ProjectItem,
   TechSkill,
-  DevLog
+  DevLog,
+  CoverLetterItem
 } from './types';
 
 import {
   initialProfile,
   initialProjects,
   initialTechSkills,
-  initialDevLogs
+  initialDevLogs,
+  initialCoverLetters
 } from './data/initialData';
 
 import {
@@ -33,36 +36,43 @@ import {
   CheckCircle2,
   ExternalLink,
   Code2,
-  Layers
+  Layers,
+  FileEdit
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
   PROFILE: 'devarchive_profile_v2',
   PROJECTS: 'devarchive_projects_v2',
   SKILLS: 'devarchive_skills_v2',
-  LOGS: 'devarchive_logs_v2'
+  LOGS: 'devarchive_logs_v2',
+  COVER_LETTERS: 'devarchive_coverletters_v2'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('devarchive_profile');
     return saved ? JSON.parse(saved) : initialProfile;
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS);
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('devarchive_projects');
     return saved ? JSON.parse(saved) : initialProjects;
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS);
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('devarchive_skills');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS);
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('devarchive_logs');
     return saved ? JSON.parse(saved) : initialDevLogs;
+  });
+
+  const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('devarchive_coverletters');
+    return saved ? JSON.parse(saved) : initialCoverLetters;
   });
 
   // Navigation & View Mode State
@@ -90,6 +100,10 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(devLogs));
   }, [devLogs]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.COVER_LETTERS, JSON.stringify(coverLetters));
+  }, [coverLetters]);
 
   // CRUD Handlers - Profile
   const handleUpdateProfile = (updated: UserProfile) => {
@@ -129,12 +143,24 @@ export default function App() {
     setDevLogs(prev => prev.filter(item => item.id !== id));
   };
 
+  // CRUD Handlers - Cover Letters
+  const handleAddCoverLetter = (cl: CoverLetterItem) => {
+    setCoverLetters(prev => [cl, ...prev]);
+  };
+  const handleUpdateCoverLetter = (cl: CoverLetterItem) => {
+    setCoverLetters(prev => prev.map(item => item.id === cl.id ? cl : item));
+  };
+  const handleDeleteCoverLetter = (id: string) => {
+    setCoverLetters(prev => prev.filter(item => item.id !== id));
+  };
+
   // Import and Reset
   const handleImportData = (data: any) => {
     if (data.profile) setProfile(data.profile);
     if (data.projects) setProjects(data.projects);
     if (data.skills) setSkills(data.skills);
     if (data.devLogs) setDevLogs(data.devLogs);
+    if (data.coverLetters) setCoverLetters(data.coverLetters);
   };
 
   const handleResetData = () => {
@@ -142,6 +168,7 @@ export default function App() {
     setProjects(initialProjects);
     setSkills(initialTechSkills);
     setDevLogs(initialDevLogs);
+    setCoverLetters(initialCoverLetters);
     localStorage.clear();
   };
 
@@ -170,18 +197,18 @@ export default function App() {
           <div className="space-y-1.5">
             <div className="flex items-center space-x-2">
               <span className="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-xs font-bold border border-indigo-200">
-                개발자 포트폴리오 아카이브
+                개발자 포트폴리오 & 취업 준비 아카이브
               </span>
               <span className="text-xs text-indigo-700 font-mono flex items-center space-x-1 font-semibold">
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>GitHub 연동 & 실무 프로젝트 관리</span>
+                <span>GitHub 연동 & AI 자기소개서 지원</span>
               </span>
             </div>
             <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">
-              {profile.name}님의 프로젝트 & 기술 아카이브
+              {profile.name}님의 프로젝트 & 직무 역량 아카이브
             </h3>
             <p className="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-              학부 프로젝트부터 사이드 프로젝트, 오픈소스 기여까지 GitHub 저장소 링크 하나로 자동 분석하고 STAR 이력서와 트러블슈팅 일지로 아카이빙하세요.
+              학부 프로젝트부터 사이드 프로젝트까지 GitHub 저장소 링크 하나로 자동 분석하고, 축적된 프로젝트 경험을 토대로 AI 기반 자기소개서와 면접 대비 꼬리 질문을 준비하세요.
             </p>
           </div>
 
@@ -194,6 +221,15 @@ export default function App() {
               <Github className="w-4 h-4" />
               <span>GitHub 링크로 자동 등록</span>
               <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+            </button>
+
+            {/* AI Cover Letter Quick Link */}
+            <button
+              onClick={() => setActiveTab('coverletter')}
+              className="px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs sm:text-sm font-bold shadow-sm flex items-center space-x-2 transition-all hover:scale-105"
+            >
+              <FileEdit className="w-4 h-4" />
+              <span>AI 자기소개서 작성</span>
             </button>
 
             {/* AI Coach */}
@@ -307,7 +343,26 @@ export default function App() {
               </div>
             </div>
 
-            {/* Quick Tips / Solved.ac stats */}
+            {/* Quick Link to AI Cover Letters */}
+            <div 
+              onClick={() => setActiveTab('coverletter')}
+              className="p-5 rounded-2xl bg-gradient-to-r from-purple-50 via-indigo-50 to-white border border-purple-200/90 shadow-sm hover:border-purple-300 transition-all cursor-pointer space-y-2.5"
+            >
+              <div className="flex items-center justify-between">
+                <span className="px-2.5 py-0.5 rounded bg-purple-100 text-purple-800 text-xs font-bold">
+                  취업 & 인턴 지원 대비
+                </span>
+                <span className="text-xs text-purple-700 font-bold">{coverLetters.length}건 작성됨</span>
+              </div>
+              <h4 className="font-bold text-slate-900 text-sm">
+                프로젝트 기반 AI 자기소개서 & 면접 시뮬레이터
+              </h4>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                축적된 프로젝트의 STAR 성과와 트러블슈팅 일지를 활용해 기업별 맞춤 자소서를 작성하고 면접 꼬리 질문을 대비하세요.
+              </p>
+            </div>
+
+            {/* Solved.ac stats */}
             <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 text-white shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-indigo-300">알고리즘 & 문제 해결</span>
@@ -397,6 +452,7 @@ export default function App() {
         projects={projects}
         skills={skills}
         devLogs={devLogs}
+        coverLettersCount={coverLetters.length}
         onOpenAiCoach={() => setIsAiCoachOpen(true)}
         onNavigateTab={setActiveTab}
       />
@@ -413,6 +469,17 @@ export default function App() {
             onDeleteProject={handleDeleteProject}
             onOpenGitHubImport={() => setIsGitHubModalOpen(true)}
             targetRole={profile.targetRole}
+          />
+        )}
+
+        {activeTab === 'coverletter' && (
+          <CoverLetterSection
+            coverLetters={coverLetters}
+            projects={projects}
+            profile={profile}
+            onAddCoverLetter={handleAddCoverLetter}
+            onUpdateCoverLetter={handleUpdateCoverLetter}
+            onDeleteCoverLetter={handleDeleteCoverLetter}
           />
         )}
 
@@ -440,10 +507,10 @@ export default function App() {
       <footer className="mt-16 border-t border-slate-200 bg-white py-8 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 space-y-1.5">
           <p className="font-bold text-slate-700">
-            DevArchive • 소프트웨어 개발자 포트폴리오 & 프로젝트 아카이브
+            JMJ_Archive • 장민준 개발자 포트폴리오 & 직무 아카이브
           </p>
           <p className="text-slate-400">
-            GitHub 자동 연동, STAR 이력서 성과 분석, 기술 스택 매트릭스 및 트러블슈팅 일지
+            GitHub 자동 연동, STAR 이력서 성과 분석, 기술 스택 매트릭스, AI 자기소개서 & 면접 시뮬레이터
           </p>
         </div>
       </footer>
@@ -476,6 +543,7 @@ export default function App() {
         projects={projects}
         skills={skills}
         devLogs={devLogs}
+        coverLetters={coverLetters}
         onImportData={handleImportData}
         onResetData={handleResetData}
       />

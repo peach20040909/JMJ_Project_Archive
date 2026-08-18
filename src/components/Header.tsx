@@ -7,7 +7,8 @@ import {
   Eye, 
   Download, 
   LayoutDashboard,
-  Github
+  Github,
+  FileEdit
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -35,6 +36,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'overview', label: '대시보드', icon: LayoutDashboard },
     { id: 'projects', label: '프로젝트 아카이브', icon: FolderGit2 },
+    { id: 'coverletter', label: 'AI 자기소개서 작성', icon: FileEdit },
     { id: 'skills', label: '기술 스택 매트릭스', icon: Cpu },
     { id: 'logs', label: '트러블슈팅 일지', icon: MessageSquareCode },
   ];
@@ -46,16 +48,16 @@ export const Header: React.FC<HeaderProps> = ({
           
           {/* Brand Logo & Name */}
           <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('overview')}>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 flex items-center justify-center text-white font-black text-lg shadow-md shadow-indigo-600/20">
-              DA
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 via-indigo-700 to-violet-700 flex items-center justify-center text-white font-black text-sm tracking-tighter shadow-md shadow-indigo-600/20">
+              JMJ
             </div>
             <div>
               <div className="flex items-center space-x-2">
                 <span className="font-extrabold text-slate-900 tracking-tight text-base sm:text-lg">
-                  DevArchive
+                  JMJ_Archive
                 </span>
                 <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-[11px] font-bold border border-indigo-200/80">
-                  Project Archive
+                  Portfolio & Job Prep
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-medium">

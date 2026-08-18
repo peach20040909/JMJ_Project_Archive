@@ -86,6 +86,21 @@ export interface DevLog {
   linkedProjectId?: string;
 }
 
+export interface CoverLetterItem {
+  id: string;
+  companyName: string; // 지원 기업 (e.g. 네이버, 카카오, 토스, 라인, 쿠팡, 당근 등)
+  targetRole: string; // 지원 직무 (e.g. 서버/백엔드 개발자 인턴, 프론트엔드 엔지니어)
+  questionCategory: '지원동기 및 직무역량' | '기술적 도전 및 문제해결' | '협업 및 갈등해결' | '주도적 학습 및 성장' | '자유 양식';
+  question: string; // 자기소개서 문항
+  linkedProjectIds: string[]; // 선택된 프로젝트 ID 배열
+  content: string; // 작성/생성된 자기소개서 본문
+  targetCharCount: number; // 목표 글자수 (예: 500, 800, 1000자)
+  memo?: string; // 개인 메모
+  interviewTips?: string[]; // AI 추천 면접 예상 질문 리스트
+  keyStrengths?: string[]; // 어필된 핵심 기술 역량
+  updatedAt: string;
+}
+
 export interface UserProfile {
   name: string;
   englishName: string;
