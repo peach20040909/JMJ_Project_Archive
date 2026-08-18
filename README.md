@@ -134,8 +134,6 @@ npm start
 - **Email**: [a01027010769@gmail.com](mailto:a01027010769@gmail.com)
 - **GitHub**: [github.com/minjun-dev](https://github.com/minjun-dev)
 - **Blog**: [velog.io/@minjun_dev](https://velog.io/@minjun_dev)
-- **Solved.ac**: [solved.ac/profile/minjun-dev](https://solved.ac) (Gold IV / 284 Solved)
-
 ---
 
 <div align="center">
