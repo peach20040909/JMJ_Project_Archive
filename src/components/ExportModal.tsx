@@ -49,7 +49,6 @@ ${profile.bio}
 - 📧 **Email**: ${profile.email}
 - 🐙 **GitHub**: ${profile.githubUrl}
 - ✍️ **Blog**: ${profile.blogUrl}
-- 🔥 **Solved.ac**: ${profile.solvedAcTier} (${profile.solvedCount} Solved)
 
 ---
 

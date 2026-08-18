@@ -113,8 +113,8 @@ export interface UserProfile {
   email: string;
   githubUrl: string;
   blogUrl: string;
-  solvedAcTier: string;
-  solvedCount: number;
+  solvedAcTier?: string;
+  solvedCount?: number;
   bio: string;
   location: string;
   interests: string[];

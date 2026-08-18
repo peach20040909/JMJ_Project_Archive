@@ -12,8 +12,6 @@ export const initialProfile: UserProfile = {
   email: "a01027010769@gmail.com",
   githubUrl: "https://github.com/minjun-dev",
   blogUrl: "https://velog.io/@minjun_dev",
-  solvedAcTier: "Gold IV",
-  solvedCount: 284,
   location: "Seoul, Republic of Korea",
   bio: "명지대학교 융합소프트웨어학부 데이터사이언스전공입니다. \n상상만 했던 것들을 실제로 구현하는 활동을 좋아합니다.",
   interests: [
@@ -148,7 +146,7 @@ export const initialTechSkills: TechSkill[] = [
     category: "Languages",
     level: "Proficient (아키텍처/최적화)",
     score: 82,
-    experience: "자료구조(RB-Tree, B-Tree) 직접 구현, 메모리 관리(RAII, 스마트 포인터) 및 백준 알고리즘 문제 해결",
+    experience: "자료구조(RB-Tree, B-Tree) 직접 구현 및 메모리 관리(RAII, 스마트 포인터) 실습",
     featured: true
   },
   {
@@ -166,7 +164,7 @@ export const initialTechSkills: TechSkill[] = [
     category: "Languages",
     level: "Competent (과제/프로젝트 구현)",
     score: 75,
-    experience: "알고리즘 문제 풀이, 데이터 전처리 스크립트 및 간단한 자동화 봇 제작",
+    experience: "데이터 전처리 스크립트 작성 및 자동화 도구 개발",
     featured: false
   },
   {
@@ -247,7 +245,7 @@ export const initialTechSkills: TechSkill[] = [
     category: "CS Fundamentals",
     level: "Proficient (아키텍처/최적화)",
     score: 88,
-    experience: "자가 균형 트리, 해시 테이블 직접 구현 및 백준 280+ 문제 해결 (골드 IV)",
+    experience: "자가 균형 트리, 해시 테이블, 정렬/탐색 알고리즘 직접 구현 및 복잡도 분석",
     featured: true
   },
   {

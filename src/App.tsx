@@ -41,11 +41,11 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v3',
-  PROJECTS: 'jmj_archive_projects_v3',
-  SKILLS: 'jmj_archive_skills_v3',
-  LOGS: 'jmj_archive_logs_v3',
-  COVER_LETTERS: 'jmj_archive_coverletters_v3'
+  PROFILE: 'jmj_archive_profile_v4',
+  PROJECTS: 'jmj_archive_projects_v4',
+  SKILLS: 'jmj_archive_skills_v4',
+  LOGS: 'jmj_archive_logs_v4',
+  COVER_LETTERS: 'jmj_archive_coverletters_v4'
 };
 
 export default function App() {

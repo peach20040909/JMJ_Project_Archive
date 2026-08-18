@@ -128,10 +128,6 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
                   <span>{profile.email}</span>
                 </a>
               )}
-              <div className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-800 font-medium text-xs">
-                <Award className="w-3.5 h-3.5 text-amber-600" />
-                <span>Solved.ac {profile.solvedAcTier} ({profile.solvedCount}제)</span>
-              </div>
             </div>
           </div>
 
