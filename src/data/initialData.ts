@@ -7,7 +7,7 @@ export const initialProfile: UserProfile = {
   university: "명지대학교",
   department: "융합소프트웨어학부",
   currentSemester: "2학년 2학기 (2026 Fall)",
-  gpa: "4.18 / 4.50",
+  gpa: "4.27 / 4.50",
   targetRole: "Fullstack & Backend Software Engineer",
   email: "a01027010769@gmail.com",
   githubUrl: "https://github.com/minjun-dev",

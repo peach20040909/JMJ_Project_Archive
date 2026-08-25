@@ -8,7 +8,9 @@ import {
   Download, 
   LayoutDashboard,
   Github,
-  FileEdit
+  FileEdit,
+  CheckCircle2,
+  RefreshCw
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -21,6 +23,8 @@ interface HeaderProps {
   onOpenExport: () => void;
   onOpenGitHubImport: () => void;
   profile: UserProfile;
+  saveStatus?: 'saved' | 'saving' | 'idle';
+  lastSavedText?: string;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -31,7 +35,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAiCoach,
   onOpenExport,
   onOpenGitHubImport,
-  profile
+  profile,
+  saveStatus = 'saved',
+  lastSavedText = '자동 저장됨'
 }) => {
   const navItems = [
     { id: 'overview', label: '대시보드', icon: LayoutDashboard },
@@ -69,6 +75,28 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick Actions in Header */}
           <div className="flex items-center space-x-2">
             
+            {/* Auto-Save Status Badge */}
+            <div 
+              className={`hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[11px] font-medium border transition-all ${
+                saveStatus === 'saving' 
+                  ? 'bg-amber-50 text-amber-700 border-amber-200 animate-pulse' 
+                  : 'bg-emerald-50 text-emerald-700 border-emerald-200/80'
+              }`}
+              title="데이터 변경 시 브라우저 및 서버 파일로 자동 실시간 저장됩니다"
+            >
+              {saveStatus === 'saving' ? (
+                <>
+                  <RefreshCw className="w-3 h-3 text-amber-600 animate-spin" />
+                  <span>저장 중...</span>
+                </>
+              ) : (
+                <>
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                  <span>{lastSavedText}</span>
+                </>
+              )}
+            </div>
+
             {/* GitHub Auto Import Button */}
             <button
               onClick={onOpenGitHubImport}

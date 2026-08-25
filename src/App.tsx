@@ -41,39 +41,63 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v4',
-  PROJECTS: 'jmj_archive_projects_v4',
-  SKILLS: 'jmj_archive_skills_v4',
-  LOGS: 'jmj_archive_logs_v4',
-  COVER_LETTERS: 'jmj_archive_coverletters_v4'
+  PROFILE: 'jmj_archive_profile_v5',
+  PROJECTS: 'jmj_archive_projects_v5',
+  SKILLS: 'jmj_archive_skills_v5',
+  LOGS: 'jmj_archive_logs_v5',
+  COVER_LETTERS: 'jmj_archive_coverletters_v5'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('devarchive_profile');
-    return saved ? JSON.parse(saved) : initialProfile;
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v4');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        // Ensure GPA 4.27 default is respected if user had 4.18
+        if (parsed.gpa === '4.18 / 4.50' || !parsed.gpa) {
+          parsed.gpa = '4.27 / 4.50';
+        }
+        return parsed;
+      } catch (e) {
+        return initialProfile;
+      }
+    }
+    return initialProfile;
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('devarchive_projects');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v4');
     return saved ? JSON.parse(saved) : initialProjects;
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('devarchive_skills');
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v4');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('devarchive_logs');
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v4');
     return saved ? JSON.parse(saved) : initialDevLogs;
   });
 
   const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('devarchive_coverletters');
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v4');
     return saved ? JSON.parse(saved) : initialCoverLetters;
   });
+
+  // Save status & Notification State
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'idle'>('saved');
+  const [lastSavedText, setLastSavedText] = useState<string>('자동 저장됨');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage(prev => (prev === msg ? null : prev));
+    }, 3000);
+  };
 
   // Navigation & View Mode State
   const [activeTab, setActiveTab] = useState<string>('overview');
@@ -84,32 +108,38 @@ export default function App() {
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
   const [isGitHubModalOpen, setIsGitHubModalOpen] = useState<boolean>(false);
 
-  // Initial Load from Server if available
+  // Initial Load from Server if no local state exists
   useEffect(() => {
-    fetch('/api/archive-data')
-      .then(res => res.json())
-      .then(result => {
-        if (result.success && result.data) {
-          const d = result.data;
-          if (d.profile) setProfile(d.profile);
-          if (d.projects) setProjects(d.projects);
-          if (d.skills) setSkills(d.skills);
-          if (d.devLogs) setDevLogs(d.devLogs);
-          if (d.coverLetters) setCoverLetters(d.coverLetters);
-        }
-      })
-      .catch(err => console.log('Server archive load skipped:', err));
+    const hasLocal = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    if (!hasLocal) {
+      fetch('/api/archive-data')
+        .then(res => res.json())
+        .then(result => {
+          if (result.success && result.data) {
+            const d = result.data;
+            if (d.profile) setProfile(d.profile);
+            if (d.projects) setProjects(d.projects);
+            if (d.skills) setSkills(d.skills);
+            if (d.devLogs) setDevLogs(d.devLogs);
+            if (d.coverLetters) setCoverLetters(d.coverLetters);
+          }
+        })
+        .catch(err => console.log('Server archive load skipped:', err));
+    }
   }, []);
 
   // Sync to LocalStorage and Server File
   useEffect(() => {
+    // 1. Immediate sync to browser localStorage
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
     localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(skills));
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(devLogs));
     localStorage.setItem(STORAGE_KEYS.COVER_LETTERS, JSON.stringify(coverLetters));
 
-    // Debounced sync to server file
+    setSaveStatus('saving');
+
+    // 2. Debounced sync to server file
     const timer = setTimeout(() => {
       fetch('/api/archive-data', {
         method: 'POST',
@@ -122,8 +152,18 @@ export default function App() {
           coverLetters,
           updatedAt: new Date().toISOString()
         })
-      }).catch(err => console.log('Server archive sync skipped:', err));
-    }, 800);
+      })
+        .then(() => {
+          setSaveStatus('saved');
+          const now = new Date();
+          const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          setLastSavedText(`자동 저장됨 (${timeStr})`);
+        })
+        .catch(err => {
+          console.log('Server archive sync skipped:', err);
+          setSaveStatus('saved');
+        });
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [profile, projects, skills, devLogs, coverLetters]);
@@ -131,50 +171,63 @@ export default function App() {
   // CRUD Handlers - Profile
   const handleUpdateProfile = (updated: UserProfile) => {
     setProfile(updated);
+    showToast(`✅ 프로필이 성공적으로 저장되었습니다. (학점: ${updated.gpa})`);
   };
 
   // CRUD Handlers - Projects
   const handleAddProject = (p: ProjectItem) => {
     setProjects(prev => [p, ...prev]);
+    showToast(`✅ 프로젝트 '${p.title}'이(가) 추가되었습니다.`);
   };
   const handleUpdateProject = (p: ProjectItem) => {
     setProjects(prev => prev.map(item => item.id === p.id ? p : item));
+    showToast(`✅ 프로젝트 '${p.title}' 수정사항이 저장되었습니다.`);
   };
   const handleDeleteProject = (id: string) => {
     setProjects(prev => prev.filter(item => item.id !== id));
+    showToast('🗑️ 프로젝트가 삭제되었습니다.');
   };
 
   // CRUD Handlers - Skills
   const handleAddSkill = (s: TechSkill) => {
     setSkills(prev => [...prev, s]);
+    showToast(`✅ 기술 스택 '${s.name}'이(가) 추가되었습니다.`);
   };
   const handleUpdateSkill = (s: TechSkill) => {
     setSkills(prev => prev.map(item => item.id === s.id ? s : item));
+    showToast(`✅ 기술 스택 '${s.name}'이(가) 수정되었습니다.`);
   };
   const handleDeleteSkill = (id: string) => {
     setSkills(prev => prev.filter(item => item.id !== id));
+    showToast('🗑️ 기술 스택이 삭제되었습니다.');
   };
 
   // CRUD Handlers - DevLogs
   const handleAddLog = (l: DevLog) => {
     setDevLogs(prev => [l, ...prev]);
+    showToast(`✅ 트러블슈팅 일지 '${l.title}'이(가) 등록되었습니다.`);
   };
   const handleUpdateLog = (l: DevLog) => {
     setDevLogs(prev => prev.map(item => item.id === l.id ? l : item));
+    showToast(`✅ 트러블슈팅 일지가 수정되었습니다.`);
   };
   const handleDeleteLog = (id: string) => {
     setDevLogs(prev => prev.filter(item => item.id !== id));
+    showToast('🗑️ 일지가 삭제되었습니다.');
   };
 
   // CRUD Handlers - Cover Letters
   const handleAddCoverLetter = (cl: CoverLetterItem) => {
     setCoverLetters(prev => [cl, ...prev]);
+    showToast(`✅ '${cl.companyName}' 자기소개서가 저장되었습니다.`);
   };
   const handleUpdateCoverLetter = (cl: CoverLetterItem) => {
     setCoverLetters(prev => prev.map(item => item.id === cl.id ? cl : item));
+    showToast(`✅ 자기소개서가 수정되었습니다.`);
   };
   const handleDeleteCoverLetter = (id: string) => {
     setCoverLetters(prev => prev.filter(item => item.id !== id));
+    showToast('🗑️ 자기소개서가 삭제되었습니다.');
   };
 
   // Import and Reset
@@ -466,6 +519,8 @@ export default function App() {
         onOpenExport={() => setIsExportOpen(true)}
         onOpenGitHubImport={() => setIsGitHubModalOpen(true)}
         profile={profile}
+        saveStatus={saveStatus}
+        lastSavedText={lastSavedText}
       />
 
       {/* Main Profile Hero Banner */}
@@ -570,6 +625,12 @@ export default function App() {
         onImportData={handleImportData}
         onResetData={handleResetData}
       />
+      {/* Floating Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center space-x-2 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl text-xs sm:text-sm font-semibold border border-slate-700 animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <span>{toastMessage}</span>
+        </div>
+      )}
     </div>
   );
 }
