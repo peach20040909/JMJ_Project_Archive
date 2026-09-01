@@ -41,21 +41,20 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v5',
-  PROJECTS: 'jmj_archive_projects_v5',
-  SKILLS: 'jmj_archive_skills_v5',
-  LOGS: 'jmj_archive_logs_v5',
-  COVER_LETTERS: 'jmj_archive_coverletters_v5'
+  PROFILE: 'jmj_archive_profile_v6',
+  PROJECTS: 'jmj_archive_projects_v6',
+  SKILLS: 'jmj_archive_skills_v6',
+  LOGS: 'jmj_archive_logs_v6',
+  COVER_LETTERS: 'jmj_archive_coverletters_v6'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v4');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v5');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        // Ensure GPA 4.27 default is respected if user had 4.18
         if (parsed.gpa === '4.18 / 4.50' || !parsed.gpa) {
           parsed.gpa = '4.27 / 4.50';
         }
@@ -68,23 +67,66 @@ export default function App() {
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v4');
-    return saved ? JSON.parse(saved) : initialProjects;
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v5');
+    if (saved) {
+      try {
+        const parsed: ProjectItem[] = JSON.parse(saved);
+        // Ensure Spotify project has the latest Wikidata starBullets & troubleshooting
+        return parsed.map(p => {
+          if (p.id === 'proj-1787068301402') {
+            const initP = initialProjects.find(i => i.id === 'proj-1787068301402');
+            return initP ? { ...p, ...initP, ...p, starBullets: initP.starBullets, troubleshootingStory: initP.troubleshootingStory } : p;
+          }
+          return p;
+        });
+      } catch (e) {
+        return initialProjects;
+      }
+    }
+    return initialProjects;
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v4');
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v5');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v4');
-    return saved ? JSON.parse(saved) : initialDevLogs;
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v5');
+    if (saved) {
+      try {
+        const parsed: DevLog[] = JSON.parse(saved);
+        // Make sure the new Spotify-Wikidata log is present
+        const hasSpotifyLog = parsed.some(l => l.id === 'log-spotify-kopis-matching' || l.title.includes('Spotify-KOPIS'));
+        if (!hasSpotifyLog) {
+          const newLog = initialDevLogs.find(l => l.id === 'log-spotify-kopis-matching');
+          return newLog ? [newLog, ...parsed] : parsed;
+        }
+        return parsed;
+      } catch (e) {
+        return initialDevLogs;
+      }
+    }
+    return initialDevLogs;
   });
 
   const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v4');
-    return saved ? JSON.parse(saved) : initialCoverLetters;
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v5');
+    if (saved) {
+      try {
+        const parsed: CoverLetterItem[] = JSON.parse(saved);
+        return parsed.map(cl => {
+          if (cl.id === 'cl-1') {
+            const initCl = initialCoverLetters.find(c => c.id === 'cl-1');
+            return initCl ? { ...cl, ...initCl } : cl;
+          }
+          return cl;
+        });
+      } catch (e) {
+        return initialCoverLetters;
+      }
+    }
+    return initialCoverLetters;
   });
 
   // Save status & Notification State

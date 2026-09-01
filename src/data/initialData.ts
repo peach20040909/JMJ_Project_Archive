@@ -75,16 +75,17 @@ export const initialProjects: ProjectItem[] = [
     resultDescription: "저장소 릴리즈 및 동작 검증 완료",
     keyFeatures: [
       "5th-MVP-SetPIK-Server 핵심 서비스 로직 구현",
-      "Spotify 플레이리스트 메타데이터 연동 및 추천 매칭",
+      "Spotify 플레이리스트 메타데이터 연동 및 공연/페스티벌 추천 매칭",
+      "Wikidata API를 활용한 영문-한글 아티스트 다국어 Entity Resolution",
       "Dockerfile 기반 컨테이너 배포 및 Git 협업 파이프라인"
     ],
     starBullets: [
-      "[Situation] BE: Spotify 플레이리스트 기반 공연·페스티벌 추천 서비스",
-      "[Task] 소프트웨어 아키텍처 설계 및 기능 완성",
-      "[Action] Java, Dockerfile 스택을 활용한 개발 및 테스트",
-      "[Result] 프로젝트 구현 완료 및 GitHub 아카이빙"
+      "[Situation] Spotify 플레이리스트(영문)와 KOPIS 공연 라인업(한글) 간 언어 체계 차이로 아티스트 매칭 결과가 0건으로 계산되는 문제 발생",
+      "[Task] 오탐률 제로화 및 API 쿼터 초과 없이 안정적으로 이종 데이터 소스의 아티스트를 식별·매칭하는 알고리즘 구축",
+      "[Action] Spotify 역검색의 오탐 한계를 파악 후, Wikidata API를 매개로 한 다국어 별칭 조회 및 엔티티 매핑(Entity Resolution) 파이프라인 구현",
+      "[Result] 동명이인(배우 등) 오탐 매칭 방지, 429 Rate Limit 회피 및 추천 매칭 정확도 대폭 향상"
     ],
-    troubleshootingStory: `### 🔍 트러블슈팅\n\n- **상황**: 외부 음악 API 통신 및 컨테이너화 과정의 환경 변수 관리\n- **해결**: Dockerfile 빌드 환경 분리 및 로직 모듈화로 배포 안정성 확보`,
+    troubleshootingStory: `### 🔍 트러블슈팅: Spotify-KOPIS 아티스트 매칭 실패와 Wikidata Entity Resolution\n\n- **상황**: Spotify(영문: 'Car, the garden')와 KOPIS(한글: '카더가든')의 표기 불일치로 추천 결과가 0건이 되는 문제 발생.\n- **1차 시도 및 실패**: Spotify Search API 역매칭 시도 시 배우 동명이인 오탐 및 429 Too Many Requests 쿼터 초과 발생.\n- **최종 해결**: Wikidata 지식 베이스 API를 도입하여 영문 이름 기준 한글 별칭을 추출하고 KOPIS와 안전하게 교차 매칭하는 구조로 전환.\n- **배운 점**: 단순 문자열 유사도 매칭의 위험성을 깨닫고, 신뢰 가능한 3자 데이터 소스를 매개로 한 Entity Resolution의 견고함을 체득.`,
     githubUrl: "https://github.com/DEPthes/5th-MVP-SetPIK-Server",
     demoUrl: "",
     featured: true,
@@ -261,6 +262,68 @@ export const initialTechSkills: TechSkill[] = [
 
 export const initialDevLogs: DevLog[] = [
   {
+    id: "log-spotify-kopis-matching",
+    title: "Spotify-KOPIS 아티스트 다국어 매칭 실패와 Wikidata를 활용한 Entity Resolution",
+    date: "2026-08-28",
+    category: "트러블슈팅",
+    tags: ["Spotify API", "KOPIS", "Wikidata API", "Entity Resolution", "Rate Limiting", "데이터 파이프라인"],
+    linkedProjectId: "proj-1787068301402",
+    content: `## 문제 상황
+
+플레이리스트 분석 후 공연 추천을 계산하면 결과가 항상 **0건**으로 나오는 문제가 발생했다.
+
+### 원인 진단
+취향 분석에 사용하는 아티스트 정보는 Spotify에서 오고, 공연 라인업 정보는 KOPIS(한국공연예술통합전산망)에서 온다. 두 데이터 소스의 아티스트 이름 표기 언어가 근본적으로 달랐다.
+
+- **Spotify**: \`"Car, the garden"\` (영문 표기)
+- **KOPIS**: \`"카더가든"\` (한글 표기)
+
+기존 매칭 로직은 정규화(공백/특수문자 제거, 소문자 변환) 후 완전 일치 비교 방식이었다. 언어 자체가 다르니 정규화를 아무리 해도 일치할 수 없어 매칭이 원천적으로 불가능했다.
+
+---
+
+## 1차 시도: Spotify 검색 API로 역매칭
+
+- **접근 방식**: KOPIS 출연진 이름을 그대로 Spotify 검색 API에 질의하여, 검색 결과 1위가 기존에 저장된 Spotify 아티스트와 일치하는지 확인.
+- **결과**: **실패** (두 가지 심각한 부작용 발생)
+  1. **오탐 매칭 (False Positive)**: KOPIS에는 대중가수뿐 아니라 연극·뮤지컬 배우도 "출연진"으로 등록된다. 배우 이름("박예리" 등)을 Spotify에 검색하면 발음이 비슷한 동명이인 가수가 1위로 반환되어 전혀 다른 사람에게 잘못 연결되는 사고가 발생했다.
+  2. **API 쿼터 초과 (429 Too Many Requests)**: 신규 아티스트 하나당 검색 API를 순차 호출하다 보니, 공연 수가 많은 대형 배치에서 단시간에 수백 건의 호출이 몰려 Spotify 쿼터 제한에 도달했다.
+
+> **💡 교훈**: 이름 유사도만으로 동일 인물을 판단하는 방식은 신뢰도가 매우 낮다. *"이름이 비슷하다"*와 *"같은 사람이다"*는 완전히 다른 문제였다.
+
+---
+
+## 2차 시도 (최종 해결): Wikidata API 연동 및 Entity Resolution
+
+이름 문자열을 직접 비교하는 대신, **위키데이터(Wikidata)**라는 신뢰 가능한 공개 지식 베이스를 매개체로 삼았다.
+
+\`\`\`text
+Spotify 아티스트명 (영문)
+         ↓
+Wikidata에서 해당 인물(Entity) 조회
+         ↓
+Wikidata가 보유한 한글 레이블 및 별칭(Alias) 획득
+         ↓
+그 한글 이름으로 KOPIS 출연진과 교차 매칭
+\`\`\`
+
+문자열 유사도가 아니라, 위키데이터라는 제3의 공인 소스가 *"이 영문 이름과 이 한글 이름이 같은 실존 인물을 가리킨다"*고 검증(Entity Resolution)해주는 방식이라 배우와 가수를 혼동하는 문제를 구조적으로 해소했다.
+
+- **한계점 및 관리**: Wikidata에 한글 이름/별칭이 등록되어 있지 않은 일부 비주류 아티스트는 매칭이 누락될 수 있으나, 시스템 신뢰도를 저해하는 오탐(False Positive)을 원천 차단하는 가장 견고한 아키텍처로 안착했다.
+
+---
+
+## 시도 방식별 비교 정리
+
+| 구분 | 매칭 방식 | 발생한 문제점 및 한계 |
+|---|---|---|
+| **최초** | 문자열 완전 일치 | 언어가 다르면(영문 vs 한글) 매칭 자체가 원천 불가능 |
+| **1차 개선** | Spotify 검색 결과 신뢰 | 배우→동명이인 가수 오탐 매칭 발생, 429 API 쿼터 초과 |
+| **최종 해결** | **Wikidata 매개 매칭 (Entity Resolution)** | **오탐 완전 해결, 안정적 매칭 파이프라인 확립** (일부 미등록 아티스트 예외 관리) |
+
+> **🌟 핵심 배운 점**: 겉으로 보이는 증상("매칭이 안 된다")을 빠르게 때우는 1차 시도가 오히려 새로운 버그(잘못된 매칭)를 만든다는 것을 확인했다. 데이터 통합에서는 문자열 유사도를 맹신하지 않고, **신뢰 가능한 3자 데이터베이스를 매개로 한 검증 구조**를 설계하는 것이 가장 중요하다.`
+  },
+  {
     id: "log-1",
     title: "Spring Boot + JPA에서 N+1 문제가 발생하는 이유와 Fetch Join 최적화",
     date: "2026-08-12",
@@ -296,17 +359,19 @@ export const initialCoverLetters: CoverLetterItem[] = [
     questionCategory: "기술적 도전 및 문제해결",
     question: "본인이 수행한 프로젝트 중 가장 기술적으로 도전적이었던 문제와, 이를 해결하기 위해 시도한 구체적인 과정 및 결과를 기술해 주십시오. (1,000자 이내)",
     linkedProjectIds: ["proj-1787068301402"],
-    content: `[Spotify 연동 추천 서버 개발과 모듈화 아키텍처 설계]\n\n'5th-MVP-SetPIK-Server'의 서브 개발자로서 Spotify 플레이리스트 기반 공연/페스티벌 추천 백엔드 서비스 로직을 구현하고 컨테이너 배포 환경을 구축했습니다.\n\n외부 음악 메타데이터 연동 및 추천 매칭 로직을 안정화하기 위해 Java와 Docker 기반의 독립적인 서버 구조를 설계했습니다.\n\n이 경험을 통해 단순한 기능 개발을 넘어 사용자 관점에서 취향 데이터를 분석하고 유연한 백엔드 API를 제공하는 역량을 길렀습니다.`,
+    content: `[Spotify-KOPIS 이종 데이터 식별 불일치 해결과 Wikidata Entity Resolution 파이프라인 구축]\n\n'5th-MVP-SetPIK-Server'에서 사용자의 Spotify 플레이리스트 취향을 분석하여 KOPIS(한국공연예술전산망) 공연 라인업과 매칭하는 백엔드 핵심 로직을 개발했습니다.\n\n초기 매칭 로직에서 Spotify의 영문 아티스트명('Car, the garden')과 KOPIS의 한글 표기('카더가든') 불일치로 인해 추천 결과가 0건으로 나오는 치명적 결함을 발견했습니다.\n\n1차로 Spotify 검색 API를 이용한 역매칭을 시도했으나, 연극/뮤지컬 배우가 동명이인 가수로 오탐(False Positive)되거나 단시간 대량 호출로 인한 429 Too Many Requests 쿼터 초과 문제가 발생했습니다.\n\n단순 문자열 유사도 비교의 한계를 인식하고, 공인 지식 베이스인 Wikidata API를 매개로 한 Entity Resolution 아키텍처를 도입했습니다. 영문 식별자로부터 Wikidata의 검증된 다국어 레이블 및 한글 별칭(Alias)을 조회하여 KOPIS 출연진과 교차 검증함으로써 오탐률을 제로화하고 안정적인 추천 파이프라인을 완성했습니다.`,
     targetCharCount: 1000,
-    memo: "음악 메타데이터 가공 및 추천 매칭 알고리즘 면접 대비",
+    memo: "외부 API 연동, 데이터 불일치 해결, Entity Resolution 및 429 레이트 리밋 제어 면접 대비",
     interviewTips: [
-      "외부 API 연동 시 발생할 수 있는 레이트 리밋과 예외 처리는 어떻게 해결했나요?",
-      "Docker 컨테이너화 과정에서 겪은 설정 및 최적화 경험은 무엇인가요?"
+      "Spotify 영문 표기와 KOPIS 한글 표기 간의 식별 불일치 문제를 어떻게 정의하고 해결했나요?",
+      "단순 검색 API 대신 Wikidata 지식 베이스를 선택한 기술적 배경과 장단점은 무엇인가요?",
+      "외부 API 연동 시 레이트 리밋(429) 및 네트워크 지연을 방어하기 위한 캐싱 전략은 어떻게 구상했나요?"
     ],
     keyStrengths: [
-      "Java 기반 백엔드 API 및 서비스 로직 구현 역량",
-      "Dockerfile을 활용한 컨테이너 배포 및 협업 경험"
+      "이종 데이터 소스 간 다국어 Entity Resolution 및 데이터 파이프라인 구축",
+      "Java & Spring Boot 기반 서비스 로직 모듈화 및 외부 API 예외 방어",
+      "Dockerfile을 활용한 컨테이너 패키징 및 협업 역량"
     ],
-    updatedAt: "2026-08-18"
+    updatedAt: "2026-08-28"
   }
 ];
