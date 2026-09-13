@@ -41,17 +41,17 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v6',
-  PROJECTS: 'jmj_archive_projects_v6',
-  SKILLS: 'jmj_archive_skills_v6',
-  LOGS: 'jmj_archive_logs_v6',
-  COVER_LETTERS: 'jmj_archive_coverletters_v6'
+  PROFILE: 'jmj_archive_profile_v7',
+  PROJECTS: 'jmj_archive_projects_v7',
+  SKILLS: 'jmj_archive_skills_v7',
+  LOGS: 'jmj_archive_logs_v7',
+  COVER_LETTERS: 'jmj_archive_coverletters_v7'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v6') || localStorage.getItem('jmj_archive_profile_v5');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -67,10 +67,18 @@ export default function App() {
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v6') || localStorage.getItem('jmj_archive_projects_v5');
     if (saved) {
       try {
-        const parsed: ProjectItem[] = JSON.parse(saved);
+        let parsed: ProjectItem[] = JSON.parse(saved);
+        // Ensure the new HMK project is present
+        const hasHmk = parsed.some(p => p.id === 'proj-hmk-2026' || p.title.includes('한만큼'));
+        if (!hasHmk) {
+          const hmkProj = initialProjects.find(p => p.id === 'proj-hmk-2026');
+          if (hmkProj) {
+            parsed = [hmkProj, ...parsed];
+          }
+        }
         // Ensure Spotify project has the latest Wikidata starBullets & troubleshooting
         return parsed.map(p => {
           if (p.id === 'proj-1787068301402') {
@@ -87,20 +95,26 @@ export default function App() {
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v6') || localStorage.getItem('jmj_archive_skills_v5');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v6') || localStorage.getItem('jmj_archive_logs_v5');
     if (saved) {
       try {
-        const parsed: DevLog[] = JSON.parse(saved);
-        // Make sure the new Spotify-Wikidata log is present
+        let parsed: DevLog[] = JSON.parse(saved);
+        // Make sure the new HMK log is present
+        const hasHmkLog = parsed.some(l => l.id === 'log-hmk-2026' || l.title.includes('한만큼'));
+        if (!hasHmkLog) {
+          const hmkLog = initialDevLogs.find(l => l.id === 'log-hmk-2026');
+          if (hmkLog) parsed = [hmkLog, ...parsed];
+        }
+        // Make sure the Spotify-Wikidata log is present
         const hasSpotifyLog = parsed.some(l => l.id === 'log-spotify-kopis-matching' || l.title.includes('Spotify-KOPIS'));
         if (!hasSpotifyLog) {
           const newLog = initialDevLogs.find(l => l.id === 'log-spotify-kopis-matching');
-          return newLog ? [newLog, ...parsed] : parsed;
+          if (newLog) parsed = [...parsed, newLog];
         }
         return parsed;
       } catch (e) {
@@ -111,10 +125,16 @@ export default function App() {
   });
 
   const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v6') || localStorage.getItem('jmj_archive_coverletters_v5');
     if (saved) {
       try {
-        const parsed: CoverLetterItem[] = JSON.parse(saved);
+        let parsed: CoverLetterItem[] = JSON.parse(saved);
+        // Make sure the HMK cover letter is present
+        const hasHmkCl = parsed.some(c => c.id === 'cl-hmk-2026' || c.question.includes('한만큼') || c.question.includes('피벗'));
+        if (!hasHmkCl) {
+          const hmkCl = initialCoverLetters.find(c => c.id === 'cl-hmk-2026');
+          if (hmkCl) parsed = [hmkCl, ...parsed];
+        }
         return parsed.map(cl => {
           if (cl.id === 'cl-1') {
             const initCl = initialCoverLetters.find(c => c.id === 'cl-1');
