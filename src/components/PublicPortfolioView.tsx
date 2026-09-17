@@ -34,43 +34,50 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:text-black">
-      <div className="max-w-4xl mx-auto space-y-10">
+    <div className="min-h-screen bg-zinc-50 text-zinc-900 py-12 px-4 sm:px-6 lg:px-8 print:bg-white print:text-black">
+      <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Navigation & Controls (Hidden in Print) */}
-        <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
+        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-4 print:hidden">
           <button
             onClick={onBackToArchive}
-            className="text-xs sm:text-sm font-bold text-indigo-600 hover:text-indigo-800 flex items-center space-x-1"
+            className="text-xs sm:text-sm font-semibold text-zinc-600 hover:text-zinc-900 flex items-center space-x-1 transition-colors"
           >
             <span>← 아카이브 관리 모드로 돌아가기</span>
           </button>
 
           <div className="flex items-center space-x-3">
-            <span className="text-xs px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold">
-              공개 포트폴리오 뷰 (Recruiter Mode)
+            <span className="text-xs px-2.5 py-1 rounded-md bg-zinc-900 text-white font-mono font-medium">
+              Recruiter Mode
             </span>
             <button
               onClick={handlePrint}
-              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-xs font-bold text-slate-700 transition-colors shadow-sm"
+              className="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-zinc-100 border border-zinc-200 text-xs font-semibold text-zinc-700 transition-colors shadow-xs"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>PDF / 인쇄 출력</span>
+              <span>PDF / 인쇄</span>
             </button>
           </div>
         </div>
 
         {/* 1. Header / Intro Profile */}
-        <header className="space-y-4 bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm print:border-none print:shadow-none print:p-0">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="inline-block px-3 py-1 rounded-md bg-indigo-50 text-indigo-700 font-mono text-xs font-bold mb-2 border border-indigo-200">
-                {profile.university} {profile.department} {profile.currentSemester && `• ${profile.currentSemester}`} {profile.gpa && `(GPA: ${profile.gpa})`}
+        <header className="space-y-4 bg-white p-6 sm:p-8 rounded-xl border border-zinc-200/80 shadow-xs print:border-none print:shadow-none print:p-0">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="space-y-2">
+              <div className="inline-flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 text-xs font-medium">
+                  {profile.university} {profile.department} {profile.currentSemester && `• ${profile.currentSemester}`}
+                </span>
+                {profile.gpa && (
+                  <span className="px-2.5 py-0.5 rounded-md bg-zinc-900 text-white text-xs font-mono font-bold">
+                    GPA {profile.gpa}
+                  </span>
+                )}
               </div>
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-                {profile.name} <span className="text-lg font-normal text-slate-500">({profile.englishName})</span>
+              <h1 className="text-3xl sm:text-4xl font-extrabold text-zinc-900 tracking-tight">
+                {profile.name} <span className="text-base font-normal text-zinc-400">({profile.englishName})</span>
               </h1>
-              <p className="text-lg text-indigo-600 font-bold mt-1">
+              <p className="text-base font-semibold text-zinc-900">
                 {profile.targetRole}
               </p>
             </div>
@@ -82,7 +89,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                   href={profile.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 border border-slate-200 flex items-center space-x-1.5 text-slate-800 font-medium transition-colors"
+                  className="px-3 py-1.5 rounded-lg bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 flex items-center space-x-1.5 text-zinc-700 font-medium transition-colors"
                 >
                   <Github className="w-3.5 h-3.5" />
                   <span>GitHub</span>

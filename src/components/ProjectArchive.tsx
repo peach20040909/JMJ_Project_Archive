@@ -190,56 +190,55 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
     <div className="space-y-6 py-6">
       
       {/* Top Action Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span>프로젝트 아카이브</span>
-            <span className="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
-              총 {projects.length}개
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>프로젝트</span>
+            <span className="text-sm font-normal text-slate-500">
+              ({projects.length})
             </span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            GitHub 과제, 팀 프로젝트, CS 실습 결과물을 체계적으로 관리하고 STAR 기법으로 정리합니다.
+            학부 과제, 팀 프로젝트, 대회 출품작을 체계적으로 관리합니다.
           </p>
         </div>
 
-        <div className="flex items-center space-x-2.5 flex-shrink-0">
+        <div className="flex items-center space-x-2 flex-shrink-0">
           {/* GitHub Auto Import Button */}
           {onOpenGitHubImport && (
             <button
               onClick={onOpenGitHubImport}
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-bold flex items-center space-x-2 shadow-sm transition-all hover:scale-105"
+              className="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold flex items-center space-x-1.5 transition-colors shadow-xs"
             >
-              <Github className="w-4 h-4" />
-              <span>GitHub 링크로 자동 등록</span>
-              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+              <Github className="w-3.5 h-3.5" />
+              <span>GitHub로 등록</span>
             </button>
           )}
 
           {/* Manual Add Button */}
           <button
             onClick={handleOpenAdd}
-            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-105"
+            className="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold flex items-center space-x-1 transition-colors shadow-xs"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             <span>수동 등록</span>
           </button>
         </div>
       </div>
 
       {/* Filter and Search Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2 rounded-xl border border-slate-200/80">
         
         {/* Category Pills */}
-        <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+        <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none">
           {CATEGORIES.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 selectedCategory === cat
-                  ? 'bg-indigo-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               {cat}
@@ -248,65 +247,65 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
         </div>
 
         {/* Search Field */}
-        <div className="relative min-w-[220px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+        <div className="relative min-w-[200px]">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder="제목, 기술스택 검색..."
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition-all"
           />
         </div>
       </div>
 
       {/* Project Cards Grid */}
       {filteredProjects.length === 0 ? (
-        <div className="p-12 text-center bg-white rounded-2xl border border-slate-200 shadow-sm space-y-3">
-          <FolderGit2 className="w-10 h-10 text-slate-300 mx-auto" />
-          <h3 className="font-bold text-slate-700 text-sm">해당 조건에 맞는 프로젝트가 없습니다.</h3>
+        <div className="p-12 text-center bg-white rounded-xl border border-slate-200 shadow-xs space-y-3">
+          <FolderGit2 className="w-8 h-8 text-slate-300 mx-auto" />
+          <h3 className="font-semibold text-slate-700 text-sm">해당 조건에 맞는 프로젝트가 없습니다.</h3>
           <p className="text-xs text-slate-400">
-            GitHub 링크를 붙여넣어 새 프로젝트를 바로 추가해보세요!
+            새 프로젝트를 등록하거나 검색 조건을 변경해보세요.
           </p>
           {onOpenGitHubImport && (
             <button
               onClick={onOpenGitHubImport}
-              className="mt-2 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold inline-flex items-center space-x-1.5"
+              className="mt-2 px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold inline-flex items-center space-x-1.5"
             >
-              <Github className="w-4 h-4" />
+              <Github className="w-3.5 h-3.5" />
               <span>GitHub 링크로 가져오기</span>
             </button>
           )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {filteredProjects.map(project => (
             <div
               key={project.id}
               onClick={() => setSelectedProject(project)}
-              className="bg-white rounded-2xl border border-slate-200/90 shadow-sm hover:shadow-md hover:border-indigo-300 transition-all cursor-pointer flex flex-col justify-between p-5 space-y-4 group"
+              className="bg-white rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer flex flex-col justify-between p-4.5 space-y-3.5 group"
             >
-              <div className="space-y-3">
+              <div className="space-y-2.5">
                 {/* Header tags */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-1.5">
-                    <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[11px] font-bold border border-indigo-200/70">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
                       {project.category}
                     </span>
-                    <span className="text-[11px] text-slate-500 font-mono">
+                    <span className="text-[11px] text-slate-400 font-mono">
                       {project.semester}
                     </span>
                   </div>
 
-                  <div className="flex items-center space-x-1">
+                  <div className="flex items-center space-x-0.5">
                     {project.featured && (
-                      <span className="p-1 rounded bg-amber-50 text-amber-600 text-xs font-bold flex items-center" title="대표 프로젝트">
-                        <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+                      <span className="p-1 rounded text-amber-500" title="대표 프로젝트">
+                        <Star className="w-3.5 h-3.5 fill-amber-400" />
                       </span>
                     )}
                     <button
                       onClick={(e) => handleOpenEdit(project, e)}
-                      className="p-1 rounded-md text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                      className="p-1 rounded text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                       title="수정"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
@@ -318,7 +317,7 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                           onDeleteProject(project.id);
                         }
                       }}
-                      className="p-1 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
                       title="삭제"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -328,16 +327,16 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
 
                 {/* Title and Summary */}
                 <div>
-                  <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
                     {project.title}
                   </h3>
-                  <p className="text-xs text-slate-600 mt-1 line-clamp-2 leading-relaxed">
+                  <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
                     {project.summary}
                   </p>
                 </div>
 
                 {/* Role and Period */}
-                <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-100">
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
                   <span className="truncate">{project.role} ({project.teamType})</span>
                   <span className="font-mono flex-shrink-0">{project.period}</span>
                 </div>
@@ -345,12 +344,12 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                 {/* Tech Badges */}
                 <div className="flex flex-wrap gap-1">
                   {project.techStack.slice(0, 4).map((tech, i) => (
-                    <span key={i} className="px-2 py-0.5 rounded bg-slate-100 text-slate-700 text-[11px] font-mono border border-slate-200">
+                    <span key={i} className="px-2 py-0.5 rounded bg-slate-50 text-slate-600 text-[11px] font-mono border border-slate-200/60">
                       {tech}
                     </span>
                   ))}
                   {project.techStack.length > 4 && (
-                    <span className="text-[10px] text-slate-400 self-center font-bold">
+                    <span className="text-[10px] text-slate-400 self-center font-medium">
                       +{project.techStack.length - 4}
                     </span>
                   )}
@@ -360,7 +359,7 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
               {/* Card Footer Links */}
               <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
                 <span className="text-[11px] text-indigo-600 font-semibold group-hover:underline">
-                  상세보기 및 STAR 이력서 →
+                  상세보기 및 STAR →
                 </span>
                 <div className="flex items-center space-x-2" onClick={e => e.stopPropagation()}>
                   {project.githubUrl && (

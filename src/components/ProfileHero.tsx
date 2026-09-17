@@ -49,62 +49,72 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
   };
 
   return (
-    <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 border-b border-slate-200 py-8">
+    <div className="bg-white border-b border-zinc-200/80 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
         
         {/* Main Profile Info Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
           
           {/* Left: User Identity */}
-          <div className="space-y-2.5 max-w-3xl">
+          <div className="space-y-3.5 max-w-3xl">
+            {/* Academic Tags */}
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-200/80 text-indigo-700 text-xs font-bold font-mono">
+              <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-800 text-xs font-medium">
                 {profile.university} {profile.department}
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-md bg-zinc-100 text-zinc-600 text-xs font-medium">
                 {profile.currentSemester}
               </span>
-              <span className="px-2.5 py-1 rounded-md bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
+              <span className="px-2.5 py-0.5 rounded-md bg-zinc-900 text-white text-xs font-mono font-bold">
                 GPA {profile.gpa}
               </span>
+              {profile.solvedAcTier && (
+                <span className="px-2.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80 text-xs font-mono font-bold">
+                  {profile.solvedAcTier} ({profile.solvedCount} Solved)
+                </span>
+              )}
             </div>
 
+            {/* Name & Edit Button */}
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                {profile.name} <span className="text-lg font-normal text-slate-500">({profile.englishName})</span>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 tracking-tight">
+                {profile.name} <span className="text-base font-normal text-zinc-400">({profile.englishName})</span>
               </h1>
               <button
                 onClick={() => {
                   setFormData(profile);
                   setIsEditing(true);
                 }}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors"
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-900 hover:bg-zinc-100 transition-colors"
                 title="프로필 정보 수정"
               >
-                <Edit3 className="w-4 h-4" />
+                <Edit3 className="w-3.5 h-3.5" />
               </button>
             </div>
 
-            <p className="text-sm sm:text-base font-semibold text-indigo-600">
-              {profile.targetRole}
+            {/* Role */}
+            <p className="text-sm font-bold text-zinc-900 flex items-center space-x-2">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              <span>{profile.targetRole}</span>
             </p>
 
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+            {/* Bio */}
+            <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-2xl">
               {profile.bio}
             </p>
 
             {/* Social & Contact Links */}
-            <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
               {profile.githubUrl && (
                 <a
                   href={profile.githubUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 font-medium shadow-sm transition-all"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 font-medium transition-colors"
                 >
                   <Github className="w-3.5 h-3.5" />
                   <span>GitHub</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <ExternalLink className="w-3 h-3 text-zinc-400" />
                 </a>
               )}
               {profile.blogUrl && (
@@ -112,81 +122,81 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
                   href={profile.blogUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 font-medium shadow-sm transition-all"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 font-medium transition-colors"
                 >
-                  <Globe className="w-3.5 h-3.5 text-emerald-600" />
+                  <Globe className="w-3.5 h-3.5 text-zinc-500" />
                   <span>Tech Blog</span>
-                  <ExternalLink className="w-3 h-3 text-slate-400" />
+                  <ExternalLink className="w-3 h-3 text-zinc-400" />
                 </a>
               )}
               {profile.email && (
                 <a
                   href={`mailto:${profile.email}`}
-                  className="flex items-center space-x-1.5 px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 hover:text-slate-900 hover:border-slate-300 font-medium shadow-sm transition-all"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-zinc-50 border border-zinc-200 text-zinc-700 hover:text-zinc-900 hover:bg-zinc-100 font-medium transition-colors"
                 >
-                  <Mail className="w-3.5 h-3.5 text-indigo-500" />
+                  <Mail className="w-3.5 h-3.5 text-zinc-500" />
                   <span>{profile.email}</span>
                 </a>
               )}
             </div>
           </div>
 
-          {/* Right: Quick Stat Tiles */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-3 min-w-[280px]">
+          {/* Right: Clean Quick Stat Counters */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 min-w-[240px]">
             
             <div 
               onClick={() => onNavigateTab('projects')}
-              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group"
+              className="p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200/80 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">전체 프로젝트</span>
-                <FolderGit2 className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
+              <div className="flex items-center justify-between text-zinc-500">
+                <span className="text-[11px] font-medium text-zinc-500">프로젝트</span>
+                <FolderGit2 className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1">
-                <span className="text-xl font-black text-slate-900">{projects.length}</span>
-                <span className="text-xs text-slate-500">개 아카이빙</span>
+                <span className="text-lg font-bold text-zinc-900">{projects.length}</span>
+                <span className="text-[11px] text-zinc-400">개</span>
               </div>
             </div>
 
             <div 
               onClick={() => onNavigateTab('coverletter')}
-              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-indigo-300 hover:shadow-md transition-all cursor-pointer group"
+              className="p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200/80 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">AI 자기소개서</span>
-                <FileEdit className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform" />
+              <div className="flex items-center justify-between text-zinc-500">
+                <span className="text-[11px] font-medium text-zinc-500">자기소개서</span>
+                <FileEdit className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1">
-                <span className="text-xl font-black text-slate-900">{coverLettersCount}</span>
-                <span className="text-xs text-slate-500">건 작성/관리</span>
+                <span className="text-lg font-bold text-zinc-900">{coverLettersCount}</span>
+                <span className="text-[11px] text-zinc-400">건</span>
               </div>
             </div>
 
             <div 
               onClick={() => onNavigateTab('skills')}
-              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-violet-300 hover:shadow-md transition-all cursor-pointer group"
+              className="p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200/80 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">기술 스택</span>
-                <Cpu className="w-4 h-4 text-violet-600 group-hover:scale-110 transition-transform" />
+              <div className="flex items-center justify-between text-zinc-500">
+                <span className="text-[11px] font-medium text-zinc-500">기술 스택</span>
+                <Cpu className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1">
-                <span className="text-xl font-black text-slate-900">{skills.length}</span>
-                <span className="text-xs text-slate-500">개 보유</span>
+                <span className="text-lg font-bold text-zinc-900">{skills.length}</span>
+                <span className="text-[11px] text-zinc-400">개</span>
               </div>
             </div>
 
             <div 
               onClick={() => onNavigateTab('logs')}
-              className="p-3.5 rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:border-amber-300 hover:shadow-md transition-all cursor-pointer group"
+              className="p-3 rounded-xl bg-zinc-50 hover:bg-zinc-100/80 border border-zinc-200/80 transition-all cursor-pointer group"
             >
-              <div className="flex items-center justify-between text-slate-500">
-                <span className="text-xs font-semibold">트러블슈팅 일지</span>
-                <MessageSquareCode className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform" />
+              <div className="flex items-center justify-between text-zinc-500">
+                <span className="text-[11px] font-medium text-zinc-500">트러블슈팅</span>
+                <MessageSquareCode className="w-3.5 h-3.5 text-zinc-400 group-hover:text-zinc-900 transition-colors" />
               </div>
               <div className="mt-1 flex items-baseline space-x-1">
-                <span className="text-xl font-black text-slate-900">{devLogs.length}</span>
-                <span className="text-xs text-slate-500">편 작성</span>
+                <span className="text-lg font-bold text-zinc-900">{devLogs.length}</span>
+                <span className="text-[11px] text-zinc-400">편</span>
               </div>
             </div>
 

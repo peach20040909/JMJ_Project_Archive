@@ -107,37 +107,37 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight flex items-center space-x-2">
-            <span>트러블슈팅 & 기술 학습 일지</span>
-            <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
-              총 {devLogs.length}편
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center space-x-2">
+            <span>트러블슈팅 & 개발 일지</span>
+            <span className="text-sm font-normal text-slate-500">
+              ({devLogs.length})
             </span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            개발 중 직면한 버그 해결 과정, CS 이론 공부(TIL), 학기말 회고를 기록하는 엔지니어링 일지입니다.
+            버그 해결 과정, 기술 학습 내용, 회고를 체계적으로 기록합니다.
           </p>
         </div>
 
         <button
           onClick={handleOpenAdd}
-          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold flex items-center space-x-1.5 shadow-sm transition-all hover:scale-105 self-start sm:self-auto"
+          className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center space-x-1 transition-colors shadow-xs self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           <span>새 일지 작성</span>
         </button>
       </div>
 
       {/* Filter and Search */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
-        <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none pb-1 sm:pb-0">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-2 rounded-xl border border-slate-200/80">
+        <div className="flex items-center space-x-1 overflow-x-auto scrollbar-none">
           {CATEGORIES.map(cat => (
             <button
               key={cat}
               onClick={() => setSelectedCat(cat)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-colors ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-colors ${
                 selectedCat === cat
-                  ? 'bg-blue-600 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                  ? 'bg-slate-900 text-white'
+                  : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
               {cat}
@@ -146,19 +146,19 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
         </div>
 
         <div className="relative min-w-[200px]">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
           <input
             type="text"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            placeholder="제목, 태그, 내용 검색..."
-            className="w-full pl-9 pr-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all"
+            placeholder="제목, 태그 검색..."
+            className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 text-xs placeholder-slate-400 focus:outline-none focus:ring-1 focus:ring-slate-900 focus:bg-white transition-all"
           />
         </div>
       </div>
 
       {/* Logs Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredLogs.map(log => {
           const linkedProj = projects.find(p => p.id === log.linkedProjectId);
 
@@ -166,19 +166,19 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
             <div
               key={log.id}
               onClick={() => setSelectedLog(log)}
-              className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md hover:border-blue-300 transition-all cursor-pointer p-5 flex flex-col justify-between space-y-4 group"
+              className="bg-white rounded-xl border border-slate-200/80 hover:border-slate-300 hover:shadow-xs transition-all cursor-pointer p-4 flex flex-col justify-between space-y-3 group"
             >
-              <div className="space-y-2.5">
+              <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 text-xs font-bold border border-blue-200">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
                     {log.category}
                   </span>
                   
-                  <div className="flex items-center space-x-1">
-                    <span className="text-[11px] text-slate-400 font-mono">{log.date}</span>
+                  <div className="flex items-center space-x-0.5">
+                    <span className="text-[11px] text-slate-400 font-mono mr-1">{log.date}</span>
                     <button
                       onClick={(e) => handleOpenEdit(log, e)}
-                      className="p-1 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                      className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded"
                     >
                       <Edit3 className="w-3.5 h-3.5" />
                     </button>
@@ -196,26 +196,26 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
                   </div>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
                   {log.title}
                 </h3>
 
-                <p className="text-xs text-slate-500 line-clamp-3 leading-relaxed">
+                <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                   {log.content.replace(/[#*`]/g, '')}
                 </p>
               </div>
 
-              <div className="space-y-2 pt-2 border-t border-slate-100">
+              <div className="space-y-1.5 pt-2 border-t border-slate-100">
                 <div className="flex flex-wrap gap-1">
                   {log.tags.map((t, i) => (
-                    <span key={i} className="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
+                    <span key={i} className="text-[10px] px-1.5 py-0.2 rounded bg-slate-50 text-slate-500 font-medium">
                       #{t}
                     </span>
                   ))}
                 </div>
 
                 {linkedProj && (
-                  <div className="text-[11px] text-indigo-600 font-semibold truncate flex items-center space-x-1">
+                  <div className="text-[11px] text-indigo-600 font-medium truncate flex items-center space-x-1">
                     <LinkIcon className="w-3 h-3 flex-shrink-0" />
                     <span className="truncate">{linkedProj.title}</span>
                   </div>
