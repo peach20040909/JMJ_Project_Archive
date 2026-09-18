@@ -32,6 +32,11 @@ interface ProjectArchiveProps {
 
 const CATEGORIES: ProjectCategory[] = ['All', 'Web', 'Backend', 'Frontend', 'System', 'Algorithm', 'AI/Data'];
 
+export const cleanSemester = (sem?: string): string => {
+  if (!sem) return '';
+  return sem.replace(/\s*\([^)]*(예정|진행|수강|Fall|Spring)[^)]*\)/gi, '').trim();
+};
+
 export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
   projects,
   onAddProject,
@@ -125,15 +130,19 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
       return;
     }
 
+    const cleanedSemester = (cleanSemester(formData.semester) || '2학년 2학기') as SemesterType;
+
     if (editingId) {
       onUpdateProject({
         ...(formData as ProjectItem),
+        semester: cleanedSemester,
         id: editingId,
         updatedAt: new Date().toISOString().split('T')[0]
       });
     } else {
       const newProj: ProjectItem = {
         ...(formData as ProjectItem),
+        semester: cleanedSemester,
         id: `proj-${Date.now()}`,
         updatedAt: new Date().toISOString().split('T')[0]
       };
@@ -292,8 +301,8 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                     <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
                       {project.category}
                     </span>
-                    <span className="text-[11px] text-slate-400 font-mono">
-                      {project.semester}
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      {cleanSemester(project.semester)}
                     </span>
                   </div>
 
@@ -648,12 +657,33 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                     onChange={e => setFormData({ ...formData, semester: e.target.value as SemesterType })}
                     className="w-full mt-1 p-2 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs"
                   >
-                    <option value="1학년 1학기">1학년 1학기</option>
-                    <option value="1학년 2학기">1학년 2학기</option>
-                    <option value="2학년 1학기">2학년 1학기</option>
-                    <option value="2학년 여름방학">2학년 여름방학</option>
-                    <option value="2학년 2학기 (예정/진행중)">2학년 2학기 (예정/진행중)</option>
-                    <option value="기타/개인">기타/개인</option>
+                    <optgroup label="1학년">
+                      <option value="1학년 1학기">1학년 1학기</option>
+                      <option value="1학년 2학기">1학년 2학기</option>
+                      <option value="1학년 겨울방학">1학년 겨울방학</option>
+                    </optgroup>
+                    <optgroup label="2학년">
+                      <option value="2학년 1학기">2학년 1학기</option>
+                      <option value="2학년 여름방학">2학년 여름방학</option>
+                      <option value="2학년 2학기">2학년 2학기</option>
+                      <option value="2학년 겨울방학">2학년 겨울방학</option>
+                    </optgroup>
+                    <optgroup label="3학년">
+                      <option value="3학년 1학기">3학년 1학기</option>
+                      <option value="3학년 여름방학">3학년 여름방학</option>
+                      <option value="3학년 2학기">3학년 2학기</option>
+                      <option value="3학년 겨울방학">3학년 겨울방학</option>
+                    </optgroup>
+                    <optgroup label="4학년">
+                      <option value="4학년 1학기">4학년 1학기</option>
+                      <option value="4학년 여름방학">4학년 여름방학</option>
+                      <option value="4학년 2학기">4학년 2학기</option>
+                    </optgroup>
+                    <optgroup label="기타">
+                      <option value="사이드 프로젝트">사이드 프로젝트</option>
+                      <option value="산학/인턴십">산학/인턴십</option>
+                      <option value="기타/개인">기타/개인</option>
+                    </optgroup>
                   </select>
                 </div>
                 <div>

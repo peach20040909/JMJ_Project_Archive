@@ -165,12 +165,15 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
                   <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-bold border border-indigo-200">
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded bg-zinc-900 text-white text-xs font-bold">
                         {project.category}
                       </span>
-                      <span className="text-xs text-slate-500 font-mono">{project.period}</span>
-                      <span className="text-xs text-slate-500">• {project.role} ({project.teamType})</span>
+                      <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-xs font-medium border border-zinc-200">
+                        {project.semester}
+                      </span>
+                      <span className="text-xs text-zinc-500 font-mono">{project.period}</span>
+                      <span className="text-xs text-zinc-500">• {project.role} ({project.teamType})</span>
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 mt-1">
                       {project.title}

@@ -1,11 +1,22 @@
 export type SemesterType = 
-  | '1학년' 
-  | '2학년' 
-  | '3학년' 
-  | '4학년' 
+  | '1학년 1학기'
+  | '1학년 2학기'
+  | '1학년 겨울방학'
+  | '2학년 1학기'
+  | '2학년 여름방학'
+  | '2학년 2학기'
+  | '2학년 겨울방학'
+  | '3학년 1학기'
+  | '3학년 여름방학'
+  | '3학년 2학기'
+  | '3학년 겨울방학'
+  | '4학년 1학기'
+  | '4학년 여름방학'
+  | '4학년 2학기'
   | '사이드 프로젝트' 
   | '산학/인턴십' 
-  | '기타/개인';
+  | '기타/개인'
+  | string;
 
 export type ProjectCategory = 
   | 'All' 
@@ -84,6 +95,7 @@ export interface DevLog {
   tags: string[];
   content: string;
   linkedProjectId?: string;
+  updatedAt?: string;
 }
 
 export interface CoverLetterItem {

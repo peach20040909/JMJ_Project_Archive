@@ -41,22 +41,26 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v7',
-  PROJECTS: 'jmj_archive_projects_v7',
-  SKILLS: 'jmj_archive_skills_v7',
-  LOGS: 'jmj_archive_logs_v7',
-  COVER_LETTERS: 'jmj_archive_coverletters_v7'
+  PROFILE: 'jmj_archive_profile_v8',
+  PROJECTS: 'jmj_archive_projects_v8',
+  SKILLS: 'jmj_archive_skills_v8',
+  LOGS: 'jmj_archive_logs_v8',
+  COVER_LETTERS: 'jmj_archive_coverletters_v8'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v6') || localStorage.getItem('jmj_archive_profile_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v7') || localStorage.getItem('jmj_archive_profile_v6');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
         if (parsed.gpa === '4.18 / 4.50' || !parsed.gpa) {
           parsed.gpa = '4.27 / 4.50';
+        }
+        // Remove '(예정 / 진행 중)' or '(2026 Fall)' suffixes to keep pure semester name
+        if (parsed.currentSemester && (parsed.currentSemester.includes('예정') || parsed.currentSemester.includes('진행') || parsed.currentSemester.includes('2026 Fall'))) {
+          parsed.currentSemester = '2학년 2학기';
         }
         return parsed;
       } catch (e) {
@@ -67,11 +71,43 @@ export default function App() {
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v6') || localStorage.getItem('jmj_archive_projects_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v7') || localStorage.getItem('jmj_archive_projects_v6');
     if (saved) {
       try {
         let parsed: ProjectItem[] = JSON.parse(saved);
-        // Ensure the new HMK project is present
+        // Ensure the SoloMap project is present and has full links & metadata
+        const hasSolomap = parsed.some(p => p.id === 'proj-mju-solomap' || p.title.includes('혼밥지도') || (p.demoUrl && p.demoUrl.includes('mju-solomap')));
+        const solomapProj = initialProjects.find(p => p.id === 'proj-mju-solomap');
+        if (!hasSolomap && solomapProj) {
+          parsed = [solomapProj, ...parsed];
+        } else if (hasSolomap && solomapProj) {
+          parsed = parsed.map(p => {
+            if (p.id === 'proj-mju-solomap' || p.title.includes('혼밥지도')) {
+              return {
+                ...solomapProj,
+                ...p,
+                title: '혼밥지도 - 명지대학교 인문캠퍼스',
+                githubUrl: p.githubUrl || solomapProj.githubUrl || 'https://github.com/peach20040909/mju-solomap',
+                demoUrl: p.demoUrl || solomapProj.demoUrl || 'https://mju-solomap.onrender.com/',
+                semester: '2학년 2학기',
+                period: '2026.09 - 2026.12',
+                role: '기획 및 개발 (개인)',
+                teamType: '개인',
+                techStack: ['JavaScript', 'CSS', 'HTML', 'TypeScript', 'Leaflet', 'Render'],
+                summary: (p.summary && p.summary !== 'GitHub 프로젝트') ? p.summary : solomapProj.summary,
+                problemDescription: p.problemDescription || solomapProj.problemDescription,
+                solutionDescription: p.solutionDescription || solomapProj.solutionDescription,
+                resultDescription: p.resultDescription || solomapProj.resultDescription,
+                keyFeatures: (p.keyFeatures && p.keyFeatures.length > 0) ? p.keyFeatures : solomapProj.keyFeatures,
+                starBullets: (p.starBullets && p.starBullets.length > 0) ? p.starBullets : solomapProj.starBullets,
+                troubleshootingStory: p.troubleshootingStory || solomapProj.troubleshootingStory
+              };
+            }
+            return p;
+          });
+        }
+
+        // Ensure the HMK project is present
         const hasHmk = parsed.some(p => p.id === 'proj-hmk-2026' || p.title.includes('한만큼'));
         if (!hasHmk) {
           const hmkProj = initialProjects.find(p => p.id === 'proj-hmk-2026');
@@ -79,6 +115,15 @@ export default function App() {
             parsed = [hmkProj, ...parsed];
           }
         }
+
+        // Clean semester labels (remove '예정/진행중' suffix)
+        parsed = parsed.map(p => {
+          if (p.semester && (p.semester.includes('예정') || p.semester.includes('진행'))) {
+            return { ...p, semester: '2학년 2학기' };
+          }
+          return p;
+        });
+
         // Ensure Spotify project has the latest Wikidata starBullets & troubleshooting
         return parsed.map(p => {
           if (p.id === 'proj-1787068301402') {
@@ -95,15 +140,21 @@ export default function App() {
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v6') || localStorage.getItem('jmj_archive_skills_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v7') || localStorage.getItem('jmj_archive_skills_v6');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v6') || localStorage.getItem('jmj_archive_logs_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v7') || localStorage.getItem('jmj_archive_logs_v6');
     if (saved) {
       try {
         let parsed: DevLog[] = JSON.parse(saved);
+        // Make sure the SoloMap log is present
+        const hasSolomapLog = parsed.some(l => l.id === 'log-mju-solomap' || l.title.includes('혼밥지도'));
+        if (!hasSolomapLog) {
+          const soloLog = initialDevLogs.find(l => l.id === 'log-mju-solomap');
+          if (soloLog) parsed = [soloLog, ...parsed];
+        }
         // Make sure the new HMK log is present
         const hasHmkLog = parsed.some(l => l.id === 'log-hmk-2026' || l.title.includes('한만큼'));
         if (!hasHmkLog) {
@@ -125,7 +176,7 @@ export default function App() {
   });
 
   const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v6') || localStorage.getItem('jmj_archive_coverletters_v5');
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v7') || localStorage.getItem('jmj_archive_coverletters_v6');
     if (saved) {
       try {
         let parsed: CoverLetterItem[] = JSON.parse(saved);

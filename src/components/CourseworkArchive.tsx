@@ -23,7 +23,17 @@ interface CourseworkArchiveProps {
   onDeleteCoursework: (id: string) => void;
 }
 
-const SEMESTERS = ['전체', '1학년 1학기', '1학년 2학기', '2학년 1학기', '2학년 2학기 (수강예정)'] as const;
+const SEMESTERS = [
+  '전체',
+  '1학년 1학기',
+  '1학년 2학기',
+  '2학년 1학기',
+  '2학년 2학기',
+  '3학년 1학기',
+  '3학년 2학기',
+  '4학년 1학기',
+  '4학년 2학기'
+] as const;
 
 export const CourseworkArchive: React.FC<CourseworkArchiveProps> = ({
   courseworks,
@@ -39,9 +49,9 @@ export const CourseworkArchive: React.FC<CourseworkArchiveProps> = ({
 
   const [formData, setFormData] = useState<Partial<CourseworkSubject>>({
     name: '',
-    semester: '2학년 2학기 (수강예정)',
+    semester: '2학년 2학기',
     credits: 3,
-    grade: '수강예정',
+    grade: '수강중',
     professor: '',
     keyConcepts: [],
     termProjectName: '',
@@ -62,16 +72,16 @@ export const CourseworkArchive: React.FC<CourseworkArchiveProps> = ({
   });
 
   const totalCredits = courseworks
-    .filter(c => c.grade !== '수강예정')
+    .filter(c => c.grade !== '수강예정' && c.grade !== '수강중')
     .reduce((sum, c) => sum + c.credits, 0);
 
   const handleOpenAdd = () => {
     setEditingId(null);
     setFormData({
       name: '',
-      semester: '2학년 2학기 (수강예정)',
+      semester: '2학년 2학기',
       credits: 3,
-      grade: '수강예정',
+      grade: '수강중',
       professor: '',
       keyConcepts: [''],
       termProjectName: '',
@@ -305,7 +315,11 @@ export const CourseworkArchive: React.FC<CourseworkArchiveProps> = ({
                     <option value="1학년 1학기">1학년 1학기</option>
                     <option value="1학년 2학기">1학년 2학기</option>
                     <option value="2학년 1학기">2학년 1학기</option>
-                    <option value="2학년 2학기 (수강예정)">2학년 2학기 (수강예정)</option>
+                    <option value="2학년 2학기">2학년 2학기</option>
+                    <option value="3학년 1학기">3학년 1학기</option>
+                    <option value="3학년 2학기">3학년 2학기</option>
+                    <option value="4학년 1학기">4학년 1학기</option>
+                    <option value="4학년 2학기">4학년 2학기</option>
                   </select>
                 </div>
               </div>
@@ -331,6 +345,7 @@ export const CourseworkArchive: React.FC<CourseworkArchiveProps> = ({
                     <option value="A0">A0</option>
                     <option value="B+">B+</option>
                     <option value="B0">B0</option>
+                    <option value="수강중">수강중</option>
                     <option value="수강예정">수강예정</option>
                     <option value="P">P (Pass)</option>
                   </select>
