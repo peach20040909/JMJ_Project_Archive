@@ -7,9 +7,12 @@ import {
   Layers, 
   Printer, 
   FolderGit2,
-  Code2
+  Code2,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill } from '../types';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface PublicPortfolioViewProps {
   profile: UserProfile;
@@ -24,6 +27,12 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
   skills,
   onBackToArchive
 }) => {
+  const [openTroubleshootIds, setOpenTroubleshootIds] = React.useState<Record<string, boolean>>({});
+
+  const toggleTroubleshoot = (id: string) => {
+    setOpenTroubleshootIds(prev => ({ ...prev, [id]: !prev[id] }));
+  };
+
   const featuredProjects = projects.filter(p => p.featured);
   const displayProjects = featuredProjects.length > 0 ? featuredProjects : projects;
   const featuredSkills = skills.filter(s => s.featured);
@@ -244,6 +253,34 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                         <li key={i}>{feat}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {/* Troubleshooting & Performance Story (Notion Style) */}
+                {project.troubleshootingStory && (
+                  <div className="pt-2 border-t border-slate-100">
+                    <button
+                      onClick={() => toggleTroubleshoot(project.id)}
+                      className="w-full flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100/80 text-left transition-colors text-xs font-semibold text-slate-800"
+                    >
+                      <span className="flex items-center space-x-1.5">
+                        <Code2 className="w-3.5 h-3.5 text-indigo-600" />
+                        <span>트러블슈팅 & 핵심 설계 일지</span>
+                      </span>
+                      <span className="flex items-center space-x-1 text-slate-400 text-[11px] font-normal">
+                        <span>{openTroubleshootIds[project.id] ? '접기' : '노션 스타일로 보기'}</span>
+                        {openTroubleshootIds[project.id] ? (
+                          <ChevronUp className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        )}
+                      </span>
+                    </button>
+                    {openTroubleshootIds[project.id] && (
+                      <div className="p-4 mt-2 rounded-xl bg-white border border-slate-200/80 shadow-2xs">
+                        <MarkdownRenderer content={project.troubleshootingStory} />
+                      </div>
+                    )}
                   </div>
                 )}
               </article>

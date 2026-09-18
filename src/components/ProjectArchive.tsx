@@ -20,6 +20,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { ProjectItem, ProjectCategory, SemesterType } from '../types';
+import { MarkdownRenderer } from './MarkdownRenderer';
 
 interface ProjectArchiveProps {
   projects: ProjectItem[];
@@ -54,6 +55,7 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
   // AI Enhancer state
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceSuccess, setEnhanceSuccess] = useState(false);
+  const [troubleshootTab, setTroubleshootTab] = useState<'write' | 'preview'>('write');
 
   // Form State
   const [formData, setFormData] = useState<Partial<ProjectItem>>({
@@ -503,16 +505,21 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                 </div>
               )}
 
-              {/* Troubleshooting Story */}
+              {/* Troubleshooting Story (Notion Style Markdown) */}
               {selectedProject.troubleshootingStory && (
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
-                  <h4 className="font-bold text-slate-900 flex items-center space-x-1.5">
-                    <Code2 className="w-4 h-4 text-indigo-600" />
-                    <span>트러블슈팅 & 성능 개선 일지</span>
-                  </h4>
-                  <pre className="whitespace-pre-wrap font-sans text-slate-700 leading-relaxed">
-                    {selectedProject.troubleshootingStory}
-                  </pre>
+                <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/90 shadow-xs space-y-3">
+                  <div className="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                    <h4 className="font-bold text-slate-900 flex items-center space-x-2 text-xs sm:text-sm">
+                      <Code2 className="w-4 h-4 text-indigo-600" />
+                      <span>트러블슈팅 & 성능 개선 일지</span>
+                    </h4>
+                    <span className="text-[10px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60">
+                      Notion Markdown View
+                    </span>
+                  </div>
+                  <div className="px-1 py-0.5">
+                    <MarkdownRenderer content={selectedProject.troubleshootingStory} />
+                  </div>
                 </div>
               )}
 
@@ -795,16 +802,53 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                 </div>
               </div>
 
-              {/* Troubleshooting */}
+              {/* Troubleshooting with Markdown / Notion Preview Tabs */}
               <div>
-                <label className="font-bold text-slate-700">트러블슈팅 & 문제 해결 과정</label>
-                <textarea
-                  value={formData.troubleshootingStory || ''}
-                  onChange={e => setFormData({ ...formData, troubleshootingStory: e.target.value })}
-                  rows={3}
-                  placeholder="발생했던 오류 및 최적화 해결 과정을 적어주세요 (마크다운 지원)."
-                  className="w-full mt-1 p-2.5 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-mono"
-                />
+                <div className="flex items-center justify-between">
+                  <label className="font-bold text-slate-700 text-xs">트러블슈팅 & 문제 해결 과정</label>
+                  <div className="flex items-center space-x-1 p-0.5 bg-slate-100 rounded-lg text-[11px] font-medium">
+                    <button
+                      type="button"
+                      onClick={() => setTroubleshootTab('write')}
+                      className={`px-2 py-0.5 rounded-md transition-all ${
+                        troubleshootTab === 'write'
+                          ? 'bg-white text-indigo-700 shadow-xs font-semibold'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      편집 (Markdown)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTroubleshootTab('preview')}
+                      className={`px-2 py-0.5 rounded-md transition-all ${
+                        troubleshootTab === 'preview'
+                          ? 'bg-white text-indigo-700 shadow-xs font-semibold'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      노션 스타일 미리보기
+                    </button>
+                  </div>
+                </div>
+
+                {troubleshootTab === 'write' ? (
+                  <textarea
+                    value={formData.troubleshootingStory || ''}
+                    onChange={e => setFormData({ ...formData, troubleshootingStory: e.target.value })}
+                    rows={4}
+                    placeholder="발생했던 오류 및 최적화 해결 과정을 적어주세요 (마크다운 지원: ###, ####, -, **강조** 등)."
+                    className="w-full mt-1.5 p-3 rounded-xl border border-slate-300 bg-white text-slate-900 text-xs font-mono leading-relaxed focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                  />
+                ) : (
+                  <div className="w-full mt-1.5 p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 min-h-[100px] max-h-56 overflow-y-auto">
+                    {formData.troubleshootingStory ? (
+                      <MarkdownRenderer content={formData.troubleshootingStory} />
+                    ) : (
+                      <p className="text-xs text-slate-400 italic">입력된 트러블슈팅 내용이 없습니다.</p>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Modal Footer */}
