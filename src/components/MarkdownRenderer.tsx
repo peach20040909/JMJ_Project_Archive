@@ -1,5 +1,6 @@
 import React from 'react';
 import Markdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MarkdownRendererProps {
   content: string;
@@ -12,6 +13,7 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
   return (
     <div className={`notion-markdown-body text-slate-800 leading-relaxed text-xs sm:text-sm ${className}`}>
       <Markdown
+        remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
             <h1 className="text-base sm:text-lg font-bold text-slate-900 mt-4 mb-2 pb-1.5 border-b border-slate-200">
@@ -79,6 +81,38 @@ export const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ content, cla
             </pre>
           ),
           hr: () => <hr className="my-3 border-slate-200" />,
+          table: ({ children }) => (
+            <div className="my-3 overflow-x-auto rounded-lg border border-slate-200 shadow-2xs">
+              <table className="w-full text-left border-collapse text-xs">
+                {children}
+              </table>
+            </div>
+          ),
+          thead: ({ children }) => (
+            <thead className="bg-slate-100/90 text-slate-700 font-semibold border-b border-slate-200">
+              {children}
+            </thead>
+          ),
+          tbody: ({ children }) => (
+            <tbody className="divide-y divide-slate-100 bg-white">
+              {children}
+            </tbody>
+          ),
+          tr: ({ children }) => (
+            <tr className="hover:bg-slate-50/70 transition-colors">
+              {children}
+            </tr>
+          ),
+          th: ({ children }) => (
+            <th className="px-3 py-2 text-slate-800 font-semibold border-r border-slate-200 last:border-r-0 whitespace-nowrap">
+              {children}
+            </th>
+          ),
+          td: ({ children }) => (
+            <td className="px-3 py-2 text-slate-700 border-r border-slate-100 last:border-r-0 leading-normal">
+              {children}
+            </td>
+          ),
         }}
       >
         {content}

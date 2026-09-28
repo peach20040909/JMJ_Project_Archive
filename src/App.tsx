@@ -75,6 +75,35 @@ export default function App() {
     if (saved) {
       try {
         let parsed: ProjectItem[] = JSON.parse(saved);
+        // Ensure the Kickboard project is present
+        const hasKickboard = parsed.some(p => p.id === 'proj-kickboard-2026' || p.title.includes('킥보드'));
+        const kickboardProj = initialProjects.find(p => p.id === 'proj-kickboard-2026');
+        if (!hasKickboard && kickboardProj) {
+          parsed = [kickboardProj, ...parsed];
+        } else if (hasKickboard && kickboardProj) {
+          parsed = parsed.map(p => {
+            if (p.id === 'proj-kickboard-2026' || p.title.includes('킥보드')) {
+              return {
+                ...kickboardProj,
+                ...p,
+                title: p.title || kickboardProj.title,
+                summary: p.summary || kickboardProj.summary,
+                period: p.period || kickboardProj.period,
+                role: p.role || kickboardProj.role,
+                teamType: p.teamType || kickboardProj.teamType,
+                techStack: (p.techStack && p.techStack.length > 0) ? p.techStack : kickboardProj.techStack,
+                problemDescription: p.problemDescription || kickboardProj.problemDescription,
+                solutionDescription: p.solutionDescription || kickboardProj.solutionDescription,
+                resultDescription: p.resultDescription || kickboardProj.resultDescription,
+                keyFeatures: (p.keyFeatures && p.keyFeatures.length > 0) ? p.keyFeatures : kickboardProj.keyFeatures,
+                starBullets: (p.starBullets && p.starBullets.length > 0) ? p.starBullets : kickboardProj.starBullets,
+                troubleshootingStory: p.troubleshootingStory || kickboardProj.troubleshootingStory
+              };
+            }
+            return p;
+          });
+        }
+
         // Ensure the SoloMap project is present and has full links & metadata
         const hasSolomap = parsed.some(p => p.id === 'proj-mju-solomap' || p.title.includes('혼밥지도') || (p.demoUrl && p.demoUrl.includes('mju-solomap')));
         const solomapProj = initialProjects.find(p => p.id === 'proj-mju-solomap');

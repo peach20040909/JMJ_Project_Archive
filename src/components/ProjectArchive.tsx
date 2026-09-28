@@ -306,6 +306,15 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                     <span className="text-[11px] text-slate-500 font-medium">
                       {cleanSemester(project.semester)}
                     </span>
+                    {(project.period?.includes('진행') || project.resultDescription?.includes('진행 중') || project.id === 'proj-mju-solomap' || project.id === 'proj-hmk-2026' || project.id === 'proj-kickboard-2026') ? (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200/80">
+                        진행 중
+                      </span>
+                    ) : (
+                      <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+                        완료
+                      </span>
+                    )}
                   </div>
 
                   <div className="flex items-center space-x-0.5">
@@ -414,6 +423,15 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                   <span className="px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold">
                     {selectedProject.category}
                   </span>
+                  {(selectedProject.period?.includes('진행') || selectedProject.resultDescription?.includes('진행 중') || selectedProject.id === 'proj-mju-solomap' || selectedProject.id === 'proj-hmk-2026' || selectedProject.id === 'proj-kickboard-2026') ? (
+                    <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-xs font-semibold">
+                      진행 중 (In Progress)
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-semibold">
+                      완료 (Completed)
+                    </span>
+                  )}
                   <span className="text-xs text-slate-500 font-mono">{selectedProject.period}</span>
                   <span className="text-xs text-slate-500">• {selectedProject.teamType} ({selectedProject.role})</span>
                 </div>
