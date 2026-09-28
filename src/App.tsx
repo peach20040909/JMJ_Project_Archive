@@ -41,17 +41,17 @@ import {
 } from 'lucide-react';
 
 const STORAGE_KEYS = {
-  PROFILE: 'jmj_archive_profile_v8',
-  PROJECTS: 'jmj_archive_projects_v8',
-  SKILLS: 'jmj_archive_skills_v8',
-  LOGS: 'jmj_archive_logs_v8',
-  COVER_LETTERS: 'jmj_archive_coverletters_v8'
+  PROFILE: 'jmj_archive_profile_v10',
+  PROJECTS: 'jmj_archive_projects_v10',
+  SKILLS: 'jmj_archive_skills_v10',
+  LOGS: 'jmj_archive_logs_v10',
+  COVER_LETTERS: 'jmj_archive_coverletters_v10'
 };
 
 export default function App() {
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v7') || localStorage.getItem('jmj_archive_profile_v6');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v9') || localStorage.getItem('jmj_archive_profile_v8') || localStorage.getItem('jmj_archive_profile_v7') || localStorage.getItem('jmj_archive_profile_v6');
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
@@ -71,7 +71,7 @@ export default function App() {
   });
 
   const [projects, setProjects] = useState<ProjectItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v7') || localStorage.getItem('jmj_archive_projects_v6');
+    const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v9') || localStorage.getItem('jmj_archive_projects_v8') || localStorage.getItem('jmj_archive_projects_v7') || localStorage.getItem('jmj_archive_projects_v6');
     if (saved) {
       try {
         let parsed: ProjectItem[] = JSON.parse(saved);
@@ -88,6 +88,8 @@ export default function App() {
                 ...p,
                 title: p.title || kickboardProj.title,
                 summary: p.summary || kickboardProj.summary,
+                githubUrl: p.githubUrl || kickboardProj.githubUrl || '',
+                demoUrl: p.demoUrl || kickboardProj.demoUrl || '',
                 period: p.period || kickboardProj.period,
                 role: p.role || kickboardProj.role,
                 teamType: p.teamType || kickboardProj.teamType,
@@ -136,13 +138,42 @@ export default function App() {
           });
         }
 
-        // Ensure the HMK project is present
+        // Ensure the HMK project is present and has full links & metadata
+        const hmkProj = initialProjects.find(p => p.id === 'proj-hmk-2026');
         const hasHmk = parsed.some(p => p.id === 'proj-hmk-2026' || p.title.includes('한만큼'));
-        if (!hasHmk) {
-          const hmkProj = initialProjects.find(p => p.id === 'proj-hmk-2026');
-          if (hmkProj) {
-            parsed = [hmkProj, ...parsed];
-          }
+        if (!hasHmk && hmkProj) {
+          parsed = [hmkProj, ...parsed];
+        } else if (hasHmk && hmkProj) {
+          parsed = parsed.map(p => {
+            if (p.id === 'proj-hmk-2026' || p.title.includes('한만큼')) {
+              let cleanTitle = p.title || hmkProj.title;
+              cleanTitle = cleanTitle.replace(/\s*\(HMK\)/gi, '').replace(/\s*\(hmk\)/gi, '');
+              let cleanPeriod = p.period || hmkProj.period;
+              if (cleanPeriod.includes('아이디어 발굴') || cleanPeriod.includes('경진대회')) {
+                cleanPeriod = '2026.09 - 2026.10';
+              }
+              return {
+                ...hmkProj,
+                ...p,
+                title: cleanTitle,
+                githubUrl: p.githubUrl || hmkProj.githubUrl || 'https://github.com/peach20040909/hanmankeum',
+                demoUrl: p.demoUrl || hmkProj.demoUrl || 'https://hanmankeum.onrender.com/',
+                semester: '2학년 2학기',
+                period: cleanPeriod,
+                role: p.role || hmkProj.role,
+                teamType: p.teamType || hmkProj.teamType,
+                techStack: (p.techStack && p.techStack.length > 0) ? p.techStack : hmkProj.techStack,
+                summary: p.summary || hmkProj.summary,
+                problemDescription: p.problemDescription || hmkProj.problemDescription,
+                solutionDescription: p.solutionDescription || hmkProj.solutionDescription,
+                resultDescription: p.resultDescription || hmkProj.resultDescription,
+                keyFeatures: (p.keyFeatures && p.keyFeatures.length > 0) ? p.keyFeatures : hmkProj.keyFeatures,
+                starBullets: (p.starBullets && p.starBullets.length > 0) ? p.starBullets : hmkProj.starBullets,
+                troubleshootingStory: (p.troubleshootingStory || hmkProj.troubleshootingStory || '').replace(/'한만큼\(HMK\)'/g, "'한만큼'")
+              };
+            }
+            return p;
+          });
         }
 
         // Clean semester labels (remove '예정/진행중' suffix)
@@ -169,12 +200,12 @@ export default function App() {
   });
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v7') || localStorage.getItem('jmj_archive_skills_v6');
+    const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v9') || localStorage.getItem('jmj_archive_skills_v8') || localStorage.getItem('jmj_archive_skills_v7') || localStorage.getItem('jmj_archive_skills_v6');
     return saved ? JSON.parse(saved) : initialTechSkills;
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v7') || localStorage.getItem('jmj_archive_logs_v6');
+    const saved = localStorage.getItem(STORAGE_KEYS.LOGS) || localStorage.getItem('jmj_archive_logs_v9') || localStorage.getItem('jmj_archive_logs_v8') || localStorage.getItem('jmj_archive_logs_v7') || localStorage.getItem('jmj_archive_logs_v6');
     if (saved) {
       try {
         let parsed: DevLog[] = JSON.parse(saved);
@@ -184,11 +215,25 @@ export default function App() {
           const soloLog = initialDevLogs.find(l => l.id === 'log-mju-solomap');
           if (soloLog) parsed = [soloLog, ...parsed];
         }
-        // Make sure the new HMK log is present
+        // Make sure the HMK log is present and has updated links
+        const hmkLog = initialDevLogs.find(l => l.id === 'log-hmk-2026');
         const hasHmkLog = parsed.some(l => l.id === 'log-hmk-2026' || l.title.includes('한만큼'));
-        if (!hasHmkLog) {
-          const hmkLog = initialDevLogs.find(l => l.id === 'log-hmk-2026');
-          if (hmkLog) parsed = [hmkLog, ...parsed];
+        if (!hasHmkLog && hmkLog) {
+          parsed = [hmkLog, ...parsed];
+        } else if (hasHmkLog && hmkLog) {
+          parsed = parsed.map(l => {
+            if (l.id === 'log-hmk-2026' || l.title.includes('한만큼')) {
+              let cleanTitle = l.title || hmkLog.title;
+              cleanTitle = cleanTitle.replace(/\s*\(HMK\)/gi, '').replace(/\s*\(hmk\)/gi, '');
+              return {
+                ...hmkLog,
+                ...l,
+                title: cleanTitle,
+                content: (l.content && l.content.includes('github.com')) ? l.content.replace(/팀:\s*HMK/g, '팀: 한만큼') : hmkLog.content
+              };
+            }
+            return l;
+          });
         }
         // Make sure the Spotify-Wikidata log is present
         const hasSpotifyLog = parsed.some(l => l.id === 'log-spotify-kopis-matching' || l.title.includes('Spotify-KOPIS'));
@@ -205,7 +250,7 @@ export default function App() {
   });
 
   const [coverLetters, setCoverLetters] = useState<CoverLetterItem[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v7') || localStorage.getItem('jmj_archive_coverletters_v6');
+    const saved = localStorage.getItem(STORAGE_KEYS.COVER_LETTERS) || localStorage.getItem('jmj_archive_coverletters_v9') || localStorage.getItem('jmj_archive_coverletters_v8') || localStorage.getItem('jmj_archive_coverletters_v7') || localStorage.getItem('jmj_archive_coverletters_v6');
     if (saved) {
       try {
         let parsed: CoverLetterItem[] = JSON.parse(saved);
@@ -443,7 +488,7 @@ export default function App() {
                     <span className="text-[11px] text-zinc-400 font-mono">{project.period}</span>
                   </div>
 
-                  <h4 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                  <h4 className="text-sm font-bold text-zinc-900 group-hover:text-indigo-600 transition-colors line-clamp-2 min-h-[1.25rem]">
                     {project.title}
                   </h4>
 
@@ -523,7 +568,7 @@ export default function App() {
                       <span className="text-[10px] text-zinc-400 font-mono">{log.date}</span>
                     </div>
 
-                    <h4 className="font-bold text-zinc-900 text-xs group-hover:text-indigo-600 transition-colors line-clamp-1">
+                    <h4 className="font-bold text-zinc-900 text-xs group-hover:text-indigo-600 transition-colors line-clamp-2">
                       {log.title}
                     </h4>
 

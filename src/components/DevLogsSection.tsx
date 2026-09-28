@@ -196,7 +196,7 @@ export const DevLogsSection: React.FC<DevLogsSectionProps> = ({
                   </div>
                 </div>
 
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[1.25rem]">
                   {log.title}
                 </h3>
 

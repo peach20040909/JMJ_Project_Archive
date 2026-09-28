@@ -183,11 +183,11 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                       </span>
                       {(project.period?.includes('진행') || project.resultDescription?.includes('진행 중') || project.id === 'proj-mju-solomap' || project.id === 'proj-hmk-2026' || project.id === 'proj-kickboard-2026') ? (
                         <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
-                          진행 중 (In Progress)
+                          진행 중
                         </span>
                       ) : (
                         <span className="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">
-                          완료 (Completed)
+                          완료
                         </span>
                       )}
                       <span className="text-xs text-zinc-500 font-mono">{project.period}</span>

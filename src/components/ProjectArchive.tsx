@@ -347,7 +347,7 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
 
                 {/* Title and Summary */}
                 <div>
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-2 min-h-[1.25rem]">
                     {project.title}
                   </h3>
                   <p className="text-xs text-slate-500 mt-1 line-clamp-2 leading-relaxed">
@@ -356,9 +356,9 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
                 </div>
 
                 {/* Role and Period */}
-                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100">
-                  <span className="truncate">{project.role} ({project.teamType})</span>
-                  <span className="font-mono flex-shrink-0">{project.period}</span>
+                <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-100 gap-2">
+                  <span className="truncate flex-1 min-w-0">{project.role} ({project.teamType})</span>
+                  <span className="font-mono flex-shrink-0 text-slate-500 font-medium">{project.period}</span>
                 </div>
 
                 {/* Tech Badges */}
@@ -419,17 +419,17 @@ export const ProjectArchive: React.FC<ProjectArchiveProps> = ({
             {/* Modal Header */}
             <div className="p-6 border-b border-slate-100 bg-slate-50 flex items-center justify-between">
               <div className="space-y-1">
-                <div className="flex items-center space-x-2">
+                <div className="flex flex-wrap items-center gap-1.5">
                   <span className="px-2.5 py-0.5 rounded-md bg-indigo-100 text-indigo-700 text-xs font-bold">
                     {selectedProject.category}
                   </span>
                   {(selectedProject.period?.includes('진행') || selectedProject.resultDescription?.includes('진행 중') || selectedProject.id === 'proj-mju-solomap' || selectedProject.id === 'proj-hmk-2026' || selectedProject.id === 'proj-kickboard-2026') ? (
                     <span className="px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 text-xs font-semibold">
-                      진행 중 (In Progress)
+                      진행 중
                     </span>
                   ) : (
                     <span className="px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 text-xs font-semibold">
-                      완료 (Completed)
+                      완료
                     </span>
                   )}
                   <span className="text-xs text-slate-500 font-mono">{selectedProject.period}</span>
