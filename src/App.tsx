@@ -288,7 +288,9 @@ export default function App() {
 
   // Navigation & View Mode State
   const [activeTab, setActiveTab] = useState<string>('overview');
-  const [isPublicView, setIsPublicView] = useState<boolean>(false);
+  const [isPublicView, setIsPublicView] = useState<boolean>(() =>
+    new URLSearchParams(window.location.search).get('view') !== 'manage'
+  );
 
   // Modals
   const [isAiCoachOpen, setIsAiCoachOpen] = useState<boolean>(false);
