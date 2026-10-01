@@ -44,6 +44,12 @@ src/data/userArchiveData.json      서버 저장 데이터
 server.ts                         Express 서버 및 AI API
 ```
 
+## 공개 화면과 관리 화면
+
+기본 주소는 채용 담당자용 공개 화면으로 시작하도록 구성했습니다. 편집할 때는 `?view=manage`를 사용합니다. 이 설정은 소스를 다시 배포한 뒤 적용됩니다.
+
+[공개 포트폴리오](https://jmj-archive-portfolio.ai.studio/) · [관리 화면](https://jmj-archive-portfolio.ai.studio/?view=manage)
+
 ## 실행
 
 ```bash
@@ -56,6 +62,13 @@ AI 기능은 로컬 환경 변수 `GEMINI_API_KEY`를 설정합니다. 키는 Gi
 ```bash
 npm run build
 npm start
+```
+
+공개/관리 진입 경로는 다음 명령으로 확인합니다.
+
+```bash
+npm run lint
+node --import tsx --test tests/public-entry.test.tsx
 ```
 
 실행 스크립트와 실제 모델 설정은 `package.json` 및 `server.ts`를 기준으로 확인합니다.
