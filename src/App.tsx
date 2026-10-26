@@ -83,6 +83,10 @@ export default function App() {
         } else if (hasKickboard && kickboardProj) {
           parsed = parsed.map(p => {
             if (p.id === 'proj-kickboard-2026' || p.title.includes('킥보드')) {
+              // Refresh the pre-selection description saved by older browsers.
+              if (p.resultDescription?.includes('면접 시연용')) {
+                p = { ...p, resultDescription: kickboardProj.resultDescription, keyFeatures: kickboardProj.keyFeatures, starBullets: kickboardProj.starBullets, troubleshootingStory: kickboardProj.troubleshootingStory };
+              }
               return {
                 ...kickboardProj,
                 ...p,
