@@ -15,8 +15,8 @@
 | 프로젝트 | 문제와 구현 | 링크 |
 |---|---|---|
 | Mobility Field Lab · 해외탐방 조사 플랫폼 | 공유 이동수단 조사 기록, 사진 저장, 두 사람의 독립 판정과 조정, 지도·지표, CSV 내보내기 | [저장소](https://github.com/peach20040909/mobility-field-lab) · [시연](https://peach20040909.github.io/mobility-field-lab/) |
-| 한만큼 | GitHub·Notion 작업 기록을 MRL 3축으로 집계해 교수에게 팀 기여 근거를 제공 | [저장소](https://github.com/peach20040909/hanmankeum) · [시연](https://hanmankeum.onrender.com/) |
-| MJU SoloMap · 혼밥지도 | 캠퍼스 주변 식당 검색, 혼밥 난이도 필터, 지도·추천 경험 | [저장소](https://github.com/peach20040909/MJU_solomap) · [시연](https://mju-solomap.onrender.com/) |
+| 한만큼 | GitHub·Notion 작업 기록을 MRL 3축으로 집계해 교수에게 팀 기여 근거를 제공 | [저장소](https://github.com/peach20040909/hanmankeum) · [시연](https://hanmankeum.vercel.app/) |
+| MJU SoloMap · 혼밥지도 | 캠퍼스 주변 식당 검색, 혼밥 난이도 필터, 지도·추천 경험 | [저장소](https://github.com/peach20040909/MJU_solomap) · [시연](https://mju-solomap.vercel.app/) |
 | Loadmap · 팀 프로젝트 | 강의 복습 후보 구간을 시각화하는 서비스의 React·TypeScript 개발 참여 | [팀 저장소](https://github.com/6eaverr/SW-programming) |
 | SetPIK · 팀 프로젝트 | Spotify 취향과 공연 정보를 연결하는 Spring Boot 서비스의 서브 개발 참여 | [팀 저장소](https://github.com/DEPthes/5th-MVP-SetPIK-Server) |
 
