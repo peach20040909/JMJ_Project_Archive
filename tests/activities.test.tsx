@@ -15,3 +15,11 @@ test('six activities preserve selection stages and awards without prize amounts'
   assert.equal(activities.find(item => item.id === 'ai-literacy')?.outcome, '1차 서류 합격');
   assert.equal(activities.find(item => item.id === 'expressway-ai')?.outcome, '참여');
 });
+
+test('dashboard summary shows awards only and supports an empty award list', () => {
+  const html = renderToStaticMarkup(<ActivitiesSection items={activities} awardsOnly />);
+  assert.ok(html.includes('수상 이력'));
+  assert.ok(html.includes('우수상') && html.includes('은상'));
+  assert.ok(!html.includes('창업경진대회') && !html.includes('해외탐방'));
+  assert.ok(renderToStaticMarkup(<ActivitiesSection items={[]} awardsOnly />).includes('아직 등록된 수상 이력이 없습니다.'));
+});
