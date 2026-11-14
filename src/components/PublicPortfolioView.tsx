@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
+import { ActivitiesSection } from './ActivitiesSection';
 
 interface PublicPortfolioViewProps {
   profile: UserProfile;
@@ -131,6 +132,8 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
             {profile.bio}
           </div>
         </header>
+
+        <ActivitiesSection />
 
         {/* 2. Core Tech Skills & Competencies */}
         <section className="space-y-4">
