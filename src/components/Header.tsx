@@ -75,28 +75,6 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* Desktop Nav Items - Never Wrap, Always Single Line */}
-          <nav className="hidden lg:flex items-center p-1 bg-zinc-100/90 rounded-xl border border-zinc-200/80 flex-shrink-0">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all select-none ${
-                    isActive
-                      ? 'bg-white text-zinc-900 shadow-xs'
-                      : 'text-zinc-600 hover:text-zinc-900 hover:bg-white/60'
-                  }`}
-                >
-                  <Icon className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-indigo-600' : 'text-zinc-400'}`} />
-                  <span className="whitespace-nowrap">{item.label}</span>
-                </button>
-              );
-            })}
-          </nav>
-
           {/* Quick Actions */}
           <div className="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
             {/* Auto-Save Subtle Indicator */}
@@ -159,7 +137,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Medium & Mobile Navigation Tabs */}
-        <nav className="flex lg:hidden space-x-1 overflow-x-auto scrollbar-none py-2 border-t border-zinc-100">
+        <nav className="flex space-x-1 overflow-x-auto scrollbar-none py-2 border-t border-zinc-100">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
