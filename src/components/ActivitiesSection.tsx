@@ -1,6 +1,6 @@
 import React from 'react';
 import { Award, Trophy, BadgeCheck, ArrowUpRight, ChevronRight } from 'lucide-react';
-import { activities } from '../data/activities';
+import { activities as initialActivities, PortfolioActivity } from '../data/activities';
 
 const outcomeStyles = {
   수상: 'bg-amber-50 text-amber-900 border-amber-200',
@@ -9,19 +9,28 @@ const outcomeStyles = {
   참여: 'bg-zinc-100 text-zinc-700 border-zinc-200',
 };
 
-export function ActivitiesSection() {
+interface ActivitiesSectionProps {
+  items?: PortfolioActivity[];
+  awardsOnly?: boolean;
+  actions?: (activity: PortfolioActivity) => React.ReactNode;
+}
+
+export function ActivitiesSection({ items = initialActivities, awardsOnly = false, actions }: ActivitiesSectionProps) {
+  const activities = awardsOnly ? items.filter(item => item.kind === '수상') : items;
   return (
     <section aria-labelledby="activities-heading" className="space-y-5 scroll-mt-28" id="activities">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-zinc-200 pb-4">
         <div className="space-y-2">
           <h2 id="activities-heading" className="flex items-center gap-2 text-xl font-bold tracking-tight text-zinc-900">
             <Award aria-hidden="true" className="h-5 w-5 text-indigo-600" />
-            공모전·대외활동
+            {awardsOnly ? '수상 이력' : '공모전·대외활동'}
           </h2>
-          <p className="text-sm leading-relaxed text-zinc-600">개발 프로젝트 밖에서도 아이디어를 제안하고, 도전하며 쌓은 경험입니다.</p>
+          <p className="text-sm leading-relaxed text-zinc-600">{awardsOnly ? '공모전과 대회에서 인정받은 결과입니다.' : '개발 프로젝트 밖에서도 아이디어를 제안하고, 도전하며 쌓은 경험입니다.'}</p>
         </div>
         <span className="shrink-0 text-sm font-medium text-zinc-600">활동 {activities.length}건 · 수상 {activities.filter(item => item.kind === '수상').length}건</span>
       </div>
+
+      {activities.length === 0 && <p className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600">{awardsOnly ? '아직 등록된 수상 이력이 없습니다.' : '등록된 활동이 없습니다. 새 활동을 추가해 주세요.'}</p>}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 print:grid-cols-2">
         {activities.map(activity => {
@@ -44,6 +53,7 @@ export function ActivitiesSection() {
                 ))}
               </ol>
               {activity.note && <p className="mt-3 text-sm leading-relaxed text-zinc-500">{activity.note}</p>}
+              {actions && <div className="mt-4 border-t border-zinc-100 pt-3 print:hidden">{actions(activity)}</div>}
             </article>
           );
         })}
