@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
+import { ActivitiesSection } from './components/ActivitiesSection';
 import { ProfileHero } from './components/ProfileHero';
 import { ProjectArchive } from './components/ProjectArchive';
 import { TechStackMatrix } from './components/TechStackMatrix';
@@ -460,6 +461,7 @@ export default function App() {
 
     return (
       <div className="space-y-10 py-8">
+        <ActivitiesSection />
         
         {/* Section 1: Featured Projects (Full 3-Column Grid) */}
         <div className="space-y-4">
@@ -710,6 +712,8 @@ export default function App() {
             {renderDashboardOverview()}
           </>
         )}
+
+        {activeTab === 'activities' && <div className="py-8"><ActivitiesSection /></div>}
 
         {activeTab === 'projects' && (
           <ProjectArchive
