@@ -14,11 +14,13 @@ import {
 import { UserProfile, ProjectItem, TechSkill } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { ActivitiesSection } from './ActivitiesSection';
+import { PortfolioActivity } from '../data/activities';
 
 interface PublicPortfolioViewProps {
   profile: UserProfile;
   projects: ProjectItem[];
   skills: TechSkill[];
+  activities?: PortfolioActivity[];
   onBackToArchive: () => void;
 }
 
@@ -26,6 +28,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
   profile,
   projects,
   skills,
+  activities,
   onBackToArchive
 }) => {
   const [openTroubleshootIds, setOpenTroubleshootIds] = React.useState<Record<string, boolean>>({});
@@ -133,7 +136,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
           </div>
         </header>
 
-        <ActivitiesSection />
+        <ActivitiesSection items={activities} />
 
         {/* 2. Core Tech Skills & Competencies */}
         <section className="space-y-4">
