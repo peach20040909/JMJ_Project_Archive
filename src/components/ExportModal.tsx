@@ -9,6 +9,7 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill, DevLog, CoverLetterItem } from '../types';
+import { PortfolioActivity } from '../data/activities';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -18,6 +19,7 @@ interface ExportModalProps {
   skills: TechSkill[];
   devLogs: DevLog[];
   coverLetters: CoverLetterItem[];
+  activities: PortfolioActivity[];
   onImportData: (data: any) => void;
   onResetData: () => void;
 }
@@ -30,6 +32,7 @@ export const ExportModal: React.FC<ExportModalProps> = ({
   skills,
   devLogs,
   coverLetters = [],
+  activities = [],
   onImportData,
   onResetData
 }) => {
@@ -51,6 +54,9 @@ ${profile.bio}
 - ✍️ **Blog**: ${profile.blogUrl}
 
 ---
+
+## 공모전·대외활동
+${activities.map(activity => `### ${activity.title}\n- 결과: ${activity.outcome}\n${activity.subtitle ? `- 작품: ${activity.subtitle}\n` : ''}- 과정: ${activity.stages.join(' → ')}\n${activity.note || ''}`).join('\n\n')}
 
 ## 🛠️ Tech Stack & Core Competencies
 ${skills.map(s => `- **${s.name}** (${s.category} / ${s.level}): ${s.experience}`).join('\n')}
@@ -115,6 +121,7 @@ ${l.content}
       skills,
       devLogs,
       coverLetters,
+      activities,
       exportedAt: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
