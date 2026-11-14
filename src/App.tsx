@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ActivitiesSection } from './components/ActivitiesSection';
+import { ActivitiesManager } from './components/ActivitiesManager';
+import { activities as initialActivities, PortfolioActivity } from './data/activities';
 import { ProfileHero } from './components/ProfileHero';
 import { ProjectArchive } from './components/ProjectArchive';
 import { TechStackMatrix } from './components/TechStackMatrix';
@@ -46,10 +48,19 @@ const STORAGE_KEYS = {
   PROJECTS: 'jmj_archive_projects_v10',
   SKILLS: 'jmj_archive_skills_v10',
   LOGS: 'jmj_archive_logs_v10',
-  COVER_LETTERS: 'jmj_archive_coverletters_v10'
+  COVER_LETTERS: 'jmj_archive_coverletters_v10',
+  ACTIVITIES: 'jmj_archive_activities_v1'
 };
 
 export default function App() {
+  const [activities, setActivities] = useState<PortfolioActivity[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
+      const parsed = saved ? JSON.parse(saved) : null;
+      return Array.isArray(parsed) ? parsed : initialActivities;
+    } catch { return initialActivities; }
+  });
+  const [archiveLoaded, setArchiveLoaded] = useState(false);
   // 1. Core State with LocalStorage Persistence
   const [profile, setProfile] = useState<UserProfile>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.PROFILE) || localStorage.getItem('jmj_archive_profile_v9') || localStorage.getItem('jmj_archive_profile_v8') || localStorage.getItem('jmj_archive_profile_v7') || localStorage.getItem('jmj_archive_profile_v6');
@@ -124,7 +135,7 @@ export default function App() {
                 ...p,
                 title: p.title || '혼밥지도 - 명지대학교 인문캠퍼스',
                 githubUrl: p.githubUrl || solomapProj.githubUrl || 'https://github.com/peach20040909/mju-solomap',
-                demoUrl: p.demoUrl || solomapProj.demoUrl || 'https://mju-solomap.onrender.com/',
+                demoUrl: p.demoUrl || solomapProj.demoUrl || 'https://mju-solomap.vercel.app/',
                 semester: '2학년 2학기',
                 period: p.period || '2026.09 - 2026.12',
                 role: p.role || '기획 및 개발 (개인)',
@@ -162,7 +173,7 @@ export default function App() {
                 ...p,
                 title: cleanTitle,
                 githubUrl: p.githubUrl || hmkProj.githubUrl || 'https://github.com/peach20040909/hanmankeum',
-                demoUrl: p.demoUrl || hmkProj.demoUrl || 'https://hanmankeum.onrender.com/',
+                demoUrl: p.demoUrl || hmkProj.demoUrl || 'https://hanmankeum.vercel.app/',
                 semester: '2학년 2학기',
                 period: cleanPeriod,
                 role: p.role || hmkProj.role,
@@ -305,12 +316,17 @@ export default function App() {
   // Initial Load from Server if no local state exists
   useEffect(() => {
     const hasLocal = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    if (!hasLocal) {
+    const hasLocalActivities = localStorage.getItem(STORAGE_KEYS.ACTIVITIES) !== null;
+    let cancelled = false;
+    {
       fetch('/api/archive-data')
         .then(res => res.json())
         .then(result => {
           if (result.success && result.data) {
+            if (cancelled) return;
             const d = result.data;
+            if ((!hasLocalActivities || isPublicView) && Array.isArray(d.activities)) setActivities(d.activities);
+            if (hasLocal) return;
             if (d.profile) setProfile(d.profile);
             if (d.projects) setProjects(d.projects);
             if (d.skills) setSkills(d.skills);
@@ -318,18 +334,22 @@ export default function App() {
             if (d.coverLetters) setCoverLetters(d.coverLetters);
           }
         })
-        .catch(err => console.log('Server archive load skipped:', err));
+        .catch(err => console.log('Server archive load skipped:', err))
+        .finally(() => { if (!cancelled) setArchiveLoaded(true); });
     }
+    return () => { cancelled = true; };
   }, []);
 
   // Sync to LocalStorage and Server File
   useEffect(() => {
+    if (!archiveLoaded || isPublicView) return;
     // 1. Immediate sync to browser localStorage
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
     localStorage.setItem(STORAGE_KEYS.SKILLS, JSON.stringify(skills));
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(devLogs));
     localStorage.setItem(STORAGE_KEYS.COVER_LETTERS, JSON.stringify(coverLetters));
+    localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(activities));
 
     setSaveStatus('saving');
 
@@ -344,10 +364,12 @@ export default function App() {
           skills,
           devLogs,
           coverLetters,
+          activities,
           updatedAt: new Date().toISOString()
         })
       })
-        .then(() => {
+        .then(async response => {
+          if (!response.ok || !(await response.json()).success) throw new Error('Archive save failed');
           setSaveStatus('saved');
           const now = new Date();
           const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -356,11 +378,12 @@ export default function App() {
         .catch(err => {
           console.log('Server archive sync skipped:', err);
           setSaveStatus('saved');
+          setLastSavedText('브라우저에 저장됨 · 서버 저장 실패');
         });
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [profile, projects, skills, devLogs, coverLetters]);
+  }, [profile, projects, skills, devLogs, coverLetters, activities, archiveLoaded, isPublicView]);
 
   // CRUD Handlers - Profile
   const handleUpdateProfile = (updated: UserProfile) => {
@@ -431,6 +454,7 @@ export default function App() {
     if (data.skills) setSkills(data.skills);
     if (data.devLogs) setDevLogs(data.devLogs);
     if (data.coverLetters) setCoverLetters(data.coverLetters);
+    if (Array.isArray(data.activities)) setActivities(data.activities);
   };
 
   const handleResetData = () => {
@@ -439,6 +463,7 @@ export default function App() {
     setSkills(initialTechSkills);
     setDevLogs(initialDevLogs);
     setCoverLetters(initialCoverLetters);
+    setActivities(initialActivities);
     localStorage.clear();
   };
 
@@ -449,6 +474,7 @@ export default function App() {
         profile={profile}
         projects={projects}
         skills={skills}
+        activities={activities}
         onBackToArchive={() => setIsPublicView(false)}
       />
     );
@@ -461,7 +487,7 @@ export default function App() {
 
     return (
       <div className="space-y-10 py-8">
-        <ActivitiesSection />
+        <ActivitiesSection items={activities} awardsOnly />
         
         {/* Section 1: Featured Projects (Full 3-Column Grid) */}
         <div className="space-y-4">
@@ -713,7 +739,7 @@ export default function App() {
           </>
         )}
 
-        {activeTab === 'activities' && <div className="py-8"><ActivitiesSection /></div>}
+        {activeTab === 'activities' && <ActivitiesManager items={activities} onChange={setActivities} />}
 
         {activeTab === 'projects' && (
           <ProjectArchive
@@ -798,6 +824,7 @@ export default function App() {
         skills={skills}
         devLogs={devLogs}
         coverLetters={coverLetters}
+        activities={activities}
         onImportData={handleImportData}
         onResetData={handleResetData}
       />
