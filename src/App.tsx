@@ -331,7 +331,7 @@ export default function App() {
             const d = result.data;
             if ((!hasLocalActivities || isPublicView) && Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
             if ((!hasLocalSkills || isPublicView) && Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
-            if (hasLocal) return;
+            if (hasLocal && !isPublicView) return;
             if (d.profile) setProfile(d.profile);
             if (d.projects) setProjects(d.projects);
             if (d.devLogs) setDevLogs(d.devLogs);
