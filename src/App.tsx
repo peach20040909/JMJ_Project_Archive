@@ -26,6 +26,7 @@ import {
 import {
   initialProfile,
   initialProjects,
+  upgradeHanmankeumProject,
   initialTechSkills,
   initialDevLogs,
   initialCoverLetters
@@ -88,7 +89,7 @@ export default function App() {
     const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v9') || localStorage.getItem('jmj_archive_projects_v8') || localStorage.getItem('jmj_archive_projects_v7') || localStorage.getItem('jmj_archive_projects_v6');
     if (saved) {
       try {
-        let parsed: ProjectItem[] = JSON.parse(saved);
+        let parsed: ProjectItem[] = upgradeHanmankeumProject(JSON.parse(saved), Number(localStorage.getItem('jmj_archive_activities_version')));
         // Ensure the Kickboard project is present
         const hasKickboard = parsed.some(p => p.id === 'proj-kickboard-2026' || p.title.includes('킥보드'));
         const kickboardProj = initialProjects.find(p => p.id === 'proj-kickboard-2026');
@@ -458,7 +459,7 @@ export default function App() {
   // Import and Reset
   const handleImportData = (data: any) => {
     if (data.profile) setProfile(data.profile);
-    if (data.projects) setProjects(data.projects);
+    if (data.projects) setProjects(upgradeHanmankeumProject(data.projects, data.activitiesVersion));
     if (Array.isArray(data.skills)) setSkills(upgradeAiSkills(data.skills, data.aiSkillsVersion));
     if (data.devLogs) setDevLogs(data.devLogs);
     if (data.coverLetters) setCoverLetters(data.coverLetters);

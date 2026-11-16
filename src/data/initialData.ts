@@ -523,3 +523,10 @@ export const initialCoverLetters: CoverLetterItem[] = [
     "updatedAt": "2026-08-28"
   }
 ];
+
+// Apply this owner-requested revision once; preserve later edits and deleted projects.
+export function upgradeHanmankeumProject(items: ProjectItem[], activitiesVersion = 0): ProjectItem[] {
+  if (activitiesVersion >= 4) return items;
+  const current = initialProjects.find(project => project.id === 'proj-hmk-2026')!;
+  return items.map(item => item.id === current.id ? { ...item, ...current, title: item.title, featured: item.featured } : item);
+}

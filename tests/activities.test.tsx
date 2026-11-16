@@ -1,4 +1,5 @@
 import test from 'node:test';
+import { initialProjects, upgradeHanmankeumProject } from '../src/data/initialData';
 import assert from 'node:assert/strict';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
@@ -74,4 +75,18 @@ test('competition revision separates planning from implementation and keeps stat
   const edited = { ...ai, status: '발표 완료' };
   assert.deepEqual(upgradeActivities([edited], ACTIVITIES_VERSION), [edited]);
   assert.deepEqual(upgradeActivities([], 3), []);
+});
+
+
+test('old browser project data upgrades once without restoring deleted projects or discarding later edits', () => {
+  const latest = initialProjects.find(p => p.id === 'proj-hmk-2026')!;
+  const legacy = { ...latest, title: '내 한만큼', techStack: ['SQLite', 'Render'], role: '이전 역할' };
+  const other = { ...latest, id: 'custom-project' };
+  const upgraded = upgradeHanmankeumProject([legacy, other], 3);
+  assert.equal(upgraded[0].title, '내 한만큼');
+  assert.ok(upgraded[0].techStack.includes('Turso (libSQL)'));
+  assert.equal(upgraded[0].role, latest.role);
+  assert.equal(upgraded[1], other);
+  assert.deepEqual(upgradeHanmankeumProject([], 3), []);
+  assert.deepEqual(upgradeHanmankeumProject([legacy], 4), [legacy]);
 });
