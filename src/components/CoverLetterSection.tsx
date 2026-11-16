@@ -67,6 +67,8 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
   const [isEditorOpen, setIsEditorOpen] = useState<boolean>(false);
   const [editingItem, setEditingItem] = useState<CoverLetterItem | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<CoverLetterItem | null>(null);
+  const [editMessage, setEditMessage] = useState('');
 
   // Form State
   const [companyName, setCompanyName] = useState<string>('');
@@ -88,7 +90,7 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
     ? coverLetters
     : coverLetters.filter(c => c.companyName === selectedCompanyFilter);
 
-  const currentActive = coverLetters.find(c => c.id === activeLetterId) || filteredLetters[0];
+  const currentActive = filteredLetters.find(c => c.id === activeLetterId) || filteredLetters[0];
 
   const handleOpenNewModal = (template?: any) => {
     setEditingItem(null);
@@ -217,6 +219,9 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
       onAddCoverLetter(newItem);
       setActiveLetterId(newItem.id);
     }
+    setSelectedCompanyFilter('All');
+    setActiveLetterId(newItem.id);
+    setEditMessage(editingItem ? '자기소개서를 수정했습니다.' : '자기소개서를 저장했습니다.');
     setIsEditorOpen(false);
   };
 
@@ -284,6 +289,8 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
       </div>
 
       {/* Main Grid: Left List (4 cols) & Right Detail View (8 cols) */}
+      {editMessage && <p role="status" className="text-sm text-emerald-700">{editMessage}</p>}
+      {pendingDelete && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200 bg-red-50 p-4"><p className="text-sm text-slate-700">‘{pendingDelete.companyName}’ 자기소개서를 삭제할까요?</p><div className="flex gap-2"><button type="button" onClick={() => setPendingDelete(null)} className="min-h-11 rounded-lg border bg-white px-4 text-sm">취소</button><button type="button" onClick={() => { const remaining = coverLetters.filter(item => item.id !== pendingDelete.id); const next = selectedCompanyFilter === 'All' ? remaining : remaining.filter(item => item.companyName === selectedCompanyFilter); onDeleteCoverLetter(pendingDelete.id); if (next.length === 0) setSelectedCompanyFilter('All'); setActiveLetterId((next[0] ?? remaining[0])?.id ?? ''); setPendingDelete(null); setEditMessage('자기소개서를 삭제했습니다.'); }} className="min-h-11 rounded-lg bg-red-600 px-4 text-sm font-semibold text-white hover:bg-red-700">삭제 확인</button></div></div>}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         {/* Left: Saved Cover Letters List (4 cols) */}
@@ -367,6 +374,7 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
                           {linkedProjects.map(p => p.title.split('-')[0].trim()).join(', ') || '프로젝트 연동'}
                         </span>
                       </div>
+                      <div className="flex gap-2 pt-1"><button type="button" aria-label={`${letter.companyName} 자기소개서 수정`} onClick={event => { event.stopPropagation(); handleOpenEditModal(letter); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-3 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 focus-visible:ring-2 focus-visible:ring-indigo-500"><Edit3 aria-hidden="true" className="h-3.5 w-3.5" />수정</button><button type="button" aria-label={`${letter.companyName} 자기소개서 삭제`} onClick={event => { event.stopPropagation(); setPendingDelete(letter); }} className="inline-flex min-h-11 items-center gap-1.5 rounded-lg border border-red-200 bg-white px-3 text-xs font-semibold text-red-700 hover:bg-red-50 focus-visible:ring-2 focus-visible:ring-indigo-500"><Trash2 aria-hidden="true" className="h-3.5 w-3.5" />삭제</button></div>
                     </div>
                   );
                 })
@@ -417,22 +425,20 @@ export const CoverLetterSection: React.FC<CoverLetterSectionProps> = ({
 
                   <button
                     onClick={() => handleOpenEditModal(currentActive)}
-                    className="p-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center space-x-1 transition-colors"
+                    className="min-h-11 px-3 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-semibold flex items-center space-x-1 transition-colors"
                     title="수정하기"
                   >
                     <Edit3 className="w-4 h-4" />
+                    <span>수정</span>
                   </button>
 
                   <button
-                    onClick={() => {
-                      if (confirm(`'${currentActive.companyName}' 자기소개서를 삭제하시겠습니까?`)) {
-                        onDeleteCoverLetter(currentActive.id);
-                      }
-                    }}
-                    className="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs transition-colors"
+                    onClick={() => setPendingDelete(currentActive)}
+                    className="inline-flex min-h-11 items-center gap-1 px-3 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs transition-colors"
                     title="삭제"
                   >
                     <Trash2 className="w-4 h-4" />
+                    <span>삭제</span>
                   </button>
                 </div>
               </div>

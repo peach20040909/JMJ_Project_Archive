@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { ActivitiesSection } from './components/ActivitiesSection';
 import { ActivitiesManager } from './components/ActivitiesManager';
-import { activities as initialActivities, PortfolioActivity } from './data/activities';
+import { GradesSection } from './components/GradesSection';
+import { upgradeAiSkills, AI_SKILLS_VERSION } from './data/aiSkills';
+import { activities as initialActivities, PortfolioActivity, upgradeActivities, ACTIVITIES_VERSION } from './data/activities';
 import { ProfileHero } from './components/ProfileHero';
 import { ProjectArchive } from './components/ProjectArchive';
 import { TechStackMatrix } from './components/TechStackMatrix';
@@ -57,7 +59,7 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEYS.ACTIVITIES);
       const parsed = saved ? JSON.parse(saved) : null;
-      return Array.isArray(parsed) ? parsed : initialActivities;
+      return Array.isArray(parsed) ? upgradeActivities(parsed, Number(localStorage.getItem('jmj_archive_activities_version'))) : initialActivities;
     } catch { return initialActivities; }
   });
   const [archiveLoaded, setArchiveLoaded] = useState(false);
@@ -217,7 +219,8 @@ export default function App() {
 
   const [skills, setSkills] = useState<TechSkill[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.SKILLS) || localStorage.getItem('jmj_archive_skills_v9') || localStorage.getItem('jmj_archive_skills_v8') || localStorage.getItem('jmj_archive_skills_v7') || localStorage.getItem('jmj_archive_skills_v6');
-    return saved ? JSON.parse(saved) : initialTechSkills;
+    try { return upgradeAiSkills(saved ? JSON.parse(saved) : initialTechSkills, Number(localStorage.getItem('jmj_archive_ai_skills_version'))); }
+    catch { return upgradeAiSkills(initialTechSkills); }
   });
 
   const [devLogs, setDevLogs] = useState<DevLog[]>(() => {
@@ -317,6 +320,7 @@ export default function App() {
   useEffect(() => {
     const hasLocal = localStorage.getItem(STORAGE_KEYS.PROFILE);
     const hasLocalActivities = localStorage.getItem(STORAGE_KEYS.ACTIVITIES) !== null;
+    const hasLocalSkills = localStorage.getItem(STORAGE_KEYS.SKILLS) !== null;
     let cancelled = false;
     {
       fetch('/api/archive-data')
@@ -325,11 +329,11 @@ export default function App() {
           if (result.success && result.data) {
             if (cancelled) return;
             const d = result.data;
-            if ((!hasLocalActivities || isPublicView) && Array.isArray(d.activities)) setActivities(d.activities);
+            if ((!hasLocalActivities || isPublicView) && Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
+            if ((!hasLocalSkills || isPublicView) && Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
             if (hasLocal) return;
             if (d.profile) setProfile(d.profile);
             if (d.projects) setProjects(d.projects);
-            if (d.skills) setSkills(d.skills);
             if (d.devLogs) setDevLogs(d.devLogs);
             if (d.coverLetters) setCoverLetters(d.coverLetters);
           }
@@ -350,6 +354,8 @@ export default function App() {
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(devLogs));
     localStorage.setItem(STORAGE_KEYS.COVER_LETTERS, JSON.stringify(coverLetters));
     localStorage.setItem(STORAGE_KEYS.ACTIVITIES, JSON.stringify(activities));
+    localStorage.setItem('jmj_archive_activities_version', String(ACTIVITIES_VERSION));
+    localStorage.setItem('jmj_archive_ai_skills_version', String(AI_SKILLS_VERSION));
 
     setSaveStatus('saving');
 
@@ -365,6 +371,8 @@ export default function App() {
           devLogs,
           coverLetters,
           activities,
+          activitiesVersion: ACTIVITIES_VERSION,
+          aiSkillsVersion: AI_SKILLS_VERSION,
           updatedAt: new Date().toISOString()
         })
       })
@@ -451,16 +459,16 @@ export default function App() {
   const handleImportData = (data: any) => {
     if (data.profile) setProfile(data.profile);
     if (data.projects) setProjects(data.projects);
-    if (data.skills) setSkills(data.skills);
+    if (Array.isArray(data.skills)) setSkills(upgradeAiSkills(data.skills, data.aiSkillsVersion));
     if (data.devLogs) setDevLogs(data.devLogs);
     if (data.coverLetters) setCoverLetters(data.coverLetters);
-    if (Array.isArray(data.activities)) setActivities(data.activities);
+    if (Array.isArray(data.activities)) setActivities(upgradeActivities(data.activities, data.activitiesVersion));
   };
 
   const handleResetData = () => {
     setProfile(initialProfile);
     setProjects(initialProjects);
-    setSkills(initialTechSkills);
+    setSkills(upgradeAiSkills(initialTechSkills));
     setDevLogs(initialDevLogs);
     setCoverLetters(initialCoverLetters);
     setActivities(initialActivities);
@@ -652,14 +660,14 @@ export default function App() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-zinc-900 text-xs">{skill.name}</span>
-                      <span className="text-[11px] font-mono text-zinc-500">{skill.score}%</span>
+                      {typeof skill.score === 'number' && <span className="text-[11px] font-mono text-zinc-500">{skill.score}%</span>}
                     </div>
-                    <div className="w-full bg-zinc-200/70 rounded-full h-1 overflow-hidden">
+                    {typeof skill.score === 'number' && <div className="w-full bg-zinc-200/70 rounded-full h-1 overflow-hidden">
                       <div
                         className="bg-zinc-800 h-full rounded-full transition-all"
                         style={{ width: `${skill.score}%` }}
                       ></div>
-                    </div>
+                    </div>}
                   </div>
                 ))}
               </div>
@@ -740,6 +748,7 @@ export default function App() {
         )}
 
         {activeTab === 'activities' && <ActivitiesManager items={activities} onChange={setActivities} />}
+        {activeTab === 'grades' && <GradesSection />}
 
         {activeTab === 'projects' && (
           <ProjectArchive

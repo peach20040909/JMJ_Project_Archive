@@ -12,9 +12,11 @@ import {
   ExternalLink,
   MessageSquareCode,
   Sparkles,
-  FileEdit
+  FileEdit,
+  GraduationCap
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill, DevLog } from '../types';
+import { academicSummary, formatGpa } from '../data/academics';
 
 interface ProfileHeroProps {
   profile: UserProfile;
@@ -142,7 +144,7 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
           </div>
 
           {/* Right: Clean Quick Stat Counters */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 min-w-[240px]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5 min-w-[240px]">
             
             <div 
               onClick={() => onNavigateTab('projects')}
@@ -157,6 +159,8 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
                 <span className="text-[11px] text-zinc-400">개</span>
               </div>
             </div>
+
+            <button type="button" onClick={() => onNavigateTab('grades')} className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-left transition-colors hover:bg-indigo-100 focus-visible:ring-2 focus-visible:ring-indigo-500"><span className="flex items-center justify-between text-xs text-indigo-600">성적<GraduationCap aria-hidden="true" className="h-4 w-4" /></span><span className="mt-1 block text-lg font-bold text-indigo-700">{formatGpa(academicSummary.gpa)}<span className="ml-1 text-xs font-normal text-indigo-500">/ 4.50</span></span></button>
 
             <div 
               onClick={() => onNavigateTab('coverletter')}

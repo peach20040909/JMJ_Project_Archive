@@ -9,7 +9,9 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { UserProfile, ProjectItem, TechSkill, DevLog, CoverLetterItem } from '../types';
-import { PortfolioActivity } from '../data/activities';
+import { PortfolioActivity, ACTIVITIES_VERSION } from '../data/activities';
+import { AI_SKILLS_VERSION } from '../data/aiSkills';
+import { academicTerms, transcriptDate } from '../data/academics';
 
 interface ExportModalProps {
   isOpen: boolean;
@@ -56,7 +58,7 @@ ${profile.bio}
 ---
 
 ## 공모전·대외활동
-${activities.map(activity => `### ${activity.title}\n- 결과: ${activity.outcome}\n${activity.subtitle ? `- 작품: ${activity.subtitle}\n` : ''}- 과정: ${activity.stages.join(' → ')}\n${activity.note || ''}`).join('\n\n')}
+${activities.map(activity => `### ${activity.title}\n- 결과: ${activity.outcome}\n${activity.subtitle ? `- 소개: ${activity.subtitle}\n` : ''}${activity.period ? `- 기간: ${activity.period}\n` : ''}${activity.role ? `- 역할: ${activity.role}\n` : ''}${activity.tags?.length ? `- 키워드: ${activity.tags.join(', ')}\n` : ''}- 과정: ${activity.stages.join(' → ')}\n${activity.note || ''}`).join('\n\n')}
 
 ## 🛠️ Tech Stack & Core Competencies
 ${skills.map(s => `- **${s.name}** (${s.category} / ${s.level}): ${s.experience}`).join('\n')}
@@ -122,6 +124,9 @@ ${l.content}
       devLogs,
       coverLetters,
       activities,
+      activitiesVersion: ACTIVITIES_VERSION,
+      aiSkillsVersion: AI_SKILLS_VERSION,
+      academics: { transcriptDate, terms: academicTerms },
       exportedAt: new Date().toISOString()
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });

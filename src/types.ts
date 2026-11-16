@@ -69,9 +69,9 @@ export interface CourseworkSubject {
 export interface TechSkill {
   id: string;
   name: string;
-  category: 'Languages' | 'Frontend' | 'Backend' | 'Database & Infra' | 'CS Fundamentals';
+  category: 'Languages' | 'Frontend' | 'Backend' | 'Database & Infra' | 'CS Fundamentals' | 'AI & Automation';
   level: 'Familiar (기초 문법)' | 'Competent (과제/프로젝트 구현)' | 'Proficient (아키텍처/최적화)' | 'Expert';
-  score: number; // 1-100
+  score?: number; // Optional self-assessment; omit when no confidence score was supplied.
   experience: string;
   featured: boolean;
 }

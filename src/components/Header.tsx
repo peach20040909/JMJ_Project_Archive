@@ -11,7 +11,8 @@ import {
   FileEdit,
   CheckCircle2,
   RefreshCw,
-  Award
+  Award,
+  GraduationCap
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
@@ -43,6 +44,7 @@ export const Header: React.FC<HeaderProps> = ({
   const navItems = [
     { id: 'overview', label: '대시보드', icon: LayoutDashboard },
     { id: 'projects', label: '프로젝트', icon: FolderGit2 },
+    { id: 'grades', label: '성적', icon: GraduationCap },
     { id: 'activities', label: '공모전·대외활동', icon: Award },
     { id: 'coverletter', label: '자기소개서', icon: FileEdit },
     { id: 'skills', label: '기술 스택', icon: Cpu },

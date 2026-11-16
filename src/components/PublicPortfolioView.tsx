@@ -14,6 +14,7 @@ import {
 import { UserProfile, ProjectItem, TechSkill } from '../types';
 import { MarkdownRenderer } from './MarkdownRenderer';
 import { ActivitiesSection } from './ActivitiesSection';
+import { GradesSection } from './GradesSection';
 import { PortfolioActivity } from '../data/activities';
 
 interface PublicPortfolioViewProps {
@@ -137,6 +138,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
         </header>
 
         <ActivitiesSection items={activities} />
+        <details className="rounded-xl border border-slate-200 bg-white px-4 sm:px-6"><summary className="min-h-14 cursor-pointer py-4 text-sm font-semibold text-indigo-700 focus-visible:ring-2 focus-visible:ring-indigo-500">학업 성적 · 학기별 이수 과목 보기</summary><GradesSection /></details>
 
         {/* 2. Core Tech Skills & Competencies */}
         <section className="space-y-4">

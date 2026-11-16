@@ -28,6 +28,7 @@ const CATEGORIES = [
   'Frontend',
   'Backend',
   'Database & Infra',
+  'AI & Automation',
   'CS Fundamentals'
 ] as const;
 
@@ -180,16 +181,16 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
                 <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
                   {skill.category}
                 </span>
-                <span className="font-mono text-slate-600 font-bold">{skill.score}%</span>
+                {typeof skill.score === 'number' && <span className="font-mono text-slate-600 font-bold">{skill.score}%</span>}
               </div>
 
               {/* Progress Bar */}
-              <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+              {typeof skill.score === 'number' && <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
                 <div
                   className="bg-slate-800 h-full rounded-full transition-all"
                   style={{ width: `${skill.score}%` }}
                 ></div>
-              </div>
+              </div>}
 
               <div className="text-xs font-semibold text-slate-700">
                 {skill.level}
@@ -243,6 +244,7 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
                     <option value="Frontend">Frontend</option>
                     <option value="Backend">Backend</option>
                     <option value="Database & Infra">Database & Infra</option>
+                    <option value="AI & Automation">AI & Automation</option>
                     <option value="CS Fundamentals">CS Fundamentals</option>
                   </select>
                 </div>
@@ -264,14 +266,14 @@ export const TechStackMatrix: React.FC<TechStackMatrixProps> = ({
               <div>
                 <div className="flex justify-between font-bold text-slate-700">
                   <span>자신감 점수</span>
-                  <span className="text-violet-600 font-mono">{formData.score}%</span>
+                  <span className="text-violet-600 font-mono">{formData.score === undefined ? '미설정' : `${formData.score}%`}</span>
                 </div>
                 <input
                   type="range"
                   min={10}
                   max={100}
                   step={5}
-                  value={formData.score}
+                  value={formData.score ?? 50}
                   onChange={e => setFormData({ ...formData, score: Number(e.target.value) })}
                   className="w-full mt-2 accent-violet-600"
                 />

@@ -18,6 +18,8 @@ test('the submitted portfolio URL opens the recruiter view', () => {
   const html = renderToStaticMarkup(<App />);
   assert.ok(html.includes('Recruiter Mode'), 'visitors must see the public portfolio immediately');
   assert.ok(html.includes('Mobility Field Lab'));
+  assert.ok(html.includes('공모전·대외활동'));
+  assert.ok(html.includes('학생설계전공 공모전'));
   assert.ok(!html.includes('AI 포트폴리오 코치'));
 });
 
