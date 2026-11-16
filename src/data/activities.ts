@@ -8,11 +8,12 @@ export interface PortfolioActivity {
   stages: string[];
   note?: string;
   period?: string;
+  status?: string;
   role?: string;
   tags?: string[];
 }
 
-export const ACTIVITIES_VERSION = 3;
+export const ACTIVITIES_VERSION = 4;
 export const academyExperience: PortfolioActivity = {
   id: 'j-english-ax', title: '제이영어학원', subtitle: '교육 현장의 반복 업무를 AI로 자동화한 AX 경험',
   kind: '실무', outcome: '재직 중 · AX',
@@ -31,6 +32,9 @@ export function upgradeActivities(items: PortfolioActivity[], version = 0): Port
   return existing.map(item => {
     const current = activities.find(activity => activity.id === item.id);
     if (!current) return item;
+    if (version < 4 && ['startup', 'ai-literacy'].includes(item.id)) {
+      return { ...item, ...current, title: item.title, status: item.status ?? current.status };
+    }
     return { ...current, ...item,
       summary: item.summary || current.summary,
       subtitle: ['student-major', 'startup', 'expressway-ai'].includes(item.id) ? current.subtitle : item.subtitle || current.subtitle,
@@ -68,20 +72,46 @@ export const activities: PortfolioActivity[] = [
     note: '해외 현장조사에 사용할 기록·검수·분석 플랫폼을 준비하고 있습니다.',
   },
   {
-    id: 'startup', title: '창업경진대회', kind: '진출',
-    subtitle: '한만큼',
-    summary: '팀 프로젝트의 기여도를 작업 기록과 근거 리포트로 설명하는 ‘한만큼’을 제안했습니다. 교수 인터뷰를 바탕으로 문제와 서비스 방향을 구체화해 본선에 진출했습니다.',
-    role: '현장 조사 · 서비스 기획 · 백엔드 구조 설계',
-    tags: ['사용자 조사', '서비스 기획', '창업 아이디어'],
-    note: '팀 프로젝트의 흩어진 협업 기록을 모아 개인별 기여를 설명하는 근거 리포트 서비스 ‘한만큼’으로 참가했습니다. 교수 인터뷰와 서비스 기획, 백엔드 데이터 흐름 설계에 참여했습니다. AI는 활동 기록을 정리하고 최종 판단은 교수가 수행하는 구조를 제안했습니다. 본선 진출 후 최종 수상에는 이르지 못했습니다.',
-    outcome: '본선 진출 후 탈락', stages: ['본선 진출', '본선 탈락'],
+    "id": "startup",
+    "title": "창업경진대회",
+    "kind": "진출",
+    "subtitle": "한만큼 · 사업 아이디어",
+    "summary": "교수 인터뷰로 확인한 평가 근거의 필요성을 ‘한만큼’ 사업 아이디어로 구체화했습니다. 협업 기록 기반 기여 리포트의 화면 목업과 구독 모델을 기획했습니다.",
+    "role": "문제 발견 · 사업 모델 · 현장 조사 · 교수 인터뷰 설계·진행",
+    "tags": [
+      "교수 인터뷰",
+      "사업 모델",
+      "UI 목업",
+      "서비스 기획"
+    ],
+    "outcome": "본선 진출 후 탈락",
+    "stages": [
+      "본선 진출",
+      "본선 탈락"
+    ],
+    "note": "MJU 창업 아이디어 경진대회 · HMK 5인 팀\n\n• 문제 발견: 2026.09.10~11 명지대 교수 4인의 이메일 서면 인터뷰를 설계·진행했습니다. 설명과 생각이 다를 때 조정이 어렵고, 작업 기록을 참고 자료로 활용할 의향이 있다는 답변을 바탕으로 공정한 평가에 필요한 확인 가능한 근거에 집중했습니다.\n• 서비스 기획: 학기 초 도구 연결·템플릿 선택 후 팀이 유형별 가중치에 합의하고 기준을 잠그는 흐름을 화면 목업으로 제안했습니다. GitHub·Notion·Docs 기록 수집과 기획·제작·QA·발표자료·조율 분류는 이 단계의 기획안입니다. 학기 중 점수·순위는 공개하지 않도록 설계했습니다.\n• 산출 모델: 마감 후 개인 비중 = Σ(유형 가중치 × 유형 내 활동 비중)을 원자료와 함께 확인하는 방식을 제안했습니다. 온라인 기록 0%는 실제 기여 0%를 의미하지 않으며, 학생 서술과 교수 관측은 수치에 합산하지 않습니다.\n• 사업 모델: 교수 무료 체험(1분반·최대 5팀) → 팀 수 기준 학과 구독 → 대학 계약·LMS 연동을 검토했습니다. 교내 창업지원·예비창업패키지·민간 투자 순의 자금 계획과 3·6·12개월 검증 로드맵을 구성했습니다. 기존 LMS와 협업 도구 통계를 보완하는 서비스로 포지셔닝했습니다.\n• 팀 구성: 박서준(팀장·기획/PM), 장민준(현장 조사), 김효준(기획·산출 모델), 김유민(자료 조사), 양우림(기획 지원).\n\n완성도는 예시 데이터를 사용한 UI 목업·사업 계획 단계입니다. 이후 AI 리터러시 경진대회에서 실제 서비스 구현과 AI 검증 설계로 발전시켰습니다."
   },
   {
-    id: 'ai-literacy', title: 'AI 리터러시 경진대회', kind: '진출',
-    subtitle: '한만큼',
-    summary: 'GitHub·Notion 등 흩어진 협업 기록을 팀 기여도의 근거로 정리하는 ‘한만큼’으로 1차 서류를 통과했습니다. 11월 26일 발표를 준비하며 결과와 최종 산출물을 정리할 예정입니다.',
-    note: '한만큼으로 1차 서류에 합격했습니다. 2026년 11월 26일 발표 예정이며, 발표 결과와 최종 산출물은 종료 후 반영합니다.',
-    outcome: '1차 서류 합격', stages: ['1차 서류 합격'],
+    "id": "ai-literacy",
+    "title": "AI 리터러시 경진대회",
+    "kind": "진출",
+    "subtitle": "한만큼 · 서비스 구현",
+    "summary": "창업 아이디어를 실제 배포 서비스로 발전시키며 UX·UI와 사이트 구현을 총괄했습니다. AI는 기록 정리·분류를 돕고, 원본 확인과 최종 판단은 교수가 맡도록 설계했습니다.",
+    "role": "UX·UI 설계 및 사이트 구현 총괄 · 시연 영상·최종결과물 제작",
+    "tags": [
+      "AI 검증",
+      "UX·UI",
+      "Vercel",
+      "Turso",
+      "Claude API"
+    ],
+    "outcome": "결선 진출",
+    "stages": [
+      "1차 서류 합격",
+      "결선 진출"
+    ],
+    "status": "11.26 결선 발표 예정 · 11.19 최종 제출 마감",
+    "note": "명지대 AI 리터러시 경진대회 · 박서준(팀장), 장민준, 김효준의 3인 팀\n\n• 아이디어에서 구현으로: 창업경진대회의 목업을 실제 배포 서비스(hanmankeum.vercel.app)로 발전시켰습니다. UX·UI 설계와 사이트 구현을 총괄하고 시연 영상·최종결과물을 제작했습니다.\n• 교수 기준 존중: 서비스가 정한 유형 대신 교수가 원래 쓰던 평가기준을 AI가 정리하고, 교수가 수정·확정하는 방식으로 바꿨습니다. AI의 기준 정리·기록 분류·근거 요약·자기 기술은 모두 사람이 확인하는 초안이며 서비스는 성적을 산출하지 않습니다.\n• AI 검증: AI 분류와 규칙 판단이 엇갈리면 ‘확인 필요’로 올려 교수가 원본을 보고 결정하도록 했습니다. 사람이 수정한 뒤에도 AI의 원래 판단을 보존합니다.\n• 사용 투명성: 기록마다 AI 도움을 표시하고, 요약 문장에 근거 기록 번호 인용을 필수로 했습니다. 인용이 없는 문장은 서버가 제외하며 자기 기술은 AI 초안 대비 수정률을 기록합니다.\n• 프롬프트 관리: criteria-draft-v2, criteria-classify-v1, summary-v1, selfdraft-v2를 버전별로 관리하고 별도 프롬프트 문서로 제출합니다.\n• 기술·결과물: Node.js, Vercel, Turso(libSQL), Anthropic Claude API(claude-haiku), GitHub REST API, Notion Webhook, Playwright를 사용했습니다. 학생별 기여율·계산 근거·원본 링크를 담은 교수용 근거 리포트 PDF, 1분 시연 영상, 최종결과물 PDF(17쪽), 프롬프트 PDF(16쪽), 발표 PPT를 제작했습니다. 서비스 테스트는 22개입니다.\n\n창업 버전의 사업화 전략에서 AI를 검증하며 사용하는 실제 서비스로 초점을 옮겼습니다. 최종 심사 결과는 확정 후 별도 갱신합니다."
   },
   {
     id: 'expressway-ai', title: '한국도로공사 AI 활용 공모전', kind: '참여',

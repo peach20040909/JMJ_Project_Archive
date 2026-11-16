@@ -31,7 +31,7 @@ export function ActivitiesManager({ items, onChange }: Props) {
         <form aria-label="활동 편집" onSubmit={event => {
           event.preventDefault();
           if (!draft.title.trim() || !draft.outcome.trim()) return;
-          const saved = { ...draft, title: draft.title.trim(), outcome: draft.outcome.trim(), subtitle: draft.subtitle?.trim(), note: draft.note?.trim(), period: draft.period?.trim(), role: draft.role?.trim(), tags: [...new Set(tags.split(',').map(tag => tag.trim()).filter(Boolean))], stages: stages.split('\n').map(stage => stage.trim()).filter(Boolean) };
+          const saved = { ...draft, title: draft.title.trim(), outcome: draft.outcome.trim(), subtitle: draft.subtitle?.trim(), note: draft.note?.trim(), period: draft.period?.trim(), status: draft.status?.trim(), role: draft.role?.trim(), tags: [...new Set(tags.split(',').map(tag => tag.trim()).filter(Boolean))], stages: stages.split('\n').map(stage => stage.trim()).filter(Boolean) };
           onChange(items.some(item => item.id === saved.id) ? items.map(item => item.id === saved.id ? saved : item) : [...items, saved]);
           setDraft(null);
           setMessage('활동을 저장했습니다.');
@@ -45,6 +45,7 @@ export function ActivitiesManager({ items, onChange }: Props) {
             <label className="text-sm font-medium">기간<input value={draft.period ?? ''} onChange={e => setDraft({ ...draft, period: e.target.value })} className={inputClass} placeholder="예: 2026.03 ~ 현재" /></label>
             <label className="text-sm font-medium">담당 역할<input value={draft.role ?? ''} onChange={e => setDraft({ ...draft, role: e.target.value })} className={inputClass} /></label>
           </div>
+          <label className="block text-sm font-medium">진행 상태<input value={draft.status ?? ''} onChange={e => setDraft({ ...draft, status: e.target.value })} className={inputClass} placeholder="예: 결선 발표 예정 · 결과 확정 후 이 항목만 수정" /></label>
           <p className="text-xs text-zinc-500">결과 분류가 ‘수상’인 활동은 대시보드의 수상 이력에도 표시됩니다.</p>
           <label className="block text-sm font-medium">카드 요약<textarea rows={3} value={draft.summary ?? ''} onChange={e => setDraft({ ...draft, summary: e.target.value })} className={inputClass} placeholder="활동의 주제, 역할, 핵심 결과를 2~3문장으로 정리해 주세요." /></label>
           <label className="block text-sm font-medium">키워드 <span className="font-normal text-zinc-500">— 쉼표로 구분</span><input value={tags} onChange={e => setTags(e.target.value)} className={inputClass} /></label>

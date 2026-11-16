@@ -12,7 +12,7 @@ test('activities preserve selection stages and awards without prize amounts', ()
     assert.ok(html.includes(label), label);
   }
   assert.ok(!/상금|만원/.test(html));
-  assert.equal(activities.find(item => item.id === 'ai-literacy')?.outcome, '1차 서류 합격');
+  assert.equal(activities.find(item => item.id === 'ai-literacy')?.outcome, '결선 진출');
   assert.equal(activities.find(item => item.id === 'expressway-ai')?.outcome, '참여');
 });
 
@@ -52,11 +52,26 @@ test('archive upgrade preserves existing edits, adds academy once and respects l
 test('source-backed activity cards have a substantive summary and preserve proposal status', () => {
   assert.ok(activities.every(item => item.summary && item.summary.length > 45));
   assert.equal(activities.find(item => item.id === 'student-major')?.subtitle, 'AX 시스템공학전공');
-  assert.equal(activities.find(item => item.id === 'startup')?.subtitle, '한만큼');
+  assert.equal(activities.find(item => item.id === 'startup')?.subtitle, '한만큼 · 사업 아이디어');
   const proposal = activities.find(item => item.id === 'expressway-ai')!;
   assert.equal(proposal.subtitle, 'AI 세이프콜(Safe-Call)');
   assert.equal(proposal.outcome, '참여');
   assert.ok(proposal.note?.includes('제안 목표'));
   assert.ok(!proposal.note?.includes('010-2701') && !proposal.note?.includes('@naver.com'));
   assert.equal(upgradeActivities([], 2).length, 0, 'a deleted academy record must stay deleted during a later content upgrade');
+});
+
+
+test('competition revision separates planning from implementation and keeps status editable after migration', () => {
+  const startup = activities.find(item => item.id === 'startup')!;
+  const ai = activities.find(item => item.id === 'ai-literacy')!;
+  assert.ok(startup.summary?.includes('목업') && startup.role?.includes('사업 모델'));
+  assert.ok(!startup.role?.includes('백엔드'));
+  assert.ok(ai.role?.includes('사이트 구현 총괄') && ai.note?.includes('성적을 산출하지 않습니다'));
+  assert.ok(!ai.summary?.includes('11.26'));
+  assert.ok(ai.status?.includes('11.26'));
+  assert.equal(upgradeActivities([{ ...ai, summary: '이전 요약', outcome: '1차 서류 합격' }], 3)[0].outcome, '결선 진출');
+  const edited = { ...ai, status: '발표 완료' };
+  assert.deepEqual(upgradeActivities([edited], ACTIVITIES_VERSION), [edited]);
+  assert.deepEqual(upgradeActivities([], 3), []);
 });

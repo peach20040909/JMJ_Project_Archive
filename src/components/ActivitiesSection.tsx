@@ -13,7 +13,7 @@ const kinds = ['전체', '실무', '수상', '선발', '진출', '참여'] as co
 export function filterActivities(items: PortfolioActivity[], kind: typeof kinds[number], search: string) {
   const query = search.trim().toLocaleLowerCase();
   return items.filter(item => (kind === '전체' || item.kind === kind) &&
-    [item.title, item.subtitle, item.summary, item.outcome, item.note, item.role, item.period, ...(item.tags ?? []), ...item.stages]
+    [item.title, item.subtitle, item.summary, item.outcome, item.note, item.role, item.period, item.status, ...(item.tags ?? []), ...item.stages]
       .filter(Boolean).join(' ').toLocaleLowerCase().includes(query));
 }
 
@@ -69,13 +69,14 @@ export function ActivitiesSection({ items = initialActivities, awardsOnly = fals
               <h3 title={activity.title} className="line-clamp-2 h-10 shrink-0 text-base font-bold leading-5 text-zinc-900">{activity.title}</h3>
               <p title={activity.subtitle} aria-hidden={!activity.subtitle} className="mt-1 h-5 shrink-0 truncate text-sm leading-5 text-zinc-600">{activity.subtitle || '\u00a0'}</p>
               <p className="mt-2 line-clamp-3 h-15 shrink-0 text-sm leading-5 text-zinc-600">{activity.summary || activity.note?.split('\n')[0] || `${activity.outcome} · ${activity.stages.join(' → ')}`}</p>
-              <p className="mt-2 shrink-0 truncate border-t border-zinc-100 pt-2 text-xs leading-4 text-zinc-600">{activity.stages.join(' → ') || activity.outcome}</p>
+              <p className="mt-2 shrink-0 truncate border-t border-zinc-100 pt-2 text-xs leading-4 text-zinc-600">{activity.status || activity.stages.join(' → ') || activity.outcome}</p>
               <details className="group mt-auto border-t border-zinc-100 pt-1 print:[&>div]:block">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-semibold text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"><span>상세보기 · 역할과 과정</span><ChevronRight aria-hidden="true" className="h-4 w-4 transition-transform group-open:rotate-90" /></summary>
                 <div className="space-y-3 pb-1 text-sm leading-relaxed text-zinc-600">
                   <p className="font-semibold text-zinc-800">{activity.title}</p>
                   {activity.subtitle && <p>{activity.subtitle}</p>}
                   {activity.summary && <p>{activity.summary}</p>}
+                  {activity.status && <p><span className="font-semibold text-zinc-800">진행 상태</span><br />{activity.status}</p>}
                   {activity.period && <p className="text-xs text-zinc-500">{activity.period}</p>}
                   {activity.tags && activity.tags.length > 0 && <div className="flex flex-wrap gap-1.5">{activity.tags.map(tag => <span key={tag} className="rounded border border-zinc-100 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600">{tag}</span>)}</div>}
                   {activity.role && <p><span className="font-semibold text-zinc-800">담당 역할</span><br />{activity.role}</p>}

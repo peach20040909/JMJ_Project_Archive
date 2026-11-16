@@ -58,7 +58,7 @@ ${profile.bio}
 ---
 
 ## 공모전·대외활동
-${activities.map(activity => `### ${activity.title}\n- 결과: ${activity.outcome}\n${activity.subtitle ? `- 소개: ${activity.subtitle}\n` : ''}${activity.period ? `- 기간: ${activity.period}\n` : ''}${activity.role ? `- 역할: ${activity.role}\n` : ''}${activity.tags?.length ? `- 키워드: ${activity.tags.join(', ')}\n` : ''}- 과정: ${activity.stages.join(' → ')}\n${activity.summary ? activity.summary + '\n' : ''}${activity.note || ''}`).join('\n\n')}
+${activities.map(activity => `### ${activity.title}\n- 결과: ${activity.outcome}\n${activity.subtitle ? `- 소개: ${activity.subtitle}\n` : ''}${activity.status ? `- 진행 상태: ${activity.status}\n` : ''}${activity.period ? `- 기간: ${activity.period}\n` : ''}${activity.role ? `- 역할: ${activity.role}\n` : ''}${activity.tags?.length ? `- 키워드: ${activity.tags.join(', ')}\n` : ''}- 과정: ${activity.stages.join(' → ')}\n${activity.summary ? activity.summary + '\n' : ''}${activity.note || ''}`).join('\n\n')}
 
 ## 🛠️ Tech Stack & Core Competencies
 ${skills.map(s => `- **${s.name}** (${s.category} / ${s.level}): ${s.experience}`).join('\n')}
