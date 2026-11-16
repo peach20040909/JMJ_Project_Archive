@@ -55,28 +55,32 @@ export function ActivitiesSection({ items = initialActivities, awardsOnly = fals
       </div>}
       {!awardsOnly && <p role="status" className="text-xs text-zinc-500 print:hidden">전체 {items.length}건 · 수상 {items.filter(item => item.kind === '수상').length}건 · 표시 {visible.length}건</p>}
       {visible.length === 0 && <p className="rounded-xl border border-dashed border-zinc-300 p-6 text-sm text-zinc-600">{awardsOnly ? '아직 등록된 수상 이력이 없습니다.' : items.length === 0 ? '등록된 활동이 없습니다. 새 활동을 추가해 주세요.' : '검색 조건에 맞는 활동이 없습니다.'}</p>}
-      <div className="grid auto-rows-fr grid-cols-1 items-stretch gap-4 has-[[open]]:auto-rows-auto md:grid-cols-2 lg:grid-cols-3 print:grid-cols-2">
+      <div className="grid grid-cols-1 items-start gap-4 md:grid-cols-2 lg:grid-cols-3 print:grid-cols-2">
         {visible.map(activity => {
           const Icon = activity.kind === '수상' ? Trophy : activity.kind === '선발' ? BadgeCheck : activity.kind === '실무' ? BriefcaseBusiness : ArrowUpRight;
           return (
-            <article key={activity.id} className="flex h-full min-w-0 break-inside-avoid flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 sm:p-5 print:shadow-none">
-              <div className="mb-3 flex items-start justify-between gap-2">
+            <article key={activity.id} className="flex h-60 min-w-0 break-inside-avoid flex-col rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 has-[[open]]:h-auto print:h-auto print:shadow-none">
+              <div className="mb-2 flex h-11 shrink-0 items-center justify-between gap-2">
                 <span className={`inline-flex max-w-full items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-semibold ${outcomeStyles[activity.kind]}`}>
                   <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />{activity.outcome}
                 </span>
                 {actions && <div className="shrink-0 print:hidden">{actions(activity)}</div>}
               </div>
-              <h3 className="text-base font-bold leading-relaxed text-zinc-900">{activity.title}</h3>
-              {activity.subtitle && <p className="mt-1 text-sm leading-relaxed text-zinc-600">{activity.subtitle}</p>}
-              {activity.period && <p className="mt-3 text-xs leading-relaxed text-zinc-500">{activity.period}</p>}
-              {activity.tags && activity.tags.length > 0 && <div className="mt-3 flex flex-wrap gap-1.5">{activity.tags.map(tag => <span key={tag} className="rounded border border-zinc-100 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600">{tag}</span>)}</div>}
-              {activity.stages.length > 0 && <ol aria-label={`${activity.title} 참여 과정`} className="mt-3 flex flex-wrap items-center gap-x-1 gap-y-1 border-t border-zinc-100 pt-3 text-xs leading-relaxed text-zinc-600">
-                {activity.stages.map((stage, index) => <li key={`${stage}-${index}`} className="inline-flex items-center gap-1">{index > 0 && <ChevronRight aria-hidden="true" className="h-3 w-3 shrink-0 text-zinc-400" />}{stage}</li>)}
-              </ol>}
-              {(activity.note || activity.role) && <details className="group mt-auto border-t border-zinc-100 pt-3 print:[&>div]:block">
+              <h3 title={activity.title} className="line-clamp-2 h-10 shrink-0 text-base font-bold leading-5 text-zinc-900">{activity.title}</h3>
+              <p title={activity.subtitle} aria-hidden={!activity.subtitle} className="mt-1 h-5 shrink-0 truncate text-sm leading-5 text-zinc-600">{activity.subtitle || '\u00a0'}</p>
+              <p className="mt-2 shrink-0 truncate border-t border-zinc-100 pt-2 text-xs leading-4 text-zinc-600">{activity.stages.join(' → ') || activity.outcome}</p>
+              <details className="group mt-auto border-t border-zinc-100 pt-1 print:[&>div]:block">
                 <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 rounded text-xs font-semibold text-indigo-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"><span>상세보기 · 역할과 과정</span><ChevronRight aria-hidden="true" className="h-4 w-4 transition-transform group-open:rotate-90" /></summary>
-                <div className="space-y-3 pb-1 text-sm leading-relaxed text-zinc-600">{activity.role && <p><span className="font-semibold text-zinc-800">담당 역할</span><br />{activity.role}</p>}{activity.note && <p className="whitespace-pre-line">{activity.note}</p>}</div>
-              </details>}
+                <div className="space-y-3 pb-1 text-sm leading-relaxed text-zinc-600">
+                  <p className="font-semibold text-zinc-800">{activity.title}</p>
+                  {activity.subtitle && <p>{activity.subtitle}</p>}
+                  {activity.period && <p className="text-xs text-zinc-500">{activity.period}</p>}
+                  {activity.tags && activity.tags.length > 0 && <div className="flex flex-wrap gap-1.5">{activity.tags.map(tag => <span key={tag} className="rounded border border-zinc-100 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600">{tag}</span>)}</div>}
+                  {activity.role && <p><span className="font-semibold text-zinc-800">담당 역할</span><br />{activity.role}</p>}
+                  {activity.stages.length > 0 && <ol aria-label={`${activity.title} 참여 과정`} className="space-y-1 text-xs">{activity.stages.map((stage,index) => <li key={`${stage}-${index}`} className="flex items-start gap-1"><ChevronRight aria-hidden="true" className="mt-0.5 h-3 w-3 shrink-0 text-zinc-400" />{stage}</li>)}</ol>}
+                  {activity.note && <p className="whitespace-pre-line">{activity.note}</p>}
+                </div>
+              </details>
             </article>
           );
         })}
