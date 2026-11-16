@@ -46,6 +46,7 @@ export function ActivitiesManager({ items, onChange }: Props) {
             <label className="text-sm font-medium">담당 역할<input value={draft.role ?? ''} onChange={e => setDraft({ ...draft, role: e.target.value })} className={inputClass} /></label>
           </div>
           <p className="text-xs text-zinc-500">결과 분류가 ‘수상’인 활동은 대시보드의 수상 이력에도 표시됩니다.</p>
+          <label className="block text-sm font-medium">카드 요약<textarea rows={3} value={draft.summary ?? ''} onChange={e => setDraft({ ...draft, summary: e.target.value })} className={inputClass} placeholder="활동의 주제, 역할, 핵심 결과를 2~3문장으로 정리해 주세요." /></label>
           <label className="block text-sm font-medium">키워드 <span className="font-normal text-zinc-500">— 쉼표로 구분</span><input value={tags} onChange={e => setTags(e.target.value)} className={inputClass} /></label>
           <label className="block text-sm font-medium">참여 과정 <span className="font-normal text-zinc-500">— 단계별로 한 줄씩 입력</span><textarea rows={3} value={stages} onChange={e => setStages(e.target.value)} className={inputClass} /></label>
           <label className="block text-sm font-medium">소개·본인 역할·배운 점<textarea rows={4} value={draft.note ?? ''} onChange={e => setDraft({ ...draft, note: e.target.value })} className={inputClass} /></label>

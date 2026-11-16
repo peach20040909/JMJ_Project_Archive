@@ -48,3 +48,15 @@ test('archive upgrade preserves existing edits, adds academy once and respects l
   assert.equal(upgradeActivities(upgraded).length, upgraded.length);
   assert.deepEqual(upgradeActivities([], ACTIVITIES_VERSION), []);
 });
+
+test('source-backed activity cards have a substantive summary and preserve proposal status', () => {
+  assert.ok(activities.every(item => item.summary && item.summary.length > 45));
+  assert.equal(activities.find(item => item.id === 'student-major')?.subtitle, 'AX 시스템공학전공');
+  assert.equal(activities.find(item => item.id === 'startup')?.subtitle, '한만큼');
+  const proposal = activities.find(item => item.id === 'expressway-ai')!;
+  assert.equal(proposal.subtitle, 'AI 세이프콜(Safe-Call)');
+  assert.equal(proposal.outcome, '참여');
+  assert.ok(proposal.note?.includes('제안 목표'));
+  assert.ok(!proposal.note?.includes('010-2701') && !proposal.note?.includes('@naver.com'));
+  assert.equal(upgradeActivities([], 2).length, 0, 'a deleted academy record must stay deleted during a later content upgrade');
+});
