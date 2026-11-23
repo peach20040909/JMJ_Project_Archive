@@ -9,12 +9,12 @@ import { activities, academyExperience, upgradeActivities, ACTIVITIES_VERSION } 
 test('activities preserve selection stages and awards without prize amounts', () => {
   assert.equal(activities.length, 7);
   const html = renderToStaticMarkup(<ActivitiesSection />);
-  for (const label of ['공모전·대외활동', '본선 진출 후 탈락', '최종 합격', '우수상', '은상', '한국도로공사 AI 활용 공모전', '결과 미기재']) {
+  for (const label of ['공모전·대외활동', '본선 진출 후 탈락', '최종 합격', '우수상', '은상', '한국도로공사 AI 활용 공모전', '1차 심사 탈락']) {
     assert.ok(html.includes(label), label);
   }
   assert.ok(!/상금|만원/.test(html));
   assert.equal(activities.find(item => item.id === 'ai-literacy')?.outcome, '결선 진출');
-  assert.equal(activities.find(item => item.id === 'expressway-ai')?.outcome, '참여');
+  assert.equal(activities.find(item => item.id === 'expressway-ai')?.outcome, '1차 심사 탈락');
 });
 
 test('dashboard summary shows awards only and supports an empty award list', () => {
@@ -56,7 +56,7 @@ test('source-backed activity cards have a substantive summary and preserve propo
   assert.equal(activities.find(item => item.id === 'startup')?.subtitle, '한만큼 · 사업 아이디어');
   const proposal = activities.find(item => item.id === 'expressway-ai')!;
   assert.equal(proposal.subtitle, 'AI 세이프콜(Safe-Call)');
-  assert.equal(proposal.outcome, '참여');
+  assert.equal(proposal.outcome, '1차 심사 탈락');
   assert.ok(proposal.note?.includes('제안 목표'));
   assert.ok(!proposal.note?.includes('010-2701') && !proposal.note?.includes('@naver.com'));
   assert.equal(upgradeActivities([], 2).length, 0, 'a deleted academy record must stay deleted during a later content upgrade');
