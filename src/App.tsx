@@ -27,6 +27,7 @@ import {
   initialProfile,
   initialProjects,
   upgradeHanmankeumProject,
+  upgradeSoloMapProject,
   initialTechSkills,
   initialDevLogs,
   initialCoverLetters
@@ -89,7 +90,7 @@ export default function App() {
     const saved = localStorage.getItem(STORAGE_KEYS.PROJECTS) || localStorage.getItem('jmj_archive_projects_v9') || localStorage.getItem('jmj_archive_projects_v8') || localStorage.getItem('jmj_archive_projects_v7') || localStorage.getItem('jmj_archive_projects_v6');
     if (saved) {
       try {
-        let parsed: ProjectItem[] = upgradeHanmankeumProject(JSON.parse(saved), Number(localStorage.getItem('jmj_archive_activities_version')));
+        let parsed: ProjectItem[] = upgradeSoloMapProject(upgradeHanmankeumProject(JSON.parse(saved), Number(localStorage.getItem('jmj_archive_activities_version'))));
         // Ensure the Kickboard project is present
         const hasKickboard = parsed.some(p => p.id === 'proj-kickboard-2026' || p.title.includes('킥보드'));
         const kickboardProj = initialProjects.find(p => p.id === 'proj-kickboard-2026');
@@ -139,11 +140,11 @@ export default function App() {
                 title: p.title || '혼밥지도 - 명지대학교 인문캠퍼스',
                 githubUrl: p.githubUrl || solomapProj.githubUrl || 'https://github.com/peach20040909/mju-solomap',
                 demoUrl: p.demoUrl || solomapProj.demoUrl || 'https://mju-solomap.vercel.app/',
-                semester: '2학년 2학기',
+                semester: p.semester || solomapProj.semester,
                 period: p.period || '2026.09 - 2026.12',
                 role: p.role || '기획 및 개발 (개인)',
                 teamType: p.teamType || '개인',
-                techStack: (p.techStack && p.techStack.length > 0) ? p.techStack : ['JavaScript', 'CSS', 'HTML', 'TypeScript', 'Leaflet', 'Render'],
+                techStack: (p.techStack && p.techStack.length > 0) ? p.techStack : solomapProj.techStack,
                 summary: p.summary || solomapProj.summary,
                 problemDescription: p.problemDescription || solomapProj.problemDescription,
                 solutionDescription: p.solutionDescription || solomapProj.solutionDescription,
@@ -334,7 +335,7 @@ export default function App() {
             if ((!hasLocalSkills || isPublicView) && Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
             if (hasLocal && !isPublicView) return;
             if (d.profile) setProfile(d.profile);
-            if (d.projects) setProjects(d.projects);
+            if (d.projects) setProjects(upgradeSoloMapProject(d.projects));
             if (d.devLogs) setDevLogs(d.devLogs);
             if (d.coverLetters) setCoverLetters(d.coverLetters);
           }
@@ -459,7 +460,7 @@ export default function App() {
   // Import and Reset
   const handleImportData = (data: any) => {
     if (data.profile) setProfile(data.profile);
-    if (data.projects) setProjects(upgradeHanmankeumProject(data.projects, data.activitiesVersion));
+    if (data.projects) setProjects(upgradeSoloMapProject(upgradeHanmankeumProject(data.projects, data.activitiesVersion)));
     if (Array.isArray(data.skills)) setSkills(upgradeAiSkills(data.skills, data.aiSkillsVersion));
     if (data.devLogs) setDevLogs(data.devLogs);
     if (data.coverLetters) setCoverLetters(data.coverLetters);
