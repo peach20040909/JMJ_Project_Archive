@@ -221,7 +221,7 @@ export const initialProjects: ProjectItem[] = [
     ],
     "troubleshootingStory": "### 🔍 트러블슈팅: Spotify-KOPIS 아티스트 매칭 실패와 Wikidata Entity Resolution\n\n- **상황**: Spotify(영문: 'Car, the garden')와 KOPIS(한글: '카더가든')의 표기 불일치로 추천 결과가 0건이 되는 문제 발생.\n- **1차 시도 및 실패**: Spotify Search API 역매칭 시도 시 배우 동명이인 오탐 및 429 Too Many Requests 쿼터 초과 발생.\n- **최종 해결**: Wikidata 지식 베이스 API를 도입하여 영문 이름 기준 한글 별칭을 추출하고 KOPIS와 안전하게 교차 매칭하는 구조로 전환.\n- **배운 점**: 단순 문자열 유사도 매칭의 위험성을 깨닫고, 신뢰 가능한 3자 데이터 소스를 매개로 한 Entity Resolution의 견고함을 체득.",
     "githubUrl": "https://github.com/DEPthes/5th-MVP-SetPIK-Server",
-    "demoUrl": "",
+    "demoUrl": "https://5th-mvp-set-pik-web.vercel.app/",
     "featured": true,
     "updatedAt": "2026-08-28"
   },
