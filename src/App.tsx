@@ -74,6 +74,7 @@ export default function App() {
         if (parsed.gpa === '4.18 / 4.50' || !parsed.gpa) {
           parsed.gpa = '4.27 / 4.50';
         }
+        if (parsed.blogUrl === 'https://velog.io/@minjun_dev') parsed.blogUrl = initialProfile.blogUrl;
         // Remove '(예정 / 진행 중)' or '(2026 Fall)' suffixes to keep pure semester name
         if (parsed.currentSemester && (parsed.currentSemester.includes('예정') || parsed.currentSemester.includes('진행') || parsed.currentSemester.includes('2026 Fall'))) {
           parsed.currentSemester = '2학년 2학기';

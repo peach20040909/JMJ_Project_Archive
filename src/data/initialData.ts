@@ -11,7 +11,7 @@ export const initialProfile: UserProfile = {
   "targetRole": "Software Development · Data · IT",
   "email": "a01027010769@gmail.com",
   "githubUrl": "https://github.com/peach20040909",
-  "blogUrl": "https://velog.io/@minjun_dev",
+  "blogUrl": "https://velog.io/@peach20040909/posts",
   "location": "Seoul, Republic of Korea",
   "bio": "명지대학교 융합소프트웨어학부 데이터사이언스전공 장민준입니다. 사용자 조사로 문제를 정의하고, 웹 서비스와 데이터 도구를 구현합니다. 혼밥지도, 팀 기여도 근거 리포트, 해외탐방 현장조사 플랫폼을 만들며 설계 판단과 문제 해결 과정을 기록하고 있습니다.",
   "interests": [
