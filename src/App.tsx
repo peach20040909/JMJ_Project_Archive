@@ -314,6 +314,29 @@ export default function App() {
     new URLSearchParams(window.location.search).get('view') !== 'manage'
   );
 
+  const [ownerSession, setOwnerSession] = useState<{ enabled: boolean; authorized: boolean } | null>(null);
+  const [ownerPassword, setOwnerPassword] = useState('');
+  const [loginError, setLoginError] = useState('');
+  const [loginPending, setLoginPending] = useState(false);
+
+  const login = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setLoginPending(true);
+    setLoginError('');
+    try {
+      const response = await fetch('/api/owner/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: ownerPassword }),
+      });
+      if (!response.ok) throw new Error((await response.json()).error);
+      window.location.reload();
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : '로그인에 실패했습니다.');
+      setLoginPending(false);
+    }
+  };
+
   // Modals
   const [isAiCoachOpen, setIsAiCoachOpen] = useState<boolean>(false);
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
@@ -321,20 +344,22 @@ export default function App() {
 
   // Initial Load from Server if no local state exists
   useEffect(() => {
-    const hasLocal = localStorage.getItem(STORAGE_KEYS.PROFILE);
-    const hasLocalActivities = localStorage.getItem(STORAGE_KEYS.ACTIVITIES) !== null;
-    const hasLocalSkills = localStorage.getItem(STORAGE_KEYS.SKILLS) !== null;
     let cancelled = false;
     {
+      if (!isPublicView) {
+        fetch('/api/owner/session', { cache: 'no-store' })
+          .then(res => res.ok ? res.json() : Promise.reject())
+          .then(session => { if (!cancelled) setOwnerSession(session); })
+          .catch(() => { if (!cancelled) setOwnerSession({ enabled: false, authorized: false }); });
+      }
       fetch('/api/archive-data')
         .then(res => res.json())
         .then(result => {
           if (result.success && result.data) {
             if (cancelled) return;
             const d = result.data;
-            if ((!hasLocalActivities || isPublicView) && Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
-            if ((!hasLocalSkills || isPublicView) && Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
-            if (hasLocal && !isPublicView) return;
+            if (Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
+            if (Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
             if (d.profile) setProfile(d.profile);
             if (d.projects) setProjects(upgradeSoloMapProject(d.projects));
             if (d.devLogs) setDevLogs(d.devLogs);
@@ -349,7 +374,7 @@ export default function App() {
 
   // Sync to LocalStorage and Server File
   useEffect(() => {
-    if (!archiveLoaded || isPublicView) return;
+    if (!archiveLoaded || isPublicView || !ownerSession?.authorized) return;
     // 1. Immediate sync to browser localStorage
     localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
     localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects));
@@ -394,7 +419,7 @@ export default function App() {
     }, 400);
 
     return () => clearTimeout(timer);
-  }, [profile, projects, skills, devLogs, coverLetters, activities, archiveLoaded, isPublicView]);
+  }, [profile, projects, skills, devLogs, coverLetters, activities, archiveLoaded, isPublicView, ownerSession?.authorized]);
 
   // CRUD Handlers - Profile
   const handleUpdateProfile = (updated: UserProfile) => {
@@ -486,8 +511,30 @@ export default function App() {
         projects={projects}
         skills={skills}
         activities={activities}
-        onBackToArchive={() => setIsPublicView(false)}
+        onBackToArchive={ownerSession?.authorized ? () => setIsPublicView(false) : undefined}
       />
+    );
+  }
+
+  if (!ownerSession?.authorized) {
+    return (
+      <main className="mx-auto max-w-sm space-y-4 px-5 py-16">
+        <h1 className="text-2xl font-bold">JMJ 관리자 로그인</h1>
+        {!ownerSession && <p>관리자 설정 확인 중…</p>}
+        {ownerSession && !ownerSession.enabled && <p>관리자 로그인이 아직 설정되지 않았습니다.</p>}
+        {ownerSession?.enabled && (
+          <form onSubmit={login} className="space-y-4">
+            <label className="block">
+              관리자 비밀번호
+              <input type="password" autoComplete="current-password" required value={ownerPassword}
+                onChange={event => setOwnerPassword(event.target.value)} className="mt-1 block w-full rounded-lg border p-3" />
+            </label>
+            {loginError && <p role="alert">{loginError}</p>}
+            <button disabled={loginPending} className="rounded-lg bg-zinc-900 px-4 py-3 text-white">로그인</button>
+          </form>
+        )}
+        <a href="/" className="inline-block underline">공개 포트폴리오</a>
+      </main>
     );
   }
 

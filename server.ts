@@ -1,4 +1,5 @@
 import express from "express";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import path from "path";
 import fs from "fs";
 import { createServer as createViteServer } from "vite";
@@ -11,6 +12,54 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json({ limit: "20mb" }));
+
+const ownerPassword = process.env.PORTFOLIO_ADMIN_PASSWORD ?? "";
+const ownerEnabled = ownerPassword.length >= 32;
+const ownerCookie = "jmj_owner";
+const sessionSeconds = 8 * 60 * 60;
+
+function equalSecret(value: string, expected: string) {
+  const provided = Buffer.from(value);
+  const reference = Buffer.from(expected);
+  return provided.length === reference.length && timingSafeEqual(provided, reference);
+}
+
+function signSession(expires: string) {
+  return createHmac("sha256", ownerPassword).update(`jmj-owner:${expires}`).digest("hex");
+}
+
+function isOwner(req: express.Request) {
+  if (!ownerEnabled) return false;
+  const token = req.headers.cookie?.split(";").map(part => part.trim())
+    .find(part => part.startsWith(`${ownerCookie}=`))?.slice(ownerCookie.length + 1);
+  const match = token?.match(/^(\d{13})\.([a-f0-9]{64})$/);
+  return !!match && Number(match[1]) > Date.now() && equalSecret(match[2], signSession(match[1]));
+}
+
+app.get("/api/owner/session", (req, res) => {
+  res.set("Cache-Control", "no-store").json({ enabled: ownerEnabled, authorized: isOwner(req) });
+});
+
+app.post("/api/owner/login", (req, res) => {
+  res.set("Cache-Control", "no-store");
+  if (!ownerEnabled) return res.status(503).json({ error: "관리자 로그인이 설정되지 않았습니다." });
+  if (typeof req.body?.password !== "string" || !equalSecret(req.body.password, ownerPassword)) {
+    return res.status(401).json({ error: "관리자 비밀번호를 확인해 주세요." });
+  }
+  const expires = String(Date.now() + sessionSeconds * 1000);
+  return res.cookie(ownerCookie, `${expires}.${signSession(expires)}`, {
+    httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: sessionSeconds * 1000,
+  }).json({ success: true });
+});
+
+app.use("/api", (req, res, next) => {
+  if (["GET", "HEAD", "OPTIONS"].includes(req.method)) return next();
+  if (!isOwner(req)) return res.status(401).json({ error: "관리자 로그인이 필요합니다." });
+  if (req.get("Sec-Fetch-Site") === "cross-site" || !req.is("application/json")) {
+    return res.status(403).json({ error: "허용되지 않은 요청입니다." });
+  }
+  next();
+});
 
 const DATA_FILE = path.join(process.cwd(), "src", "data", "userArchiveData.json");
 
@@ -477,12 +526,15 @@ ${JSON.stringify(selectedProjects, null, 2)}
 });
 
 // Persistent Archive Data Store (Auto-saves to workspace file)
-app.get("/api/archive-data", (_req, res) => {
+app.get("/api/archive-data", (req, res) => {
+  res.set("Cache-Control", "no-store");
   try {
     if (fs.existsSync(DATA_FILE)) {
       const raw = fs.readFileSync(DATA_FILE, "utf-8");
       const data = JSON.parse(raw);
-      return res.json({ success: true, data });
+      if (isOwner(req)) return res.json({ success: true, data });
+      const { coverLetters, devLogs, ...publicData } = data;
+      return res.json({ success: true, data: publicData });
     }
     return res.json({ success: true, data: null });
   } catch (error: any) {

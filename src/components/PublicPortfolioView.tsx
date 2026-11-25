@@ -22,7 +22,7 @@ interface PublicPortfolioViewProps {
   projects: ProjectItem[];
   skills: TechSkill[];
   activities?: PortfolioActivity[];
-  onBackToArchive: () => void;
+  onBackToArchive?: () => void;
 }
 
 export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
@@ -53,12 +53,14 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
         
         {/* Navigation & Controls (Hidden in Print) */}
         <div className="flex items-center justify-between border-b border-zinc-200/80 pb-4 print:hidden">
+          {onBackToArchive && (
           <button
             onClick={onBackToArchive}
             className="text-xs sm:text-sm font-semibold text-zinc-600 hover:text-zinc-900 flex items-center space-x-1 transition-colors"
           >
             <span>← 아카이브 관리 모드로 돌아가기</span>
           </button>
+          )}
 
           <div className="flex items-center space-x-3">
             <span className="text-xs px-2.5 py-1 rounded-md bg-zinc-900 text-white font-mono font-medium">

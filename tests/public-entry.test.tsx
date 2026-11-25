@@ -21,11 +21,13 @@ test('the submitted portfolio URL opens the recruiter view', () => {
   assert.ok(html.includes('공모전·대외활동'));
   assert.ok(html.includes('학생설계전공 공모전'));
   assert.ok(!html.includes('AI 포트폴리오 코치'));
+  assert.ok(!html.includes('아카이브 관리 모드로 돌아가기'));
 });
 
-test('the management URL still opens the editing dashboard', () => {
+test('the management URL gates the editing dashboard', () => {
   Object.assign(globalThis, { window: { location: new URL('https://jmj-archive-portfolio.ai.studio/?view=manage') } });
   const html = renderToStaticMarkup(<App />);
-  assert.ok(html.includes('AI 포트폴리오 코치'));
+  assert.ok(html.includes('JMJ 관리자 로그인'));
+  assert.ok(!html.includes('AI 포트폴리오 코치'));
   assert.ok(!html.includes('Recruiter Mode'));
 });
