@@ -252,7 +252,7 @@ export const initialProjects: ProjectItem[] = [
       "공개용 이력서 뷰(Visitor Mode) 및 JSON/Markdown 내보내기"
     ],
     "githubUrl": "https://github.com/peach20040909/JMJ_Project_Archive",
-    "demoUrl": "https://jmj-archive-portfolio.ai.studio/",
+    "demoUrl": "https://jmj-archive.ai.studio/",
     "featured": true,
     "starBullets": [
       "[Situation] 분산된 1~2학년 학업 및 개발 산출물을 단일 플랫폼에서 체계화할 필요성 대두",

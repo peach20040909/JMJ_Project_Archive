@@ -2,7 +2,7 @@
 
 > 프로젝트를 만들고, 설계 판단과 문제 해결 과정을 기록하는 개발 포트폴리오입니다.
 
-[포트폴리오 사이트](https://jmj-archive-portfolio.ai.studio/) · [GitHub](https://github.com/peach20040909) · [이메일](mailto:a01027010769@gmail.com)
+[포트폴리오 사이트](https://jmj-archive.ai.studio/) · [GitHub](https://github.com/peach20040909) · [이메일](mailto:a01027010769@gmail.com)
 
 ## 프로젝트 소개
 
@@ -48,7 +48,7 @@ server.ts                         Express 서버 및 AI API
 
 기본 주소는 채용 담당자용 공개 화면으로 시작하도록 구성했습니다. 편집할 때는 `?view=manage`를 사용합니다. 이 설정은 소스를 다시 배포한 뒤 적용됩니다.
 
-[공개 포트폴리오](https://jmj-archive-portfolio.ai.studio/) · [관리 화면](https://jmj-archive-portfolio.ai.studio/?view=manage)
+[공개 포트폴리오](https://jmj-archive.ai.studio/) · [관리 화면](https://jmj-archive.ai.studio/?view=manage)
 
 ## 실행
 
@@ -85,4 +85,4 @@ node --import tsx --test tests/public-entry.test.tsx
 
 장민준 · 명지대학교 융합소프트웨어학부 데이터사이언스전공
 
-[GitHub](https://github.com/peach20040909) · [포트폴리오](https://jmj-archive-portfolio.ai.studio/) · [문의](mailto:a01027010769@gmail.com)
+[GitHub](https://github.com/peach20040909) · [포트폴리오](https://jmj-archive.ai.studio/) · [문의](mailto:a01027010769@gmail.com)
