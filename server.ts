@@ -11,6 +11,18 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 
+// The previous public address must no longer serve the portfolio or its API.
+app.use((req, res, next) => {
+  const hosts = [req.get("host"), req.get("x-forwarded-host")];
+  if (hosts.some(value => value?.split(",").some(host =>
+    host.trim().toLowerCase().split(":")[0] === "jmj-archive-portfolio.ai.studio"
+  ))) {
+    res.set("Cache-Control", "no-store").status(410).type("text/plain").send("This portfolio address has been retired.");
+    return;
+  }
+  next();
+});
+
 app.use(express.json({ limit: "20mb" }));
 
 const ownerPassword = process.env.PORTFOLIO_ADMIN_PASSWORD ?? "";
