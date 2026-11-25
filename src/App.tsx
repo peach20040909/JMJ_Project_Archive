@@ -39,6 +39,8 @@ import {
   MessageSquareCode,
   Sparkles,
   ArrowRight,
+  ArrowLeft,
+  LockKeyhole,
   Github,
   CheckCircle2,
   ExternalLink,
@@ -518,22 +520,64 @@ export default function App() {
 
   if (!ownerSession?.authorized) {
     return (
-      <main className="mx-auto max-w-sm space-y-4 px-5 py-16">
-        <h1 className="text-2xl font-bold">JMJ 관리자 로그인</h1>
-        {!ownerSession && <p>관리자 설정 확인 중…</p>}
-        {ownerSession && !ownerSession.enabled && <p>관리자 로그인이 아직 설정되지 않았습니다.</p>}
-        {ownerSession?.enabled && (
-          <form onSubmit={login} className="space-y-4">
-            <label className="block">
-              관리자 비밀번호
-              <input type="password" autoComplete="current-password" required value={ownerPassword}
-                onChange={event => setOwnerPassword(event.target.value)} className="mt-1 block w-full rounded-lg border p-3" />
-            </label>
-            {loginError && <p role="alert">{loginError}</p>}
-            <button disabled={loginPending} className="rounded-lg bg-zinc-900 px-4 py-3 text-white">로그인</button>
-          </form>
-        )}
-        <a href="/" className="inline-block underline">공개 포트폴리오</a>
+      <main className="grid min-h-dvh place-items-center bg-zinc-50 px-4 py-10 text-zinc-900 sm:px-6">
+        <div className="w-full max-w-sm">
+          <a href="/" className="mb-4 inline-flex min-h-11 items-center gap-2 rounded-md text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600">
+            <ArrowLeft aria-hidden="true" className="size-4" />
+            공개 포트폴리오
+          </a>
+
+          <section aria-labelledby="admin-login-heading" className="overflow-hidden rounded-2xl border border-zinc-200 bg-white shadow-sm">
+            <div className="border-b border-zinc-100 bg-gradient-to-br from-indigo-50 to-white px-6 py-7 sm:px-8">
+              <div aria-hidden="true" className="mb-5 flex size-11 items-center justify-center rounded-xl bg-zinc-900 text-xs font-bold tracking-wide text-white shadow-sm">
+                JMJ
+              </div>
+              <h1 id="admin-login-heading" className="text-2xl font-bold tracking-tight">JMJ 관리자 로그인</h1>
+              <p className="mt-2 text-sm leading-relaxed text-zinc-600">포트폴리오를 편집하려면 로그인하세요.</p>
+            </div>
+
+            <div className="px-6 py-6 sm:px-8">
+              {!ownerSession && <p role="status" className="text-sm text-zinc-600">관리자 설정 확인 중…</p>}
+              {ownerSession && !ownerSession.enabled && (
+                <p className="rounded-lg bg-zinc-100 p-3 text-sm text-zinc-700">관리자 로그인이 아직 설정되지 않았습니다.</p>
+              )}
+              {ownerSession?.enabled && (
+                <form onSubmit={login} aria-busy={loginPending} className="space-y-4">
+                  <div className="space-y-2">
+                    <label htmlFor="owner-password" className="block text-sm font-semibold">관리자 비밀번호</label>
+                    <div className="relative">
+                      <LockKeyhole aria-hidden="true" className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-zinc-500" />
+                      <input
+                        id="owner-password"
+                        name="password"
+                        type="password"
+                        autoComplete="current-password"
+                        required
+                        value={ownerPassword}
+                        onChange={event => setOwnerPassword(event.target.value)}
+                        aria-describedby={loginError ? 'admin-login-error' : undefined}
+                        className="block min-h-11 w-full rounded-lg border border-zinc-300 bg-white py-2.5 pl-10 pr-3 text-base outline-none focus:border-indigo-600 focus:ring-2 focus:ring-indigo-600/25"
+                      />
+                    </div>
+                  </div>
+                  {loginError && (
+                    <p id="admin-login-error" role="alert" className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-800">
+                      {loginError}
+                    </p>
+                  )}
+                  <button
+                    type="submit"
+                    disabled={loginPending}
+                    className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-indigo-600 disabled:cursor-wait disabled:bg-indigo-500"
+                  >
+                    {loginPending ? '로그인 중…' : '로그인'}
+                    <ArrowRight aria-hidden="true" className="size-4" />
+                  </button>
+                </form>
+              )}
+            </div>
+          </section>
+        </div>
       </main>
     );
   }

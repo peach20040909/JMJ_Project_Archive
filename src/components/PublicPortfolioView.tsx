@@ -6,6 +6,7 @@ import {
   ExternalLink, 
   Layers, 
   Printer, 
+  LockKeyhole,
   FolderGit2,
   Code2,
   ChevronDown,
@@ -52,7 +53,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
       <div className="max-w-4xl mx-auto space-y-8">
         
         {/* Navigation & Controls (Hidden in Print) */}
-        <div className="flex items-center justify-between border-b border-zinc-200/80 pb-4 print:hidden">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-200/80 pb-4 print:hidden">
           {onBackToArchive && (
           <button
             onClick={onBackToArchive}
@@ -62,7 +63,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
           </button>
           )}
 
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-xs px-2.5 py-1 rounded-md bg-zinc-900 text-white font-mono font-medium">
               Recruiter Mode
             </span>
@@ -73,6 +74,12 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
               <Printer className="w-3.5 h-3.5" />
               <span>PDF / 인쇄</span>
             </button>
+            {!onBackToArchive && (
+              <a href="/?view=manage" className="inline-flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 text-xs font-semibold text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500">
+                <LockKeyhole aria-hidden="true" className="h-3.5 w-3.5 shrink-0" />
+                관리자 로그인
+              </a>
+            )}
           </div>
         </div>
 
