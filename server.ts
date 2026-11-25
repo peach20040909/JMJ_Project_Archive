@@ -26,9 +26,13 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: "20mb" }));
 
 const ownerPassword = process.env.PORTFOLIO_ADMIN_PASSWORD ?? "";
-const ownerEnabled = ownerPassword.length >= 32;
+const ownerEnabled = ownerPassword.length >= 8;
 const ownerCookie = "jmj_owner";
 const sessionSeconds = 8 * 60 * 60;
+const loginWindowMs = 5 * 60 * 1000;
+const maxLoginFailures = 5;
+let loginWindowEnds = 0;
+let loginFailures = 0;
 
 function equalSecret(value: string, expected: string) {
   const provided = Buffer.from(value);
@@ -55,10 +59,24 @@ app.get("/api/owner/session", (req, res) => {
 app.post("/api/owner/login", (req, res) => {
   res.set("Cache-Control", "no-store");
   if (!ownerEnabled) return res.status(503).json({ error: "관리자 로그인이 설정되지 않았습니다." });
+  if (req.get("Sec-Fetch-Site") === "cross-site" || !req.is("application/json")) {
+    return res.status(403).json({ error: "허용되지 않은 요청입니다." });
+  }
+  const now = Date.now();
+  if (now >= loginWindowEnds) {
+    loginWindowEnds = now + loginWindowMs;
+    loginFailures = 0;
+  }
+  if (loginFailures >= maxLoginFailures) {
+    res.set("Retry-After", String(Math.ceil((loginWindowEnds - now) / 1000)));
+    return res.status(429).json({ error: "로그인 시도가 너무 많습니다. 잠시 후 다시 시도해 주세요." });
+  }
   if (typeof req.body?.password !== "string" || !equalSecret(req.body.password, ownerPassword)) {
+    loginFailures += 1;
     return res.status(401).json({ error: "관리자 비밀번호를 확인해 주세요." });
   }
-  const expires = String(Date.now() + sessionSeconds * 1000);
+  loginFailures = 0;
+  const expires = String(now + sessionSeconds * 1000);
   return res.cookie(ownerCookie, `${expires}.${signSession(expires)}`, {
     httpOnly: true, secure: true, sameSite: "strict", path: "/", maxAge: sessionSeconds * 1000,
   }).json({ success: true });
