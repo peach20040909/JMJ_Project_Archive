@@ -10,6 +10,13 @@ const outcomeStyles = {
   실무: 'bg-sky-50 text-sky-900 border-sky-200',
 };
 const kinds = ['전체', '실무', '수상', '선발', '진출', '참여'] as const;
+const activityOrder = new Map([
+  ['hackathon', 0],
+  ['ai-literacy', 1],
+  ['student-major', 2],
+  ['overseas', 3],
+]);
+
 export function filterActivities(items: PortfolioActivity[], kind: typeof kinds[number], search: string) {
   const query = search.trim().toLocaleLowerCase();
   return items.filter(item => (kind === '전체' || item.kind === kind) &&
@@ -29,7 +36,9 @@ export function ActivitiesSection({ items = initialActivities, awardsOnly = fals
   const [kind, setKind] = useState<typeof kinds[number]>('전체');
   const [search, setSearch] = useState('');
   const available = awardsOnly ? items.filter(item => item.kind === '수상') : items;
-  const visible = awardsOnly ? available : filterActivities(available, kind, search);
+  const visible = [...(awardsOnly ? available : filterActivities(available, kind, search))]
+    .sort((first, second) => (activityOrder.get(first.id) ?? activityOrder.size) -
+      (activityOrder.get(second.id) ?? activityOrder.size));
   return (
     <section aria-labelledby={headingId} className="space-y-5 scroll-mt-28" id="activities">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

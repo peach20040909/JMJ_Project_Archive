@@ -13,6 +13,10 @@ test('activities preserve selection stages and awards without prize amounts', ()
     assert.ok(html.includes(label), label);
   }
   assert.ok(!/상금|만원/.test(html));
+  const cards = html.split('</article>');
+  assert.deepEqual(cards.slice(0, 4).map(card => card.match(/<h3[^>]*>([^<]+)/)?.[1]), [
+    '명지대학교 AI 창의적 아이디어 해커톤', 'AI 리터러시 경진대회', '학생설계전공 공모전', '해외탐방',
+  ]);
   assert.equal(activities.find(item => item.id === 'ai-literacy')?.outcome, '우수상');
   assert.equal(activities.find(item => item.id === 'expressway-ai')?.outcome, '1차 심사 탈락');
 });
