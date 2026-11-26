@@ -363,7 +363,7 @@ export default function App() {
             if (Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
             if (Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
             if (d.profile) setProfile(d.profile);
-            if (d.projects) setProjects(upgradeSoloMapProject(d.projects));
+            if (d.projects) setProjects(upgradeSoloMapProject(upgradeHanmankeumProject(d.projects, d.activitiesVersion)));
             if (d.devLogs) setDevLogs(d.devLogs);
             if (d.coverLetters) setCoverLetters(d.coverLetters);
           }

@@ -13,7 +13,7 @@ export interface PortfolioActivity {
   tags?: string[];
 }
 
-export const ACTIVITIES_VERSION = 4;
+export const ACTIVITIES_VERSION = 5;
 export const academyExperience: PortfolioActivity = {
   id: 'j-english-ax', title: '제이영어학원', subtitle: '교육 현장의 반복 업무를 AI로 자동화한 AX 경험',
   kind: '실무', outcome: '재직 중 · AX',
@@ -32,7 +32,19 @@ export function upgradeActivities(items: PortfolioActivity[], version = 0): Port
   return existing.map(item => {
     const current = activities.find(activity => activity.id === item.id);
     if (!current) return item;
-    if (version < 4 && ['startup', 'ai-literacy'].includes(item.id)) {
+    if (item.id === 'ai-literacy') {
+      if (version < 4) return { ...item, ...current, title: item.title };
+      return {
+        ...item,
+        kind: current.kind,
+        outcome: current.outcome,
+        stages: item.stages.includes('우수상 수상') ? item.stages : [...item.stages, '우수상 수상'],
+        status: current.status,
+        summary: item.summary?.includes('우수상') ? item.summary : item.summary ? item.summary + ' 결선에서 우수상을 수상했습니다.' : current.summary,
+        note: item.note?.replace('최종 심사 결과는 확정 후 별도 갱신합니다.', '2026년 11월 26일 결선 발표 후 우수상을 수상했습니다.') ?? current.note,
+      };
+    }
+    if (version < 4 && item.id === 'startup') {
       return { ...item, ...current, title: item.title, status: item.status ?? current.status };
     }
     return { ...current, ...item,
@@ -94,9 +106,9 @@ export const activities: PortfolioActivity[] = [
   {
     "id": "ai-literacy",
     "title": "AI 리터러시 경진대회",
-    "kind": "진출",
+    "kind": "수상",
     "subtitle": "한만큼 · 서비스 구현",
-    "summary": "창업 아이디어를 실제 배포 서비스로 발전시키며 UX·UI와 사이트 구현을 총괄했습니다. AI는 기록 정리·분류를 돕고, 원본 확인과 최종 판단은 교수가 맡도록 설계했습니다.",
+    "summary": "창업 아이디어를 실제 배포 서비스로 발전시키며 UX·UI와 사이트 구현을 총괄했습니다. AI는 기록 정리·분류를 돕고, 원본 확인과 최종 판단은 교수가 맡도록 설계한 이 서비스로 우수상을 수상했습니다.",
     "role": "UX·UI 설계 및 사이트 구현 총괄 · 시연 영상·최종결과물 제작",
     "tags": [
       "AI 검증",
@@ -105,13 +117,14 @@ export const activities: PortfolioActivity[] = [
       "Turso",
       "Claude API"
     ],
-    "outcome": "결선 진출",
+    "outcome": "우수상",
     "stages": [
       "1차 서류 합격",
-      "결선 진출"
+      "결선 진출",
+      "우수상 수상"
     ],
-    "status": "11.26 결선 발표 예정 · 11.19 최종 제출 마감",
-    "note": "명지대 AI 리터러시 경진대회 · 박서준(팀장), 장민준, 김효준의 3인 팀\n\n• 아이디어에서 구현으로: 창업경진대회의 목업을 실제 배포 서비스(hanmankeum.vercel.app)로 발전시켰습니다. UX·UI 설계와 사이트 구현을 총괄하고 시연 영상·최종결과물을 제작했습니다.\n• 교수 기준 존중: 서비스가 정한 유형 대신 교수가 원래 쓰던 평가기준을 AI가 정리하고, 교수가 수정·확정하는 방식으로 바꿨습니다. AI의 기준 정리·기록 분류·근거 요약·자기 기술은 모두 사람이 확인하는 초안이며 서비스는 성적을 산출하지 않습니다.\n• AI 검증: AI 분류와 규칙 판단이 엇갈리면 ‘확인 필요’로 올려 교수가 원본을 보고 결정하도록 했습니다. 사람이 수정한 뒤에도 AI의 원래 판단을 보존합니다.\n• 사용 투명성: 기록마다 AI 도움을 표시하고, 요약 문장에 근거 기록 번호 인용을 필수로 했습니다. 인용이 없는 문장은 서버가 제외하며 자기 기술은 AI 초안 대비 수정률을 기록합니다.\n• 프롬프트 관리: criteria-draft-v2, criteria-classify-v1, summary-v1, selfdraft-v2를 버전별로 관리하고 별도 프롬프트 문서로 제출합니다.\n• 기술·결과물: Node.js, Vercel, Turso(libSQL), Anthropic Claude API(claude-haiku), GitHub REST API, Notion Webhook, Playwright를 사용했습니다. 학생별 기여율·계산 근거·원본 링크를 담은 교수용 근거 리포트 PDF, 1분 시연 영상, 최종결과물 PDF(17쪽), 프롬프트 PDF(16쪽), 발표 PPT를 제작했습니다. 서비스 테스트는 22개입니다.\n\n창업 버전의 사업화 전략에서 AI를 검증하며 사용하는 실제 서비스로 초점을 옮겼습니다. 최종 심사 결과는 확정 후 별도 갱신합니다."
+    "status": "2026.11.26 결선 발표 · 우수상 수상",
+    "note": "명지대 AI 리터러시 경진대회 · 박서준(팀장), 장민준, 김효준의 3인 팀\n\n• 아이디어에서 구현으로: 창업경진대회의 목업을 실제 배포 서비스(hanmankeum.vercel.app)로 발전시켰습니다. UX·UI 설계와 사이트 구현을 총괄하고 시연 영상·최종결과물을 제작했습니다.\n• 교수 기준 존중: 서비스가 정한 유형 대신 교수가 원래 쓰던 평가기준을 AI가 정리하고, 교수가 수정·확정하는 방식으로 바꿨습니다. AI의 기준 정리·기록 분류·근거 요약·자기 기술은 모두 사람이 확인하는 초안이며 서비스는 성적을 산출하지 않습니다.\n• AI 검증: AI 분류와 규칙 판단이 엇갈리면 ‘확인 필요’로 올려 교수가 원본을 보고 결정하도록 했습니다. 사람이 수정한 뒤에도 AI의 원래 판단을 보존합니다.\n• 사용 투명성: 기록마다 AI 도움을 표시하고, 요약 문장에 근거 기록 번호 인용을 필수로 했습니다. 인용이 없는 문장은 서버가 제외하며 자기 기술은 AI 초안 대비 수정률을 기록합니다.\n• 프롬프트 관리: criteria-draft-v2, criteria-classify-v1, summary-v1, selfdraft-v2를 버전별로 관리하고 별도 프롬프트 문서로 제출합니다.\n• 기술·결과물: Node.js, Vercel, Turso(libSQL), Anthropic Claude API(claude-haiku), GitHub REST API, Notion Webhook, Playwright를 사용했습니다. 학생별 기여율·계산 근거·원본 링크를 담은 교수용 근거 리포트 PDF, 1분 시연 영상, 최종결과물 PDF(17쪽), 프롬프트 PDF(16쪽), 발표 PPT를 제작했습니다. 서비스 테스트는 22개입니다.\n\n창업 버전의 사업화 전략에서 AI를 검증하며 사용하는 실제 서비스로 초점을 옮겼습니다. 2026년 11월 26일 결선 발표 후 우수상을 수상했습니다."
   },
   {
     id: 'expressway-ai', title: '한국도로공사 AI 활용 공모전', kind: '참여',

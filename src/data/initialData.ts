@@ -122,7 +122,7 @@ export const initialProjects: ProjectItem[] = [
     "summary": "교수의 기존 평가기준과 협업 기록을 연결하는 근거 리포트 서비스. AI 초안을 사람이 검증하며, 성적을 대신 산출하지 않습니다.",
     "category": "AI/Data",
     "semester": "2학년 2학기",
-    "period": "2026.09 - 2026.11.26 (발표·종료 예정)",
+    "period": "2026.09 - 2026.11.26",
     "teamType": "팀 (3명)",
     "role": "UX·UI 설계 및 사이트 구현 총괄 · 시연 영상·최종결과물 제작",
     "techStack": [
@@ -136,7 +136,7 @@ export const initialProjects: ProjectItem[] = [
     ],
     "problemDescription": "팀 과제의 결과물만으로는 개인별 기여 과정을 파악하기 어렵습니다. 교수 4인의 이메일 서면 인터뷰를 바탕으로 확인 가능한 작업 근거를 제공하는 아이디어를 출발점으로 삼았습니다.",
     "solutionDescription": "교수의 기존 평가기준을 AI가 정리하고 교수가 수정·확정합니다. 기록 분류·근거 요약·자기 기술은 사람의 검토를 거치는 초안이며, AI와 규칙 판단이 엇갈리면 원본 확인을 요청합니다. 서비스는 성적을 산출하지 않습니다.",
-    "resultDescription": "창업경진대회에서는 UI 목업·사업 계획으로 본선에 진출했습니다. 이후 3인 팀의 AI 리터러시 경진대회 버전으로 실제 서비스를 Vercel에 배포하고 결선에 진출했습니다. 근거 리포트 PDF, 시연 영상과 제출물을 제작했으며 최종 심사 결과는 미확정입니다.",
+    "resultDescription": "창업경진대회에서는 UI 목업·사업 계획으로 본선에 진출했습니다. 이후 3인 팀의 AI 리터러시 경진대회 버전으로 실제 서비스를 Vercel에 배포하고 결선에 진출했습니다. 근거 리포트 PDF, 시연 영상과 제출물을 제작했고 2026년 11월 26일 결선에서 우수상을 수상했습니다.",
     "keyFeatures": [
       "교수의 기존 평가기준 정리·수정·확정",
       "GitHub REST API·Notion Webhook 기반 작업 기록 연결",
@@ -152,10 +152,10 @@ export const initialProjects: ProjectItem[] = [
       "[Situation] 팀 과제 평가에 참고할 확인 가능한 작업 근거가 필요했습니다.",
       "[Task] 창업 아이디어를 실제 서비스로 발전시키며 UX·UI 설계와 사이트 구현을 총괄했습니다.",
       "[Action] 교수 기준 확정, AI·규칙 불일치 검수, 요약 근거 인용 검증과 원래 AI 판단 보존을 서비스에 반영했습니다.",
-      "[Result] Vercel·Turso 기반 서비스와 PDF·시연 영상을 제작해 AI 리터러시 경진대회 결선에 진출했습니다."
+      "[Result] Vercel·Turso 기반 서비스와 PDF·시연 영상을 제작해 AI 리터러시 경진대회에서 우수상을 수상했습니다."
     ],
-    "troubleshootingStory": "# 한만큼: 아이디어에서 AI를 검증하는 서비스로\n\n## 창업 아이디어 단계\nMJU 창업 아이디어 경진대회 · HMK 5인 팀\n\n• 문제 발견: 2026.09.10~11 명지대 교수 4인의 이메일 서면 인터뷰를 설계·진행했습니다. 설명과 생각이 다를 때 조정이 어렵고, 작업 기록을 참고 자료로 활용할 의향이 있다는 답변을 바탕으로 공정한 평가에 필요한 확인 가능한 근거에 집중했습니다.\n• 서비스 기획: 학기 초 도구 연결·템플릿 선택 후 팀이 유형별 가중치에 합의하고 기준을 잠그는 흐름을 화면 목업으로 제안했습니다. GitHub·Notion·Docs 기록 수집과 기획·제작·QA·발표자료·조율 분류는 이 단계의 기획안입니다. 학기 중 점수·순위는 공개하지 않도록 설계했습니다.\n• 산출 모델: 마감 후 개인 비중 = Σ(유형 가중치 × 유형 내 활동 비중)을 원자료와 함께 확인하는 방식을 제안했습니다. 온라인 기록 0%는 실제 기여 0%를 의미하지 않으며, 학생 서술과 교수 관측은 수치에 합산하지 않습니다.\n• 사업 모델: 교수 무료 체험(1분반·최대 5팀) → 팀 수 기준 학과 구독 → 대학 계약·LMS 연동을 검토했습니다. 교내 창업지원·예비창업패키지·민간 투자 순의 자금 계획과 3·6·12개월 검증 로드맵을 구성했습니다. 기존 LMS와 협업 도구 통계를 보완하는 서비스로 포지셔닝했습니다.\n• 팀 구성: 박서준(팀장·기획/PM), 장민준(현장 조사), 김효준(기획·산출 모델), 김유민(자료 조사), 양우림(기획 지원).\n\n완성도는 예시 데이터를 사용한 UI 목업·사업 계획 단계입니다. 이후 AI 리터러시 경진대회에서 실제 서비스 구현과 AI 검증 설계로 발전시켰습니다.\n\n## 실제 구현 단계\n명지대 AI 리터러시 경진대회 · 박서준(팀장), 장민준, 김효준의 3인 팀\n\n• 아이디어에서 구현으로: 창업경진대회의 목업을 실제 배포 서비스(hanmankeum.vercel.app)로 발전시켰습니다. UX·UI 설계와 사이트 구현을 총괄하고 시연 영상·최종결과물을 제작했습니다.\n• 교수 기준 존중: 서비스가 정한 유형 대신 교수가 원래 쓰던 평가기준을 AI가 정리하고, 교수가 수정·확정하는 방식으로 바꿨습니다. AI의 기준 정리·기록 분류·근거 요약·자기 기술은 모두 사람이 확인하는 초안이며 서비스는 성적을 산출하지 않습니다.\n• AI 검증: AI 분류와 규칙 판단이 엇갈리면 ‘확인 필요’로 올려 교수가 원본을 보고 결정하도록 했습니다. 사람이 수정한 뒤에도 AI의 원래 판단을 보존합니다.\n• 사용 투명성: 기록마다 AI 도움을 표시하고, 요약 문장에 근거 기록 번호 인용을 필수로 했습니다. 인용이 없는 문장은 서버가 제외하며 자기 기술은 AI 초안 대비 수정률을 기록합니다.\n• 프롬프트 관리: criteria-draft-v2, criteria-classify-v1, summary-v1, selfdraft-v2를 버전별로 관리하고 별도 프롬프트 문서로 제출합니다.\n• 기술·결과물: Node.js, Vercel, Turso(libSQL), Anthropic Claude API(claude-haiku), GitHub REST API, Notion Webhook, Playwright를 사용했습니다. 학생별 기여율·계산 근거·원본 링크를 담은 교수용 근거 리포트 PDF, 1분 시연 영상, 최종결과물 PDF(17쪽), 프롬프트 PDF(16쪽), 발표 PPT를 제작했습니다. 서비스 테스트는 22개입니다.\n\n창업 버전의 사업화 전략에서 AI를 검증하며 사용하는 실제 서비스로 초점을 옮겼습니다. 최종 심사 결과는 확정 후 별도 갱신합니다.",
-    "updatedAt": "2026-11-16"
+    "troubleshootingStory": "# 한만큼: 아이디어에서 AI를 검증하는 서비스로\n\n## 창업 아이디어 단계\nMJU 창업 아이디어 경진대회 · HMK 5인 팀\n\n• 문제 발견: 2026.09.10~11 명지대 교수 4인의 이메일 서면 인터뷰를 설계·진행했습니다. 설명과 생각이 다를 때 조정이 어렵고, 작업 기록을 참고 자료로 활용할 의향이 있다는 답변을 바탕으로 공정한 평가에 필요한 확인 가능한 근거에 집중했습니다.\n• 서비스 기획: 학기 초 도구 연결·템플릿 선택 후 팀이 유형별 가중치에 합의하고 기준을 잠그는 흐름을 화면 목업으로 제안했습니다. GitHub·Notion·Docs 기록 수집과 기획·제작·QA·발표자료·조율 분류는 이 단계의 기획안입니다. 학기 중 점수·순위는 공개하지 않도록 설계했습니다.\n• 산출 모델: 마감 후 개인 비중 = Σ(유형 가중치 × 유형 내 활동 비중)을 원자료와 함께 확인하는 방식을 제안했습니다. 온라인 기록 0%는 실제 기여 0%를 의미하지 않으며, 학생 서술과 교수 관측은 수치에 합산하지 않습니다.\n• 사업 모델: 교수 무료 체험(1분반·최대 5팀) → 팀 수 기준 학과 구독 → 대학 계약·LMS 연동을 검토했습니다. 교내 창업지원·예비창업패키지·민간 투자 순의 자금 계획과 3·6·12개월 검증 로드맵을 구성했습니다. 기존 LMS와 협업 도구 통계를 보완하는 서비스로 포지셔닝했습니다.\n• 팀 구성: 박서준(팀장·기획/PM), 장민준(현장 조사), 김효준(기획·산출 모델), 김유민(자료 조사), 양우림(기획 지원).\n\n완성도는 예시 데이터를 사용한 UI 목업·사업 계획 단계입니다. 이후 AI 리터러시 경진대회에서 실제 서비스 구현과 AI 검증 설계로 발전시켰습니다.\n\n## 실제 구현 단계\n명지대 AI 리터러시 경진대회 · 박서준(팀장), 장민준, 김효준의 3인 팀\n\n• 아이디어에서 구현으로: 창업경진대회의 목업을 실제 배포 서비스(hanmankeum.vercel.app)로 발전시켰습니다. UX·UI 설계와 사이트 구현을 총괄하고 시연 영상·최종결과물을 제작했습니다.\n• 교수 기준 존중: 서비스가 정한 유형 대신 교수가 원래 쓰던 평가기준을 AI가 정리하고, 교수가 수정·확정하는 방식으로 바꿨습니다. AI의 기준 정리·기록 분류·근거 요약·자기 기술은 모두 사람이 확인하는 초안이며 서비스는 성적을 산출하지 않습니다.\n• AI 검증: AI 분류와 규칙 판단이 엇갈리면 ‘확인 필요’로 올려 교수가 원본을 보고 결정하도록 했습니다. 사람이 수정한 뒤에도 AI의 원래 판단을 보존합니다.\n• 사용 투명성: 기록마다 AI 도움을 표시하고, 요약 문장에 근거 기록 번호 인용을 필수로 했습니다. 인용이 없는 문장은 서버가 제외하며 자기 기술은 AI 초안 대비 수정률을 기록합니다.\n• 프롬프트 관리: criteria-draft-v2, criteria-classify-v1, summary-v1, selfdraft-v2를 버전별로 관리하고 별도 프롬프트 문서로 제출합니다.\n• 기술·결과물: Node.js, Vercel, Turso(libSQL), Anthropic Claude API(claude-haiku), GitHub REST API, Notion Webhook, Playwright를 사용했습니다. 학생별 기여율·계산 근거·원본 링크를 담은 교수용 근거 리포트 PDF, 1분 시연 영상, 최종결과물 PDF(17쪽), 프롬프트 PDF(16쪽), 발표 PPT를 제작했습니다. 서비스 테스트는 22개입니다.\n\n창업 버전의 사업화 전략에서 AI를 검증하며 사용하는 실제 서비스로 초점을 옮겼습니다. 2026년 11월 26일 결선 발표 후 우수상을 수상했습니다.",
+    "updatedAt": "2026-11-26"
   },
   {
     "id": "proj-1787068386336",
@@ -540,9 +540,19 @@ export const initialCoverLetters: CoverLetterItem[] = [
 
 // Apply this owner-requested revision once; preserve later edits and deleted projects.
 export function upgradeHanmankeumProject(items: ProjectItem[], activitiesVersion = 0): ProjectItem[] {
-  if (activitiesVersion >= 4) return items;
+  if (activitiesVersion >= 5) return items;
   const current = initialProjects.find(project => project.id === 'proj-hmk-2026')!;
-  return items.map(item => item.id === current.id ? { ...item, ...current, title: item.title, featured: item.featured } : item);
+  return items.map(item => {
+    if (item.id !== current.id) return item;
+    if (activitiesVersion < 4) return { ...item, ...current, title: item.title, featured: item.featured };
+    return {
+      ...item,
+      period: current.period,
+      resultDescription: current.resultDescription,
+      starBullets: item.starBullets?.map(entry => entry.replace('PDF·시연 영상을 제작해 AI 리터러시 경진대회 결선에 진출했습니다.', 'PDF·시연 영상을 제작해 AI 리터러시 경진대회에서 우수상을 수상했습니다.')),
+      troubleshootingStory: item.troubleshootingStory?.replace('최종 심사 결과는 확정 후 별도 갱신합니다.', '2026년 11월 26일 결선 발표 후 우수상을 수상했습니다.'),
+    };
+  });
 }
 
 // Refresh the completed SoloMap revision once without restoring deleted projects.
