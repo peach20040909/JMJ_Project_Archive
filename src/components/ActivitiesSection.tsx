@@ -1,5 +1,5 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
-import { Award, Trophy, BadgeCheck, ArrowUpRight, ChevronRight, BriefcaseBusiness, Search, X } from 'lucide-react';
+import { Award, Trophy, BadgeCheck, ArrowUpRight, ChevronRight, BriefcaseBusiness, Search, X, Github, ExternalLink } from 'lucide-react';
 import { activities as initialActivities, PortfolioActivity } from '../data/activities';
 
 const outcomeStyles = {
@@ -149,9 +149,32 @@ export function ActivitiesSection({ items = initialActivities, awardsOnly = fals
 }
 
 function ActivityDetails({ activity }: { activity: PortfolioActivity }) {
+  const links = [
+    { href: activity.githubUrl, label: 'GitHub', Icon: Github },
+    { href: activity.demoUrl, label: '라이브 데모', Icon: ExternalLink },
+  ].filter(link => link.href && /^https?:\/\//i.test(link.href));
   return (
     <div className="space-y-4 break-words text-sm leading-relaxed text-zinc-700">
       {activity.summary && <p>{activity.summary}</p>}
+      {links.length > 0 && (
+        <div className="space-y-2">
+          {activity.id === 'startup' && <p className="text-xs font-medium text-zinc-600">후속 구현 · 한만큼</p>}
+          <div className="flex flex-wrap gap-2">
+            {links.map(({ href, label, Icon }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex min-h-11 items-center gap-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm font-semibold text-zinc-800 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+              >
+                <Icon aria-hidden="true" className="size-4" />
+                {label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
       {activity.status && <p><span className="font-semibold text-zinc-800">진행 상태</span><br />{activity.status}</p>}
       {activity.period && <p className="text-xs text-zinc-500">{activity.period}</p>}
       {activity.tags && activity.tags.length > 0 && <div className="flex flex-wrap gap-1.5">{activity.tags.map(tag => <span key={tag} className="rounded border border-zinc-100 bg-zinc-50 px-2 py-0.5 text-xs text-zinc-600">{tag}</span>)}</div>}

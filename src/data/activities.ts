@@ -11,9 +11,11 @@ export interface PortfolioActivity {
   status?: string;
   role?: string;
   tags?: string[];
+  githubUrl?: string;
+  demoUrl?: string;
 }
 
-export const ACTIVITIES_VERSION = 5;
+export const ACTIVITIES_VERSION = 6;
 export const academyExperience: PortfolioActivity = {
   id: 'j-english-ax', title: '제이영어학원', subtitle: '교육 현장의 반복 업무를 AI로 자동화한 AX 경험',
   kind: '실무', outcome: '재직 중 · AX',
@@ -25,13 +27,22 @@ export const academyExperience: PortfolioActivity = {
   note: '학교별 시험 범위에 맞춘 자료 편집, 교재 합본 제작, 학습 관리 등 실제 학원 운영 업무를 맡으며 반복되는 작업을 자동화했습니다.\n\n• 자료 편집·합본 자동화: 여러 교육 자료를 내려받고 시험 범위에 맞게 편집·통합하는 작업에 AI를 활용했습니다.\n• 변형문제 생성기: GPT·Codex로 유형별 문제 생성기를 제작하고, 문제 유형별 지침과 DB 구조를 구체화했습니다. 12개 지문에서 36문제를 생성해 문제·해설 자료로 정리한 업무 기록이 있습니다.\n• AI 보조 검수: 생성 문제와 기존 교재의 정답·해설을 GPT로 점검하고, 오류를 확인·수정했습니다.\n• 학원 DB 기반 워크스페이스: 교육 자료와 업무 흐름을 연결하는 전체 워크스페이스를 설계했습니다.\n\n근무 기간 중 2024.03 ~ 2025.09는 군 복무로 제외하며, 전역 후 학원 업무에 복귀했습니다.',
 };
 
+const legacyHackathonNote = "위치 기반 AI 타임캡슐 서비스 고리(Go:RE)를 6인 팀으로 개발했습니다. 웹앱 구현과 API 연동을 담당했으며, 명지대학교 AI 창의적 아이디어 해커톤에서 우수상을 수상했습니다.";
+
 // Add the academy once, then enrich older records without restoring intentionally deleted entries.
 export function upgradeActivities(items: PortfolioActivity[], version = 0): PortfolioActivity[] {
   if (version >= ACTIVITIES_VERSION) return items;
   const existing = version < 2 && !items.some(item => item.id === academyExperience.id) ? [...items, academyExperience] : items;
-  return existing.map(item => {
-    const current = activities.find(activity => activity.id === item.id);
-    if (!current) return item;
+  return existing.map(saved => {
+    const current = activities.find(activity => activity.id === saved.id);
+    if (!current) return saved;
+    const item = {
+      ...saved,
+      githubUrl: saved.githubUrl ?? current.githubUrl,
+      demoUrl: saved.demoUrl ?? current.demoUrl,
+      note: saved.id === 'hackathon' && (!saved.note || saved.note === legacyHackathonNote) ? current.note : saved.note,
+    };
+    if (version >= 5) return item;
     if (item.id === 'ai-literacy') {
       if (version < 4) return { ...item, ...current, title: item.title };
       return {
@@ -59,11 +70,12 @@ export function upgradeActivities(items: PortfolioActivity[], version = 0): Port
 export const activities: PortfolioActivity[] = [
   academyExperience,
   {
+    githubUrl: 'https://github.com/peach20040909/GoRe', demoUrl: 'https://go-re.vercel.app/',
     id: 'hackathon', title: '명지대학교 AI 창의적 아이디어 해커톤',
     subtitle: '고리(Go:RE)', kind: '수상', outcome: '우수상',
     summary: '위치 기반 AI 타임캡슐 서비스 ‘고리’를 출품해 우수상을 수상했습니다. 장소에 남긴 사진과 편지를 다시 방문해 확인하는 웹 서비스를 팀으로 구현했습니다.',
     role: '메인 개발 · 웹앱 구현 및 API 연동', tags: ['웹 서비스', 'AI 활용', '팀 프로젝트'],
-    note: '위치 기반 AI 타임캡슐 서비스 고리(Go:RE)를 6인 팀으로 개발했습니다. 웹앱 구현과 API 연동을 담당했으며, 명지대학교 AI 창의적 아이디어 해커톤에서 우수상을 수상했습니다.',
+    note: '관광지에 물리적인 흔적을 남기지 않고도 방문 당시의 기억을 보관하고, 다시 찾아왔을 때 꺼내 볼 수 있도록 설계했습니다.\n\n• 현장 기록: 지도에서 장소를 찾고 GPS와 현장 사진으로 방문을 확인한 뒤, 사진과 편지를 디지털 고리에 담습니다. 날짜·계절·재방문 등 열림 조건을 선택할 수 있습니다.\n• 재방문 경험: 재방문 조건을 선택한 기록은 GPS와 새 사진으로 같은 장소인지 확인합니다. 기록이 열리면 AI가 두 시점의 사진과 기록을 비교해 재회 리포트를 생성합니다.\n• 담당 구현: 6인 팀의 메인 개발자로서 Next.js 웹앱, Supabase 데이터·사진 저장, NAVER Maps와 GPS, GPT-4o mini 사진·텍스트 분석을 연결했습니다. 장소별 3D 연출과 4개 언어 UI를 구현하고 Vercel에 배포했습니다.',
     stages: ['해커톤 참여', '우수상 수상'],
   },
   {
@@ -77,6 +89,7 @@ export const activities: PortfolioActivity[] = [
     stages: ['1차 서류 합격', '본선 은상 수상'],
   },
   {
+    githubUrl: 'https://github.com/peach20040909/mobility-field-lab', demoUrl: 'https://peach20040909.github.io/mobility-field-lab/',
     id: 'overseas', title: '해외탐방', subtitle: 'Mobility Field Lab',
     kind: '선발', outcome: '최종 합격',
     summary: '해외탐방 최종 선발 후 서울과 유럽의 공유 이동수단을 같은 기준으로 조사할 웹앱을 준비하고 있습니다. 현장 사진·독립 검수·지도·지표를 연결하는 조사 흐름을 구현했습니다.',
@@ -84,6 +97,8 @@ export const activities: PortfolioActivity[] = [
     note: '해외 현장조사에 사용할 기록·검수·분석 플랫폼을 준비하고 있습니다.',
   },
   {
+    "githubUrl": "https://github.com/peach20040909/hanmankeum",
+    "demoUrl": "https://hanmankeum.vercel.app/",
     "id": "startup",
     "title": "창업경진대회",
     "kind": "진출",
@@ -104,6 +119,8 @@ export const activities: PortfolioActivity[] = [
     "note": "MJU 창업 아이디어 경진대회 · HMK 5인 팀\n\n• 문제 발견: 2026.09.10~11 명지대 교수 4인의 이메일 서면 인터뷰를 설계·진행했습니다. 설명과 생각이 다를 때 조정이 어렵고, 작업 기록을 참고 자료로 활용할 의향이 있다는 답변을 바탕으로 공정한 평가에 필요한 확인 가능한 근거에 집중했습니다.\n• 서비스 기획: 학기 초 도구 연결·템플릿 선택 후 팀이 유형별 가중치에 합의하고 기준을 잠그는 흐름을 화면 목업으로 제안했습니다. GitHub·Notion·Docs 기록 수집과 기획·제작·QA·발표자료·조율 분류는 이 단계의 기획안입니다. 학기 중 점수·순위는 공개하지 않도록 설계했습니다.\n• 산출 모델: 마감 후 개인 비중 = Σ(유형 가중치 × 유형 내 활동 비중)을 원자료와 함께 확인하는 방식을 제안했습니다. 온라인 기록 0%는 실제 기여 0%를 의미하지 않으며, 학생 서술과 교수 관측은 수치에 합산하지 않습니다.\n• 사업 모델: 교수 무료 체험(1분반·최대 5팀) → 팀 수 기준 학과 구독 → 대학 계약·LMS 연동을 검토했습니다. 교내 창업지원·예비창업패키지·민간 투자 순의 자금 계획과 3·6·12개월 검증 로드맵을 구성했습니다. 기존 LMS와 협업 도구 통계를 보완하는 서비스로 포지셔닝했습니다.\n• 팀 구성: 박서준(팀장·기획/PM), 장민준(현장 조사), 김효준(기획·산출 모델), 김유민(자료 조사), 양우림(기획 지원).\n\n완성도는 예시 데이터를 사용한 UI 목업·사업 계획 단계입니다. 이후 AI 리터러시 경진대회에서 실제 서비스 구현과 AI 검증 설계로 발전시켰습니다."
   },
   {
+    "githubUrl": "https://github.com/peach20040909/hanmankeum",
+    "demoUrl": "https://hanmankeum.vercel.app/",
     "id": "ai-literacy",
     "title": "AI 리터러시 경진대회",
     "kind": "수상",
