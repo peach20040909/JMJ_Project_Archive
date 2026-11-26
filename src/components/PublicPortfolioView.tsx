@@ -198,7 +198,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
                       <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-xs font-medium border border-zinc-200">
                         {project.semester}
                       </span>
-                      {(project.period?.includes('진행') || project.resultDescription?.includes('진행 중') || project.id === 'proj-hmk-2026' || project.id === 'proj-kickboard-2026') ? (
+                      {(project.period?.includes('진행') || project.resultDescription?.includes('진행 중') || project.id === 'proj-kickboard-2026') ? (
                         <span className="px-2 py-0.5 rounded bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">
                           진행 중
                         </span>
