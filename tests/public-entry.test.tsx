@@ -18,8 +18,9 @@ test('the submitted portfolio URL opens the recruiter view', () => {
   const html = renderToStaticMarkup(<App />);
   assert.ok(html.includes('Recruiter Mode'), 'visitors must see the public portfolio immediately');
   assert.ok(html.includes('Mobility Field Lab'));
-  assert.ok(html.includes('AI 서비스 개발 · 업무 자동화 · AI 출력 검증'));
-  assert.ok(html.includes('일하던 학원에서는 시험 자료 편집과 합본 제작을 자동화했습니다.'));
+  assert.ok(html.includes('AI 서비스 개발 · 문제 정의 · 결과 검증'));
+  assert.ok(html.includes('실제 문제를 찾아 AI로 해결하고, 그 결과가 사용자에게 도움이 되는지 검증하는 개발자 장민준입니다.'));
+  assert.ok(!html.includes('일하던 학원에서는') && !html.includes('한만큼에서는 AI가 협업 기록을'));
   assert.ok(!html.includes('제이영어학원'));
   assert.ok(html.includes('공모전·대외활동'));
   assert.ok(html.includes('학생설계전공 공모전'));
