@@ -15,9 +15,9 @@ export interface PortfolioActivity {
   demoUrl?: string;
 }
 
-export const ACTIVITIES_VERSION = 6;
+export const ACTIVITIES_VERSION = 7;
 export const academyExperience: PortfolioActivity = {
-  id: 'j-english-ax', title: '제이영어학원', subtitle: '교육 현장의 반복 업무를 AI로 자동화한 AX 경험',
+  id: 'j-english-ax', title: '학원 업무 자동화', subtitle: '교육 현장의 반복 업무를 AI로 자동화한 AX 경험',
   kind: '실무', outcome: '재직 중 · AX',
   summary: '학교별 시험 자료 편집·합본 제작의 반복 업무를 AI로 자동화했습니다. GPT·Codex로 변형문제 생성기를 제작하고 학원 DB 기반 워크스페이스를 설계했습니다.',
   period: '2023.03 ~ 현재 · 2027.02 종료 예정',
@@ -38,6 +38,7 @@ export function upgradeActivities(items: PortfolioActivity[], version = 0): Port
     if (!current) return saved;
     const item = {
       ...saved,
+      title: saved.id === academyExperience.id && saved.title === '제이영어학원' ? academyExperience.title : saved.title,
       githubUrl: saved.githubUrl ?? current.githubUrl,
       demoUrl: saved.demoUrl ?? current.demoUrl,
       note: saved.id === 'hackathon' && (!saved.note || saved.note === legacyHackathonNote) ? current.note : saved.note,

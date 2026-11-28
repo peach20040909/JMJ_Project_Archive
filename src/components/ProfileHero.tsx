@@ -101,7 +101,7 @@ export const ProfileHero: React.FC<ProfileHeroProps> = ({
             </p>
 
             {/* Bio */}
-            <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed max-w-2xl whitespace-pre-line">
               {profile.bio}
             </p>
 

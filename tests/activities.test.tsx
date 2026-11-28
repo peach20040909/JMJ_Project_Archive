@@ -26,14 +26,14 @@ test('dashboard summary shows awards only and supports an empty award list', () 
   assert.ok(html.includes('수상 이력') && html.includes('AI 리터러시 경진대회'));
   assert.ok(html.includes('우수상') && html.includes('은상'));
   assert.doesNotMatch(html, />\s*(창업경진대회|해외탐방)\s*<\/h[1-6]>/);
-  assert.ok(!html.includes('제이영어학원'));
+  assert.ok(!html.includes('학원 업무 자동화'));
   assert.ok(renderToStaticMarkup(<ActivitiesSection items={[]} awardsOnly />).includes('아직 등록된 수상 이력이 없습니다.'));
 });
 
 test('academy experience distinguishes future end date and military leave without publishing private logs', () => {
   const html = renderToStaticMarkup(<ActivitiesSection items={[academyExperience]} />);
-  for (const label of ['제이영어학원', '2027.02 종료 예정', '2024.03 ~ 2025.09', 'GPT', 'Codex', '36문제', '워크스페이스']) assert.ok(html.includes(label), label);
-  assert.ok(!html.includes('drive.google.com'));
+  for (const label of ['학원 업무 자동화', '2027.02 종료 예정', '2024.03 ~ 2025.09', 'GPT', 'Codex', '36문제', '워크스페이스']) assert.ok(html.includes(label), label);
+  assert.ok(!html.includes('drive.google.com') && !html.includes('제이영어학원'));
   assert.ok(!/\d+%|시간 단축/.test(html));
 });
 

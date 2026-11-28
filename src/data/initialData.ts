@@ -8,12 +8,12 @@ export const initialProfile: UserProfile = {
   "department": "융합소프트웨어학부",
   "currentSemester": "2학년 2학기",
   "gpa": "4.27 / 4.50",
-  "targetRole": "Software Development · Data · IT",
+  "targetRole": "AI 서비스 개발 · 업무 자동화 · AI 출력 검증",
   "email": "a01027010769@gmail.com",
   "githubUrl": "https://github.com/peach20040909",
   "blogUrl": "https://velog.io/@peach20040909/posts",
   "location": "Seoul, Republic of Korea",
-  "bio": "명지대학교 융합소프트웨어학부 데이터사이언스전공 장민준입니다. 사용자 조사로 문제를 정의하고, 웹 서비스와 데이터 도구를 구현합니다. 혼밥지도, 팀 기여도 근거 리포트, 해외탐방 현장조사 플랫폼을 만들며 설계 판단과 문제 해결 과정을 기록하고 있습니다.",
+  "bio": "반복 업무를 줄이고, 판단에 필요한 근거를 확인할 수 있는 AI 서비스를 만드는 장민준입니다.\n\n일하던 학원에서는 시험 자료 편집과 합본 제작을 자동화했습니다. 한만큼에서는 AI가 협업 기록을 분류·요약하고, 교수는 원본을 확인해 최종 판단할 수 있게 설계했습니다.",
   "interests": [
     "대용량 트래픽 & 분산 시스템",
     "동시성 제어 및 쿼리 최적화",
@@ -21,6 +21,24 @@ export const initialProfile: UserProfile = {
     "Spring Boot & React 현대적 웹 아키텍처"
   ]
 };
+
+const previousProfileBios = new Set([
+  "명지대학교 융합소프트웨어학부 데이터사이언스전공 장민준입니다. 사용자 조사로 문제를 정의하고, 웹 서비스와 데이터 도구를 구현합니다. 혼밥지도, 팀 기여도 근거 리포트, 해외탐방 현장조사 플랫폼을 만들며 설계 판단과 문제 해결 과정을 기록하고 있습니다.",
+  '명지대학교 융합소프트웨어학부 데이터사이언스전공입니다. 상상만 했던 것들을 실제로 구현하는 활동을 좋아합니다.',
+]);
+
+export function upgradeProfile(profile: UserProfile): UserProfile {
+  const bio = profile.bio?.replace(/\s+/g, ' ').trim();
+  const useNewBio = !bio || previousProfileBios.has(bio);
+  return {
+    ...profile,
+    bio: useNewBio ? initialProfile.bio : profile.bio,
+    targetRole: useNewBio && (!profile.targetRole || ["Software Development · Data · IT", "Fullstack & Backend Software Engineer"].includes(profile.targetRole))
+      ? initialProfile.targetRole
+      : profile.targetRole,
+  };
+}
+
 
 export const initialProjects: ProjectItem[] = [
   {

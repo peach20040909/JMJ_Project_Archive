@@ -141,7 +141,7 @@ export const PublicPortfolioView: React.FC<PublicPortfolioViewProps> = ({
             </div>
           </div>
 
-          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed">
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line">
             {profile.bio}
           </div>
         </header>

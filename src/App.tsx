@@ -25,6 +25,7 @@ import {
 
 import {
   initialProfile,
+  upgradeProfile,
   initialProjects,
   upgradeHanmankeumProject,
   upgradeSoloMapProject,
@@ -81,7 +82,7 @@ export default function App() {
         if (parsed.currentSemester && (parsed.currentSemester.includes('예정') || parsed.currentSemester.includes('진행') || parsed.currentSemester.includes('2026 Fall'))) {
           parsed.currentSemester = '2학년 2학기';
         }
-        return parsed;
+        return upgradeProfile(parsed);
       } catch (e) {
         return initialProfile;
       }
@@ -362,7 +363,7 @@ export default function App() {
             const d = result.data;
             if (Array.isArray(d.activities)) setActivities(upgradeActivities(d.activities, d.activitiesVersion));
             if (Array.isArray(d.skills)) setSkills(upgradeAiSkills(d.skills, d.aiSkillsVersion));
-            if (d.profile) setProfile(d.profile);
+            if (d.profile) setProfile(upgradeProfile(d.profile));
             if (d.projects) setProjects(upgradeSoloMapProject(upgradeHanmankeumProject(d.projects, d.activitiesVersion)));
             if (d.devLogs) setDevLogs(d.devLogs);
             if (d.coverLetters) setCoverLetters(d.coverLetters);
@@ -487,7 +488,7 @@ export default function App() {
 
   // Import and Reset
   const handleImportData = (data: any) => {
-    if (data.profile) setProfile(data.profile);
+    if (data.profile) setProfile(upgradeProfile(data.profile));
     if (data.projects) setProjects(upgradeSoloMapProject(upgradeHanmankeumProject(data.projects, data.activitiesVersion)));
     if (Array.isArray(data.skills)) setSkills(upgradeAiSkills(data.skills, data.aiSkillsVersion));
     if (data.devLogs) setDevLogs(data.devLogs);
